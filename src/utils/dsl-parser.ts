@@ -217,6 +217,10 @@ function validateSemantics(dslFile: DifyDSLFile): string[] {
     errors.push(`Cycle detected in workflow: ${cycleResult.cycleNodes.join(' -> ')}`)
   }
 
+  // Check workflow connectivity
+  const connectivityErrors = validateWorkflowConnectivity(nodes, edges)
+  errors.push(...connectivityErrors)
+
   return errors
 }
 
@@ -273,6 +277,105 @@ function detectCycles(nodes: DifyDSLFile['workflow']['graph']['nodes'], edges: D
   }
 
   return { hasCycles: false, cycleNodes: [] }
+}
+
+/**
+ * Validate workflow connectivity
+ */
+function validateWorkflowConnectivity(nodes: DifyDSLFile['workflow']['graph']['nodes'], edges: DifyDSLFile['workflow']['graph']['edges']): string[] {
+  const errors: string[] = []
+
+  if (nodes.length === 0) {
+    return errors
+  }
+
+  // Find start and end nodes
+  const startNodes = nodes.filter(node => node.type === 'start')
+  const endNodes = nodes.filter(node => node.type === 'end')
+
+  if (startNodes.length === 0) {
+    errors.push('Workflow must have at least one start node')
+  }
+
+  if (endNodes.length === 0) {
+    errors.push('Workflow must have at least one end node')
+  }
+
+  // Build adjacency maps
+  const outgoing = new Map<string, string[]>()
+  const incoming = new Map<string, string[]>()
+
+  nodes.forEach(node => {
+    outgoing.set(node.id, [])
+    incoming.set(node.id, [])
+  })
+
+  edges.forEach(edge => {
+    const sourceTargets = outgoing.get(edge.source) || []
+    sourceTargets.push(edge.target)
+    outgoing.set(edge.source, sourceTargets)
+
+    const targetSources = incoming.get(edge.target) || []
+    targetSources.push(edge.source)
+    incoming.set(edge.target, targetSources)
+  })
+
+  // Check for isolated nodes (no incoming AND no outgoing connections)
+  nodes.forEach(node => {
+    const hasIncoming = (incoming.get(node.id) || []).length > 0
+    const hasOutgoing = (outgoing.get(node.id) || []).length > 0
+
+    // Start nodes should have outgoing but not incoming
+    if (node.type === 'start') {
+      if (!hasOutgoing) {
+        errors.push(`Start node ${node.id} has no outgoing connections`)
+      }
+    }
+    // End nodes should have incoming but not outgoing
+    else if (node.type === 'end') {
+      if (!hasIncoming) {
+        errors.push(`End node ${node.id} has no incoming connections`)
+      }
+    }
+    // All other nodes should have both
+    else {
+      if (!hasIncoming && !hasOutgoing) {
+        errors.push(`Node ${node.id} is completely isolated (no connections)`)
+      } else if (!hasIncoming) {
+        errors.push(`Node ${node.id} has no incoming connections`)
+      } else if (!hasOutgoing) {
+        errors.push(`Node ${node.id} has no outgoing connections`)
+      }
+    }
+  })
+
+  // Check if all nodes are reachable from start node
+  if (startNodes.length > 0) {
+    const visited = new Set<string>()
+    const queue = [startNodes[0].id]
+
+    while (queue.length > 0) {
+      const current = queue.shift()!
+      if (visited.has(current)) continue
+
+      visited.add(current)
+      const targets = outgoing.get(current) || []
+      targets.forEach(target => {
+        if (!visited.has(target)) {
+          queue.push(target)
+        }
+      })
+    }
+
+    // Check if any nodes are unreachable
+    nodes.forEach(node => {
+      if (!visited.has(node.id)) {
+        errors.push(`Node ${node.id} is not reachable from the start node`)
+      }
+    })
+  }
+
+  return errors
 }
 
 /**

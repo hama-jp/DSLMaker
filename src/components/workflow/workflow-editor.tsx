@@ -35,14 +35,29 @@ export function WorkflowEditor() {
     http_request: DefaultNode,
     tool: DefaultNode,
     knowledge_retrieval: DefaultNode,
+    'knowledge-retrieval': DefaultNode,
     if_else: DefaultNode,
+    'if-else': DefaultNode,
     template_transform: DefaultNode,
+    'template-transform': DefaultNode,
     variable_aggregator: DefaultNode,
     variable_assigner: DefaultNode,
     iteration: DefaultNode,
     parameter_extractor: DefaultNode,
+    'parameter-extractor': DefaultNode,
     question_classifier: DefaultNode,
     answer: DefaultNode,
+    // 不足していたノードタイプを追加
+    extract: DefaultNode,
+    kb: DefaultNode,
+    condition: DefaultNode,
+    // その他よく使われるノードタイプ
+    document: DefaultNode,
+    search: DefaultNode,
+    retrieval: DefaultNode,
+    classifier: DefaultNode,
+    aggregator: DefaultNode,
+    assigner: DefaultNode,
   }), [])
 
   // Define custom edge types
@@ -95,7 +110,7 @@ export function WorkflowEditor() {
         target: edge.target,
         sourceHandle: edge.sourceHandle,
         targetHandle: edge.targetHandle,
-        type: edge.type,
+        type: edge.type || 'custom', // デフォルトでcustomタイプを使用
       })),
     [edges]
   )

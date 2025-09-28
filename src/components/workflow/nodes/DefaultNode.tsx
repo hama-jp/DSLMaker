@@ -7,7 +7,13 @@ import {
   Database,
   GitBranch,
   Zap,
-  Box
+  Box,
+  Search,
+  FileText,
+  Layers,
+  Filter,
+  RotateCcw,
+  Archive
 } from 'lucide-react'
 
 const nodeStyles = {
@@ -39,7 +45,21 @@ const nodeStyles = {
     bgIcon: 'bg-teal-500',
     icon: Database
   },
+  'knowledge-retrieval': {
+    gradient: 'from-teal-50 to-cyan-50',
+    borderSelected: 'border-teal-600',
+    borderDefault: 'border-teal-400',
+    bgIcon: 'bg-teal-500',
+    icon: Database
+  },
   if_else: {
+    gradient: 'from-orange-50 to-red-50',
+    borderSelected: 'border-orange-600',
+    borderDefault: 'border-orange-400',
+    bgIcon: 'bg-orange-500',
+    icon: GitBranch
+  },
+  'if-else': {
     gradient: 'from-orange-50 to-red-50',
     borderSelected: 'border-orange-600',
     borderDefault: 'border-orange-400',
@@ -52,6 +72,104 @@ const nodeStyles = {
     borderDefault: 'border-pink-400',
     bgIcon: 'bg-pink-500',
     icon: Zap
+  },
+  'template-transform': {
+    gradient: 'from-pink-50 to-rose-50',
+    borderSelected: 'border-pink-600',
+    borderDefault: 'border-pink-400',
+    bgIcon: 'bg-pink-500',
+    icon: Zap
+  },
+  'parameter-extractor': {
+    gradient: 'from-emerald-50 to-green-50',
+    borderSelected: 'border-emerald-600',
+    borderDefault: 'border-emerald-400',
+    bgIcon: 'bg-emerald-500',
+    icon: Filter
+  },
+  'variable-aggregator': {
+    gradient: 'from-indigo-50 to-blue-50',
+    borderSelected: 'border-indigo-600',
+    borderDefault: 'border-indigo-400',
+    bgIcon: 'bg-indigo-500',
+    icon: Layers
+  },
+  'variable-assigner': {
+    gradient: 'from-violet-50 to-purple-50',
+    borderSelected: 'border-violet-600',
+    borderDefault: 'border-violet-400',
+    bgIcon: 'bg-violet-500',
+    icon: Archive
+  },
+  iteration: {
+    gradient: 'from-cyan-50 to-blue-50',
+    borderSelected: 'border-cyan-600',
+    borderDefault: 'border-cyan-400',
+    bgIcon: 'bg-cyan-500',
+    icon: RotateCcw
+  },
+  extract: {
+    gradient: 'from-lime-50 to-green-50',
+    borderSelected: 'border-lime-600',
+    borderDefault: 'border-lime-400',
+    bgIcon: 'bg-lime-500',
+    icon: Filter
+  },
+  kb: {
+    gradient: 'from-teal-50 to-cyan-50',
+    borderSelected: 'border-teal-600',
+    borderDefault: 'border-teal-400',
+    bgIcon: 'bg-teal-500',
+    icon: Database
+  },
+  condition: {
+    gradient: 'from-orange-50 to-red-50',
+    borderSelected: 'border-orange-600',
+    borderDefault: 'border-orange-400',
+    bgIcon: 'bg-orange-500',
+    icon: GitBranch
+  },
+  document: {
+    gradient: 'from-slate-50 to-gray-50',
+    borderSelected: 'border-slate-600',
+    borderDefault: 'border-slate-400',
+    bgIcon: 'bg-slate-500',
+    icon: FileText
+  },
+  search: {
+    gradient: 'from-yellow-50 to-orange-50',
+    borderSelected: 'border-yellow-600',
+    borderDefault: 'border-yellow-400',
+    bgIcon: 'bg-yellow-500',
+    icon: Search
+  },
+  retrieval: {
+    gradient: 'from-teal-50 to-cyan-50',
+    borderSelected: 'border-teal-600',
+    borderDefault: 'border-teal-400',
+    bgIcon: 'bg-teal-500',
+    icon: Database
+  },
+  classifier: {
+    gradient: 'from-purple-50 to-pink-50',
+    borderSelected: 'border-purple-600',
+    borderDefault: 'border-purple-400',
+    bgIcon: 'bg-purple-500',
+    icon: Filter
+  },
+  aggregator: {
+    gradient: 'from-indigo-50 to-blue-50',
+    borderSelected: 'border-indigo-600',
+    borderDefault: 'border-indigo-400',
+    bgIcon: 'bg-indigo-500',
+    icon: Layers
+  },
+  assigner: {
+    gradient: 'from-violet-50 to-purple-50',
+    borderSelected: 'border-violet-600',
+    borderDefault: 'border-violet-400',
+    bgIcon: 'bg-violet-500',
+    icon: Archive
   },
   default: {
     gradient: 'from-gray-50 to-gray-100',
@@ -95,13 +213,13 @@ export function DefaultNode({ data, selected, type }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        id="target"
+        id="input"
         className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
       />
       <Handle
         type="source"
         position={Position.Right}
-        id="source"
+        id="output"
         className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
       />
     </div>

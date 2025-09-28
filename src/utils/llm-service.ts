@@ -8,6 +8,12 @@ import {
 import { lintDSL, LintResult } from './dsl-linter'
 import { parseDSL } from './dsl-parser'
 import { DifyDSLFile } from '@/types/dify-workflow'
+import {
+  DIFY_WORKFLOW_EXPERT_PROMPT,
+  enhancePromptWithContext,
+  WORKFLOW_TYPE_PROMPTS
+} from './ai-workflow-expert-prompt'
+import RequirementAnalyzer, { RequirementAnalysis } from './requirement-analyzer'
 
 export interface LLMSettings {
   baseUrl: string
@@ -63,7 +69,7 @@ export class LLMService {
   }
 
   /**
-   * Make a request to the LLM API
+   * Make a request to the LLM API (GPT-5 compatible)
    */
   private async makeRequest(
     messages: Array<{ role: string; content: string }>,
@@ -71,22 +77,62 @@ export class LLMService {
       temperature?: number
       maxTokens?: number
       stream?: boolean
+      verbosity?: 'low' | 'medium' | 'high'
+      effort?: 'minimal' | 'low' | 'medium' | 'high'
     } = {}
   ): Promise<LLMResponse> {
     try {
-      const response = await fetch(`${this.settings.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.settings.apiKey}`
-        },
-        body: JSON.stringify({
+      // Check if this is a GPT-5 model
+      const isGPT5 = this.settings.model.includes('gpt-5')
+
+      let requestBody: any
+      let endpoint: string
+
+      if (isGPT5) {
+        // Use GPT-5 /responses endpoint - NO temperature, top_p, logprobs allowed
+        endpoint = `${this.settings.baseUrl}/responses`
+
+        // Combine messages into a single input for GPT-5
+        const input = messages.map(msg =>
+          msg.role === 'system' ? `System: ${msg.content}` :
+          msg.role === 'user' ? `User: ${msg.content}` :
+          `Assistant: ${msg.content}`
+        ).join('\n\n')
+
+        requestBody = {
+          model: this.settings.model,
+          input,
+          text: {
+            verbosity: options.verbosity || 'low'
+          },
+          reasoning: {
+            effort: options.effort || 'high'
+          }
+        }
+
+        // GPT-5 uses max_output_tokens instead of max_tokens
+        if (options.maxTokens) {
+          requestBody.max_output_tokens = options.maxTokens
+        }
+      } else {
+        // Use traditional /chat/completions for non-GPT-5 models
+        endpoint = `${this.settings.baseUrl}/chat/completions`
+        requestBody = {
           model: this.settings.model,
           messages,
           temperature: options.temperature ?? this.settings.temperature,
           max_tokens: options.maxTokens ?? this.settings.maxTokens,
           stream: options.stream ?? false
-        })
+        }
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.settings.apiKey}`
+        },
+        body: JSON.stringify(requestBody)
       })
 
       if (!response.ok) {
@@ -106,14 +152,41 @@ export class LLMService {
         }
       }
 
-      return {
-        success: true,
-        content: data.choices?.[0]?.message?.content,
-        usage: data.usage ? {
-          promptTokens: data.usage.prompt_tokens,
-          completionTokens: data.usage.completion_tokens,
-          totalTokens: data.usage.total_tokens
-        } : undefined
+      if (isGPT5) {
+        // Handle GPT-5 /responses endpoint format
+        console.log('🔍 GPT-5 Raw Response:', JSON.stringify(data, null, 2))
+
+        const messages = data.output?.filter((item: any) => item.type === 'message')
+        const content = messages?.[0]?.content?.[0]?.text
+
+        console.log('📊 GPT-5 Parsed:', {
+          hasOutput: !!data.output,
+          outputLength: data.output?.length,
+          messageCount: messages?.length,
+          firstMessage: messages?.[0],
+          extractedContent: content
+        })
+
+        return {
+          success: true,
+          content,
+          usage: data.usage ? {
+            promptTokens: data.usage.input_tokens || data.usage.prompt_tokens,
+            completionTokens: data.usage.output_tokens || data.usage.completion_tokens,
+            totalTokens: data.usage.total_tokens
+          } : undefined
+        }
+      } else {
+        // Handle traditional /chat/completions format
+        return {
+          success: true,
+          content: data.choices?.[0]?.message?.content,
+          usage: data.usage ? {
+            promptTokens: data.usage.prompt_tokens,
+            completionTokens: data.usage.completion_tokens,
+            totalTokens: data.usage.total_tokens
+          } : undefined
+        }
       }
     } catch (error) {
       return {
@@ -128,13 +201,27 @@ export class LLMService {
    */
   async generateDSL(userRequirement: string): Promise<DSLGenerationResult> {
     try {
-      const prompt = generateCreateDSLPrompt(userRequirement)
+      // Phase 1: Intelligent Requirement Analysis
+      const analysis = RequirementAnalyzer.analyzeRequirement(userRequirement)
+      console.log('🔍 Requirement Analysis:', RequirementAnalyzer.generateAnalysisSummary(analysis))
+
+      // Phase 2: Generate Enhanced Expert Prompt
+      const expertPrompt = enhancePromptWithContext(
+        userRequirement,
+        analysis.detectedWorkflowType,
+        analysis.complexity
+      )
+
+      // Phase 3: Create specialized workflow generation request
+      const workflowGenerationRequest = this.createWorkflowGenerationRequest(analysis, userRequirement)
 
       const llmResponse = await this.makeRequest([
-        { role: 'user', content: prompt }
+        { role: 'system', content: expertPrompt },
+        { role: 'user', content: workflowGenerationRequest }
       ], {
-        temperature: 0.01, // Ultra low temperature for maximum YAML consistency
-        maxTokens: 4000
+        maxTokens: 12000,  // Increased to handle reasoning + output
+        verbosity: 'low', // User requested verbosity: "low"
+        effort: 'medium'  // Reduced from high to medium to save reasoning tokens
       })
 
       if (!llmResponse.success || !llmResponse.content) {
@@ -180,6 +267,31 @@ export class LLMService {
           error: `Invalid JSON from LLM: ${jsonError.message}\n\nContent preview: ${jsonContent.substring(0, 200)}...`,
           llmResponse
         }
+      }
+
+      // Fix node data structure: copy 'name' to 'data.title' if missing
+      if (dslObject.workflow?.graph?.nodes && Array.isArray(dslObject.workflow.graph.nodes)) {
+        dslObject.workflow.graph.nodes.forEach((node: any, index: number) => {
+          if (node && typeof node === 'object') {
+            // Ensure data object exists
+            if (!node.data || typeof node.data !== 'object') {
+              node.data = {}
+            }
+            
+            // Copy name to data.title if data.title is missing
+            if (node.name && typeof node.name === 'string' && !node.data.title) {
+              node.data.title = node.name
+              console.log(`🔧 Fixed node ${index}: copied name "${node.name}" to data.title`)
+            }
+            
+            // Ensure data.title exists (fallback)
+            if (!node.data.title || typeof node.data.title !== 'string') {
+              const fallbackTitle = node.name || node.type || `Node ${index + 1}`
+              node.data.title = fallbackTitle
+              console.log(`🔧 Set fallback title for node ${index}: "${fallbackTitle}"`)
+            }
+          }
+        })
       }
 
       // Convert JSON to YAML using js-yaml
@@ -248,8 +360,9 @@ export class LLMService {
       const llmResponse = await this.makeRequest([
         { role: 'user', content: prompt }
       ], {
-        temperature: 0.01, // Ultra low temperature for maximum YAML consistency
-        maxTokens: 4000
+        maxTokens: 4000,
+        verbosity: 'low',
+        effort: 'high'
       })
 
       if (!llmResponse.success || !llmResponse.content) {
@@ -320,8 +433,9 @@ export class LLMService {
       const llmResponse = await this.makeRequest([
         { role: 'user', content: prompt }
       ], {
-        temperature: 0.2, // Low temperature for consistent analysis
-        maxTokens: 2000
+        maxTokens: 2000,
+        verbosity: 'low',
+        effort: 'high'
       })
 
       if (!llmResponse.success || !llmResponse.content) {
@@ -374,8 +488,9 @@ export class LLMService {
       const llmResponse = await this.makeRequest([
         { role: 'user', content: prompt }
       ], {
-        temperature: 0.05, // Ultra low temperature for optimization
-        maxTokens: 4000
+        maxTokens: 4000,
+        verbosity: 'low',
+        effort: 'high'
       })
 
       if (!llmResponse.success || !llmResponse.content) {
@@ -436,41 +551,39 @@ export class LLMService {
     onChunk: (chunk: string) => void
   ): Promise<DSLGenerationResult> {
     try {
-      const prompt = generateCreateDSLPrompt(userRequirement)
+      // Phase 1: Intelligent Requirement Analysis (same as generateDSL)
+      const analysis = RequirementAnalyzer.analyzeRequirement(userRequirement)
+      console.log('🔍 Requirement Analysis (Stream):', RequirementAnalyzer.generateAnalysisSummary(analysis))
 
-      const response = await fetch(`${this.settings.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.settings.apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.settings.model,
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.01, // Ultra low temperature for JSON consistency
-          max_tokens: 4000,
-          stream: false
-        })
+      // Phase 2: Generate Enhanced Expert Prompt
+      const expertPrompt = enhancePromptWithContext(
+        userRequirement,
+        analysis.detectedWorkflowType,
+        analysis.complexity
+      )
+
+      // Phase 3: Create specialized workflow generation request
+      const workflowGenerationRequest = this.createWorkflowGenerationRequest(analysis, userRequirement)
+
+      // Use the unified makeRequest method that handles GPT-5 properly
+      const llmResponse = await this.makeRequest([
+        { role: 'system', content: expertPrompt },
+        { role: 'user', content: workflowGenerationRequest }
+      ], {
+        maxTokens: 12000,  // Increased to handle reasoning + output
+        verbosity: 'low',
+        effort: 'medium'   // Reduced from high to medium to save reasoning tokens
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${await response.text()}`)
+      if (!llmResponse.success || !llmResponse.content) {
+        throw new Error(llmResponse.error || 'No content received from LLM')
       }
 
-      // Since stream is false, we get a normal JSON response
-      const responseData = await response.json()
-      let fullContent = ''
+      const fullContent = llmResponse.content
+      console.log('📝 Content from LLM:', fullContent.substring(0, 300))
 
-      console.log('🔍 Sakura AI Response:', JSON.stringify(responseData).substring(0, 500))
-
-      if (responseData.choices && responseData.choices[0]) {
-        fullContent = responseData.choices[0].message?.content || ''
-        console.log('📝 Content from Sakura AI:', fullContent.substring(0, 300))
-        // Call onChunk with the full content for compatibility
-        onChunk(fullContent)
-      } else {
-        throw new Error('Invalid response format from API')
-      }
+      // Call onChunk with the full content for compatibility
+      onChunk(fullContent)
 
       // Process the complete response as JSON
       let jsonContent = fullContent.trim()
@@ -491,6 +604,31 @@ export class LLMService {
           success: false,
           error: `Invalid JSON from streamed response: ${jsonError.message}\n\nContent preview: ${jsonContent.substring(0, 200)}...`
         }
+      }
+
+      // Fix node data structure: copy 'name' to 'data.title' if missing (same as generateDSL)
+      if (dslObject.workflow?.graph?.nodes && Array.isArray(dslObject.workflow.graph.nodes)) {
+        dslObject.workflow.graph.nodes.forEach((node: any, index: number) => {
+          if (node && typeof node === 'object') {
+            // Ensure data object exists
+            if (!node.data || typeof node.data !== 'object') {
+              node.data = {}
+            }
+            
+            // Copy name to data.title if data.title is missing
+            if (node.name && typeof node.name === 'string' && !node.data.title) {
+              node.data.title = node.name
+              console.log(`🔧 Fixed node ${index} (stream): copied name "${node.name}" to data.title`)
+            }
+            
+            // Ensure data.title exists (fallback)
+            if (!node.data.title || typeof node.data.title !== 'string') {
+              const fallbackTitle = node.name || node.type || `Node ${index + 1}`
+              node.data.title = fallbackTitle
+              console.log(`🔧 Set fallback title for node ${index} (stream): "${fallbackTitle}"`)
+            }
+          }
+        })
       }
 
       // Convert to YAML
@@ -790,8 +928,9 @@ export class LLMService {
       const response = await this.makeRequest([
         { role: 'user', content: 'Hello, please respond with just "OK" to test the connection.' }
       ], {
-        temperature: 0,
-        maxTokens: 20
+        maxTokens: 20,
+        verbosity: 'low',
+        effort: 'high'
       })
 
       if (!response.success) {
@@ -841,6 +980,200 @@ export class LLMService {
         error: error instanceof Error ? error.message : 'Validation error'
       }
     }
+  }
+
+  /**
+   * Create a specialized workflow generation request based on requirement analysis
+   */
+  private createWorkflowGenerationRequest(analysis: RequirementAnalysis, userRequirement: string): string {
+    const {
+      businessIntent,
+      detectedWorkflowType,
+      complexity,
+      recommendedPattern,
+      estimatedNodes,
+      dataInputs,
+      outputRequirements,
+      businessLogic,
+      integrationNeeds,
+      performanceRequirements,
+      securityConstraints,
+      confidence
+    } = analysis
+
+    return `
+## WORKFLOW GENERATION REQUEST
+
+### Primary Requirement
+${userRequirement}
+
+### Analysis Summary
+- **Business Intent**: ${businessIntent}
+- **Workflow Type**: ${detectedWorkflowType}
+- **Complexity Level**: ${complexity}
+- **Recommended Pattern**: ${recommendedPattern}
+- **Estimated Node Count**: ${estimatedNodes}
+- **Analysis Confidence**: ${(confidence * 100).toFixed(1)}%
+
+### Technical Specifications
+
+#### Data Input Requirements
+${dataInputs.map(input => `- **${input.name}** (${input.type}): ${input.description || 'Input data'} ${input.required ? '[Required]' : '[Optional]'}`).join('\n')}
+
+#### Expected Outputs
+${outputRequirements.map(output => `- ${output}`).join('\n')}
+
+#### Business Logic Requirements
+${businessLogic.length > 0 ? businessLogic.map(logic => `- ${logic}`).join('\n') : '- Standard processing workflow'}
+
+#### Integration Requirements
+${integrationNeeds.length > 0 ? integrationNeeds.map(integration => `- ${integration}`).join('\n') : '- No external integrations required'}
+
+#### Performance Requirements
+${performanceRequirements.length > 0 ? performanceRequirements.map(perf => `- ${perf}`).join('\n') : '- Standard performance expectations'}
+
+#### Security Constraints
+${securityConstraints.length > 0 ? securityConstraints.map(security => `- ${security}`).join('\n') : '- Standard security practices'}
+
+### 🚨 CRITICAL NODE TYPE RESTRICTIONS 🚨
+
+**ONLY USE THESE EXACT NODE TYPES - NO EXCEPTIONS:**
+1. "start" - Entry point of workflow
+2. "end" - Exit point of workflow  
+3. "llm" - AI language model processing
+4. "knowledge-retrieval" - Search knowledge base
+5. "if-else" - Conditional branching logic
+6. "template-transform" - Format/transform data
+7. "parameter-extractor" - Extract parameters from input
+
+**ABSOLUTELY FORBIDDEN NODE TYPES:**
+❌ "task", "action", "conditional", "processor", "retriever", "decision", "transform", "extract", "categorize", "search", "format", "response", "escalate"
+
+**MAPPING GUIDE - USE THESE EXACT REPLACEMENTS:**
+- Customer categorization → "parameter-extractor"
+- Knowledge base search → "knowledge-retrieval"  
+- Conditional logic/routing → "if-else"
+- Response formatting → "template-transform"
+- AI text processing → "llm"
+- Data extraction → "parameter-extractor"
+
+### CRITICAL OUTPUT FORMAT REQUIREMENTS
+
+🚨 **RESPOND WITH ONLY VALID JSON - NO OTHER TEXT** 🚨
+
+Return ONLY a complete JSON object with this exact structure:
+{
+  "app": {
+    "description": "Brief workflow description",
+    "icon": "🤖",
+    "icon_background": "#EFF1F5",
+    "mode": "workflow",
+    "name": "Workflow Name"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {},
+    "graph": {
+      "edges": [array of edge objects],
+      "nodes": [array of node objects],
+      "viewport": {"x": 0, "y": 0, "zoom": 1}
+    }
+  }
+}
+
+### EXAMPLE NODE STRUCTURE - FOLLOW EXACTLY:
+
+**Start Node:**
+{
+  "id": "start-1",
+  "type": "start",
+  "name": "Start",
+  "position": {"x": 100, "y": 200},
+  "data": {"title": "Start"}
+}
+
+**Parameter Extractor Node:**
+{
+  "id": "extract-1", 
+  "type": "parameter-extractor",
+  "name": "Extract Parameters",
+  "position": {"x": 350, "y": 200},
+  "data": {"title": "Extract Parameters"}
+}
+
+**Knowledge Retrieval Node:**
+{
+  "id": "kb-1",
+  "type": "knowledge-retrieval", 
+  "name": "Search Knowledge Base",
+  "position": {"x": 600, "y": 200},
+  "data": {"title": "Search Knowledge Base"}
+}
+
+**If-Else Node:**
+{
+  "id": "condition-1",
+  "type": "if-else",
+  "name": "Check Conditions", 
+  "position": {"x": 850, "y": 200},
+  "data": {"title": "Check Conditions"}
+}
+
+**LLM Node:**
+{
+  "id": "llm-1",
+  "type": "llm",
+  "name": "Generate Response",
+  "position": {"x": 1100, "y": 200}, 
+  "data": {"title": "Generate Response"}
+}
+
+**Template Transform Node:**
+{
+  "id": "template-1",
+  "type": "template-transform",
+  "name": "Format Output",
+  "position": {"x": 1350, "y": 200},
+  "data": {"title": "Format Output"}
+}
+
+**End Node:**
+{
+  "id": "end-1",
+  "type": "end",
+  "name": "End",
+  "position": {"x": 1600, "y": 200},
+  "data": {"title": "End"}
+}
+
+### FINAL REQUIREMENTS:
+- Start with { and end with }
+- No markdown, no explanations, no YAML
+- Include minimum ${estimatedNodes} nodes with proper connections
+- Position nodes: x: 100, 350, 600, 850, 1100, 1350, 1600... (250px apart), y: 200
+- **CRITICAL**: Create a COMPLETE LINEAR WORKFLOW - every node must connect to the next node
+- Every node MUST have "data.title" property matching the "name" property
+- Use ONLY the 7 permitted node types listed above
+
+**WORKFLOW CONNECTION RULES:**
+🔗 **MANDATORY**: Each node must have exactly one outgoing edge (except End node)
+🔗 **MANDATORY**: Each node must have exactly one incoming edge (except Start node)
+🔗 **MANDATORY**: No isolated nodes - every node must be part of the main flow
+🔗 **FORBIDDEN**: Parallel branches or disconnected nodes
+
+**VALIDATION CHECKLIST:**
+✅ JSON starts with { and ends with }
+✅ All node types are from permitted list
+✅ Every node has "data.title" field
+✅ Nodes are positioned correctly
+✅ EVERY node connected in linear sequence: Start → Node1 → Node2 → ... → End
+✅ No forbidden node types used
+✅ No isolated or disconnected nodes
+
+Generate a production-ready workflow JSON implementing: ${userRequirement}
+`
   }
 }
 
