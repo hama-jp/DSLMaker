@@ -210,18 +210,68 @@ export function DefaultNode({ data, selected, type }: NodeProps) {
         </div>
       )}
 
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="input"
-        className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="output"
-        className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
-      />
+      {/* Input handles - multiple for aggregator nodes */}
+      {(type === 'variable-aggregator' || type === 'variable_aggregator' ||
+        type === 'variable-assigner' || type === 'variable_assigner' ||
+        type === 'aggregator' || type === 'assigner') ? (
+        <>
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="input1"
+            className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+            style={{ top: '25%' }}
+          />
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="input2"
+            className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+            style={{ top: '50%' }}
+          />
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="input3"
+            className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+            style={{ top: '75%' }}
+          />
+        </>
+      ) : (
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="input"
+          className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+        />
+      )}
+
+      {/* Output handles - multiple for branching nodes */}
+      {(type === 'if-else' || type === 'if_else') ? (
+        <>
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="true"
+            className="w-3 h-3 bg-green-500 border-2 border-white"
+            style={{ top: '30%' }}
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="false"
+            className="w-3 h-3 bg-red-500 border-2 border-white"
+            style={{ top: '70%' }}
+          />
+        </>
+      ) : (
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="output"
+          className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+        />
+      )}
     </div>
   )
 }

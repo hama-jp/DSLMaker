@@ -1112,13 +1112,22 @@ Return ONLY a complete JSON object with this exact structure:
   "data": {"title": "Search Knowledge Base"}
 }
 
-**If-Else Node:**
+**If-Else Node (with branching configuration):**
 {
   "id": "condition-1",
   "type": "if-else",
-  "name": "Check Conditions", 
+  "name": "Check Conditions",
   "position": {"x": 850, "y": 200},
-  "data": {"title": "Check Conditions"}
+  "data": {
+    "title": "Check Conditions",
+    "conditions": [
+      {
+        "condition": "{{#param_extractor.sentiment_score#}} > 0.7",
+        "true_branch": "positive_path",
+        "false_branch": "negative_path"
+      }
+    ]
+  }
 }
 
 **LLM Node:**
@@ -1158,10 +1167,47 @@ Return ONLY a complete JSON object with this exact structure:
 - Use ONLY the 7 permitted node types listed above
 
 **WORKFLOW CONNECTION RULES:**
-🔗 **MANDATORY**: Each node must have exactly one outgoing edge (except End node)
-🔗 **MANDATORY**: Each node must have exactly one incoming edge (except Start node)
+🔗 **MANDATORY**: Each node must have exactly one outgoing edge (except End node and If-Else nodes)
+🔗 **MANDATORY**: Each node must have exactly one incoming edge (except Start node and Aggregator nodes)
 🔗 **MANDATORY**: No isolated nodes - every node must be part of the main flow
-🔗 **FORBIDDEN**: Parallel branches or disconnected nodes
+🔗 **IF-ELSE BRANCHING RULE**: If-else nodes MUST have exactly TWO outgoing edges:
+   - One edge with sourceHandle: "true" for true condition path
+   - One edge with sourceHandle: "false" for false condition path
+   - Both paths should eventually reconnect to a common node or separate end nodes
+🔗 **AGGREGATOR MERGING RULE**: Variable-aggregator/variable-assigner nodes can have MULTIPLE incoming edges:
+   - Each input edge should use different targetHandle: "input1", "input2", "input3"
+   - These nodes merge multiple data streams into a single output
+
+**IF-ELSE EDGE EXAMPLES:**
+// True path edge from if-else node
+{
+  "source": "condition-1",
+  "target": "llm_positive",
+  "sourceHandle": "true",
+  "targetHandle": "target"
+}
+// False path edge from if-else node
+{
+  "source": "condition-1",
+  "target": "llm_negative",
+  "sourceHandle": "false",
+  "targetHandle": "target"
+}
+
+**VARIABLE-AGGREGATOR MULTIPLE INPUT EXAMPLES:**
+// Multiple inputs merging into aggregator
+{
+  "source": "llm_positive",
+  "target": "aggregator-1",
+  "sourceHandle": "output",
+  "targetHandle": "input1"
+},
+{
+  "source": "llm_negative",
+  "target": "aggregator-1",
+  "sourceHandle": "output",
+  "targetHandle": "input2"
+}
 
 **VALIDATION CHECKLIST:**
 ✅ JSON starts with { and ends with }

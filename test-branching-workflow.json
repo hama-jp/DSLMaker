@@ -1,0 +1,280 @@
+{
+  "app": {
+    "description": "Customer Service with Sentiment-based Branching and Merging",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Branching Test Workflow"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": false
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "id": "edge-1",
+          "source": "start-1",
+          "target": "extract-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "parameter-extractor",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-2",
+          "source": "extract-1",
+          "target": "condition-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "parameter-extractor",
+            "targetType": "if-else",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-3-true",
+          "source": "condition-1",
+          "target": "llm-positive",
+          "sourceHandle": "true",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "llm",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-3-false",
+          "source": "condition-1",
+          "target": "llm-negative",
+          "sourceHandle": "false",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "llm",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-4-merge1",
+          "source": "llm-positive",
+          "target": "aggregator-1",
+          "sourceHandle": "output",
+          "targetHandle": "input1",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "variable-aggregator",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-4-merge2",
+          "source": "llm-negative",
+          "target": "aggregator-1",
+          "sourceHandle": "output",
+          "targetHandle": "input2",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "variable-aggregator",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-5",
+          "source": "aggregator-1",
+          "target": "template-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "variable-aggregator",
+            "targetType": "template-transform",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-6",
+          "source": "template-1",
+          "target": "end-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "template-transform",
+            "targetType": "end",
+            "isInIteration": false
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start-1",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "title": "Customer Input",
+            "input_variables": {
+              "user_message": {
+                "type": "string",
+                "required": true,
+                "description": "Customer message to analyze"
+              }
+            }
+          }
+        },
+        {
+          "id": "extract-1",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "title": "Sentiment Analysis",
+            "extraction_rules": {
+              "sentiment_score": "{{#start-1.user_message#}}",
+              "sentiment_label": "positive|negative|neutral"
+            }
+          }
+        },
+        {
+          "id": "condition-1",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "title": "Route by Sentiment",
+            "conditions": [
+              {
+                "condition": "{{#extract-1.sentiment_score#}} > 0.7",
+                "true_branch": "positive_response",
+                "false_branch": "escalation_response"
+              }
+            ]
+          }
+        },
+        {
+          "id": "llm-positive",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 120
+          },
+          "data": {
+            "title": "Positive Response",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4",
+              "completion_params": {
+                "temperature": 0.7
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Create a positive, helpful response for: {{#extract-1.sentiment_score#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "llm-negative",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 280
+          },
+          "data": {
+            "title": "Escalation Response",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4",
+              "completion_params": {
+                "temperature": 0.5
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Create an empathetic escalation response for: {{#extract-1.sentiment_score#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "aggregator-1",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Merge Responses",
+            "aggregation_mode": "merge",
+            "output_variables": {
+              "final_response": "string",
+              "response_type": "string",
+              "confidence": "number"
+            }
+          }
+        },
+        {
+          "id": "template-1",
+          "type": "template-transform",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "title": "Format Output",
+            "template": "Customer Service Response:\n\n{{#aggregator-1.final_response#}}\n\nResponse Type: {{#aggregator-1.response_type#}}",
+            "output_format": "text"
+          }
+        },
+        {
+          "id": "end-1",
+          "type": "end",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "title": "Final Output",
+            "outputs": {
+              "customer_response": {
+                "type": "string",
+                "value": "{{#template-1.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

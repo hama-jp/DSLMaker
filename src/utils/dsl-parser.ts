@@ -337,7 +337,7 @@ function validateWorkflowConnectivity(nodes: DifyDSLFile['workflow']['graph']['n
         errors.push(`End node ${node.id} has no incoming connections`)
       }
     }
-    // All other nodes should have both
+    // All other nodes should have both, with special cases
     else {
       if (!hasIncoming && !hasOutgoing) {
         errors.push(`Node ${node.id} is completely isolated (no connections)`)
@@ -345,6 +345,23 @@ function validateWorkflowConnectivity(nodes: DifyDSLFile['workflow']['graph']['n
         errors.push(`Node ${node.id} has no incoming connections`)
       } else if (!hasOutgoing) {
         errors.push(`Node ${node.id} has no outgoing connections`)
+      }
+
+      // Special validation for if-else nodes - they should have multiple outputs for branching
+      if (node.type === 'if-else' || node.type === 'if_else') {
+        const outgoingCount = (outgoing.get(node.id) || []).length
+        if (outgoingCount < 2) {
+          errors.push(`If-else node ${node.id} should have at least 2 outgoing connections for branching`)
+        }
+      }
+
+      // Special validation for aggregator nodes - they can have multiple inputs
+      if (node.type === 'variable-aggregator' || node.type === 'variable_aggregator' ||
+          node.type === 'variable-assigner' || node.type === 'variable_assigner') {
+        const incomingCount = (incoming.get(node.id) || []).length
+        if (incomingCount < 2) {
+          errors.push(`Aggregator node ${node.id} should have at least 2 incoming connections to merge data`)
+        }
       }
     }
   })
