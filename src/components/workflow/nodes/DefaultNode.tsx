@@ -3,7 +3,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react'
 import {
   Code,
   Globe,
-  Tool,
+  Wrench,
   Database,
   GitBranch,
   Zap,
@@ -30,7 +30,7 @@ const nodeStyles = {
     borderSelected: 'border-gray-600',
     borderDefault: 'border-gray-400',
     bgIcon: 'bg-gray-500',
-    icon: Tool
+    icon: Wrench
   },
   knowledge_retrieval: {
     gradient: 'from-teal-50 to-cyan-50',

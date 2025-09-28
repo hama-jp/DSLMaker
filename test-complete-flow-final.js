@@ -47,8 +47,8 @@ async function testCompleteFlow() {
         state: {
           llmSettings: {
             provider: 'compatible',
-            baseUrl: 'https://api.ai.sakura.ad.jp/v1',
-            apiKey: 'd5106cb4-ba55-4b0b-8da5-e5b198e7c599:RuJbTxHjo16r4Z7iJ29WMcKlKWumvYcpnyGtPVEM',
+            baseUrl: process.env.LLM_BASE_URL || 'https://api.openai.com/v1',
+            apiKey: process.env.LLM_API_KEY || 'test-key-replace-with-real',
             modelName: 'gpt-oss-120b',
             temperature: 0.1,
             maxTokens: 2000,
@@ -102,7 +102,7 @@ async function testCompleteFlow() {
 
     // ネットワークレスポンスを監視
     page.on('response', response => {
-      if (response.url().includes('api.ai.sakura.ad.jp')) {
+      if (response.url().includes('api.openai.com') || response.url().includes(process.env.LLM_BASE_URL || 'localhost')) {
         console.log(`📡 API呼び出し検出: ${response.status()}`)
       }
     })

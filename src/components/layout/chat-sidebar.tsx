@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
@@ -20,21 +19,26 @@ import {
 } from 'lucide-react'
 import { useWorkflowStore } from '@/stores/workflow-store'
 import { useSettingsStore } from '@/stores/settings-store'
-import { LLMService, DSLGenerationResult, DSLAnalysisResult } from '@/utils/llm-service'
-import { formatLintResults } from '@/utils/dsl-linter'
+import { DSLGenerationResult, DSLAnalysisResult } from '@/utils/llm-service'
+import {
+  ChatMessage,
+  generateMessageId,
+  createMessage,
+  addMessageToArray,
+  updateMessageInArray,
+  getMessageDisplayProps
+} from '@/utils/chat-utils'
+import {
+  WorkflowHandlerDependencies,
+  handleWorkflowGeneration,
+  showGenerationResult,
+  handleApplyWorkflow,
+  handleCancelPreview,
+  handleOptimizeWorkflow,
+  handleDownloadWorkflow,
+  handlePreviewWorkflow
+} from '@/utils/chat-workflow-handlers'
 
-interface ChatMessage {
-  id: string
-  type: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  metadata?: {
-    isGenerating?: boolean
-    result?: DSLGenerationResult | DSLAnalysisResult
-    tokens?: number
-    streamingContent?: string
-  }
-}
 
 export function ChatSidebar() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -121,19 +125,24 @@ export function ChatSidebar() {
   }, [messages])
 
   const addMessage = (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
-    const newMessage: ChatMessage = {
-      ...message,
-      id: `${Date.now()}-${Math.random().toString(36).substring(2)}`,
-      timestamp: new Date()
-    }
-    setMessages(prev => [...prev, newMessage])
-    return newMessage.id
+    const { messages: newMessages, messageId } = addMessageToArray(messages, message)
+    setMessages(newMessages)
+    return messageId
   }
 
   const updateMessage = (id: string, updates: Partial<ChatMessage>) => {
-    setMessages(prev => prev.map(msg =>
-      msg.id === id ? { ...msg, ...updates } : msg
-    ))
+    setMessages(prev => updateMessageInArray(prev, id, updates))
+  }
+
+  const dependencies: WorkflowHandlerDependencies = {
+    llmSettings,
+    dslFile,
+    exportDSL,
+    previewDSL,
+    commitPreview,
+    discardPreview,
+    isPreviewing,
+    activePreviewId
   }
 
   const handleSendMessage = async () => {
@@ -148,109 +157,52 @@ export function ChatSidebar() {
       content: userMessage
     })
 
-    // Check if we have LLM settings
-    if (!llmSettings.baseUrl || !llmSettings.apiKey) {
-      addMessage({
-        type: 'system',
-        content: '⚠️ Please configure your LLM settings first. Go to Settings to set up your API key and endpoint.'
-      })
-      return
-    }
-
     setIsGenerating(true)
 
     try {
-      const llmService = new LLMService({
-        baseUrl: llmSettings.baseUrl,
-        model: llmSettings.modelName,
-        apiKey: llmSettings.apiKey,
-        temperature: llmSettings.temperature,
-        maxTokens: llmSettings.maxTokens
+      // Create streaming update handler
+      const messageId = addMessage({
+        type: 'assistant',
+        content: '',
+        metadata: { isGenerating: true }
       })
 
-      // Determine the type of request
-      const isModification = userMessage.toLowerCase().includes('modify') ||
-                           userMessage.toLowerCase().includes('change') ||
-                           userMessage.toLowerCase().includes('update') ||
-                           userMessage.toLowerCase().includes('improve')
+      let accumulatedContent = ''
+      const onStreamUpdate = (chunk: string) => {
+        accumulatedContent += chunk
+        updateMessage(messageId, {
+          metadata: {
+            isGenerating: true,
+            streamingContent: accumulatedContent
+          }
+        })
+      }
 
-      const isAnalysis = userMessage.toLowerCase().includes('analyze') ||
-                        userMessage.toLowerCase().includes('review') ||
-                        userMessage.toLowerCase().includes('check') ||
-                        userMessage.toLowerCase().includes('explain')
+      const result = await handleWorkflowGeneration(userMessage, dependencies, onStreamUpdate)
 
-      let result: DSLGenerationResult | DSLAnalysisResult
+      updateMessage(messageId, {
+        metadata: { isGenerating: false, result, streamingContent: undefined }
+      })
 
-      if (isAnalysis && dslFile) {
-        // Analyze current workflow
-        const currentDSL = await exportDSL()
-        result = await llmService.analyzeDSL(currentDSL)
-
-        if (result.success && 'analysis' in result) {
-          addMessage({
-            type: 'assistant',
+      if (result.success) {
+        if ('analysis' in result) {
+          // Analysis result
+          updateMessage(messageId, {
             content: result.analysis || 'Analysis completed.',
             metadata: { result }
           })
-        } else {
-          addMessage({
-            type: 'assistant',
-            content: `❌ Analysis failed: ${result.error}`
+        } else if ('dsl' in result && result.dsl) {
+          // Generation/modification result
+          updateMessage(messageId, {
+            content: '✅ Workflow processed successfully!'
           })
-        }
-      } else if (isModification && dslFile) {
-        // Modify existing workflow
-        const currentDSL = await exportDSL()
-        result = await llmService.modifyDSL(currentDSL, userMessage, dslFile)
-
-        if (result.success && 'dsl' in result && result.dsl) {
-          const messageId = addMessage({
-            type: 'assistant',
-            content: '✅ Workflow modified successfully!',
-            metadata: { result }
-          })
-
-          await showGenerationResult(result, messageId)
-        } else {
-          addMessage({
-            type: 'assistant',
-            content: `❌ Modification failed: ${result.error}`
-          })
+          const displayMessage = await showGenerationResult(result, messageId, dependencies)
+          updateMessage(messageId, { content: displayMessage })
         }
       } else {
-        // Generate new workflow with streaming
-        const messageId = addMessage({
-          type: 'assistant',
-          content: '',
-          metadata: { isGenerating: true }
-        })
-
-        let accumulatedContent = ''
-        result = await llmService.generateDSLStream(userMessage, (chunk) => {
-          accumulatedContent += chunk
-          updateMessage(messageId, {
-            metadata: {
-              isGenerating: true,
-              streamingContent: accumulatedContent
-            }
-          })
-        })
-
         updateMessage(messageId, {
-          metadata: { isGenerating: false, result, streamingContent: undefined }
+          content: `❌ Processing failed: ${result.error}`
         })
-
-        if (result.success && 'dsl' in result && result.dsl) {
-          updateMessage(messageId, {
-            content: '✅ Workflow generated successfully!'
-          })
-
-          await showGenerationResult(result, messageId)
-        } else {
-          updateMessage(messageId, {
-            content: `❌ Generation failed: ${result.error}`
-          })
-        }
       }
     } catch (error) {
       addMessage({
@@ -262,147 +214,48 @@ export function ChatSidebar() {
     }
   }
 
-  const showGenerationResult = async (result: DSLGenerationResult, messageId: string) => {
-    if (!result.success || !result.dsl || !result.lintResult) return
 
-    const lintSummary = formatLintResults(result.lintResult)
-    let previewNote = '⚠️ Preview unavailable because no YAML content was returned.'
-
-    if (result.yamlContent) {
-      try {
-        await previewDSL(result.yamlContent, messageId)
-        previewNote = '👀 The canvas displays a live preview. Select Apply to confirm or Cancel to revert.'
-      } catch (error) {
-        previewNote = `❌ Preview failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      }
-    }
-
-    updateMessage(messageId, {
-      content: `✅ Workflow generated successfully!
-
-${lintSummary}
-
-${previewNote}
-
-**Token Usage:** ${result.llmResponse?.usage?.totalTokens || 'N/A'}`
-    })
-  }
-
-  const handleApplyWorkflow = async (result: DSLGenerationResult, messageId: string) => {
-    console.log('🎯 handleApplyWorkflow called with:', {
-      success: result.success,
-      hasDsl: !!result.dsl,
-      hasYamlContent: !!result.yamlContent,
-      yamlContentLength: result.yamlContent?.length
-    })
-
-    if (!result.success || !result.dsl || !result.yamlContent) {
-      console.log('❌ Cannot apply: success =', result.success, 'dsl =', !!result.dsl, 'yaml =', !!result.yamlContent)
-      return
-    }
-
-    try {
-      const yamlToApply = result.yamlContent
-      console.log('📋 Applying YAML, length:', yamlToApply.length)
-      console.log('📋 First 200 chars of YAML:', yamlToApply.substring(0, 200))
-
-      await previewDSL(yamlToApply, messageId)
-      commitPreview()
-      addMessage({
-        type: 'system',
-        content: '✅ Workflow applied to canvas successfully!'
-      })
-    } catch (error) {
-      console.error('❌ Apply failed:', error)
-      addMessage({
-        type: 'system',
-        content: `❌ Failed to apply workflow: ${error instanceof Error ? error.message : 'Unknown error'}`
-      })
-    }
-  }
-
-  const handleCancelPreview = (messageId: string) => {
-    if (!isPreviewing || activePreviewId !== messageId) return
-
-    discardPreview()
+  const handleApplyWorkflowWrapper = async (result: DSLGenerationResult, messageId: string) => {
+    const response = await handleApplyWorkflow(result, messageId, dependencies)
     addMessage({
       type: 'system',
-      content: '↩️ Preview cancelled. Canvas restored to the previous workflow.'
+      content: response.message
     })
   }
 
-  const handlePreviewWorkflow = (result: DSLGenerationResult) => {
-    if (!result.yamlContent) return
-
-    // Create a preview modal or new window
-    const previewWindow = window.open('', '_blank', 'width=800,height=600')
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <html>
-          <head><title>Workflow Preview</title></head>
-          <body style="font-family: monospace; padding: 20px;">
-            <h2>Generated Workflow DSL</h2>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow: auto;">
-${result.yamlContent}
-            </pre>
-          </body>
-        </html>
-      `)
-      previewWindow.document.close()
-    }
-  }
-
-  const handleDownloadWorkflow = (result: DSLGenerationResult) => {
-    if (!result.yamlContent) return
-
-    const blob = new Blob([result.yamlContent], { type: 'text/yaml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `workflow-${Date.now()}.yml`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    addMessage({
-      type: 'system',
-      content: '📁 Workflow DSL downloaded successfully!'
-    })
-  }
-
-  const handleOptimizeWorkflow = async () => {
-    if (!dslFile) {
+  const handleCancelPreviewWrapper = (messageId: string) => {
+    const response = handleCancelPreview(messageId, dependencies)
+    if (response.success) {
       addMessage({
         type: 'system',
-        content: '⚠️ No workflow to optimize. Please create or load a workflow first.'
+        content: response.message
       })
-      return
     }
+  }
 
+  const handlePreviewWorkflowWrapper = (result: DSLGenerationResult) => {
+    const response = handlePreviewWorkflow(result)
+    if (!response.success) {
+      addMessage({
+        type: 'system',
+        content: response.message
+      })
+    }
+  }
+
+  const handleDownloadWorkflowWrapper = (result: DSLGenerationResult) => {
+    const response = handleDownloadWorkflow(result)
+    addMessage({
+      type: 'system',
+      content: response.message
+    })
+  }
+
+  const handleOptimizeWorkflowWrapper = async () => {
     setIsGenerating(true)
 
     try {
-      const llmService = new LLMService({
-        baseUrl: llmSettings.baseUrl,
-        model: llmSettings.modelName,
-        apiKey: llmSettings.apiKey,
-        temperature: llmSettings.temperature,
-        maxTokens: llmSettings.maxTokens
-      })
-
-      const currentDSL = await exportDSL()
-      const lintResult = LLMService.validateDSL(currentDSL).lintResult
-
-      if (!lintResult || (lintResult.errors.length === 0 && lintResult.warnings.length === 0)) {
-        addMessage({
-          type: 'assistant',
-          content: '✅ Your workflow is already well-optimized! No issues were found.'
-        })
-        return
-      }
-
-      const result = await llmService.optimizeDSL(currentDSL, lintResult)
+      const result = await handleOptimizeWorkflow(dependencies)
 
       if (result.success && result.dsl) {
         const messageId = addMessage({
@@ -411,7 +264,8 @@ ${result.yamlContent}
           metadata: { result }
         })
 
-        await showGenerationResult(result, messageId)
+        const displayMessage = await showGenerationResult(result, messageId, dependencies)
+        updateMessage(messageId, { content: displayMessage })
       } else {
         addMessage({
           type: 'assistant',
@@ -421,7 +275,7 @@ ${result.yamlContent}
     } catch (error) {
       addMessage({
         type: 'assistant',
-        content: `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        content: error instanceof Error ? error.message : 'Unknown error'
       })
     } finally {
       setIsGenerating(false)
@@ -429,19 +283,12 @@ ${result.yamlContent}
   }
 
   const renderMessage = (message: ChatMessage) => {
-    const isUser = message.type === 'user'
-    const isSystem = message.type === 'system'
+    const { isUser, isSystem, containerClass, messageClass } = getMessageDisplayProps(message)
     const result = message.metadata?.result as DSLGenerationResult | undefined
 
     return (
-      <div key={message.id} className={`mb-4 ${isUser ? 'ml-8' : 'mr-8'}`}>
-        <div className={`p-3 rounded-lg ${
-          isUser
-            ? 'bg-blue-500 text-white ml-auto'
-            : isSystem
-              ? 'bg-gray-100 text-gray-800'
-              : 'bg-white border'
-        } ${!isUser ? 'max-w-full' : 'max-w-fit ml-auto'}`}>
+      <div key={message.id} className={containerClass}>
+        <div className={messageClass}>
           {message.metadata?.isGenerating ? (
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -463,7 +310,7 @@ ${result.yamlContent}
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  onClick={() => handleApplyWorkflow(result, message.id)}
+                  onClick={() => handleApplyWorkflowWrapper(result, message.id)}
                   className="bg-green-500 hover:bg-green-600"
                 >
                   <CheckCircle className="h-3 w-3 mr-1" />
@@ -473,7 +320,7 @@ ${result.yamlContent}
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleCancelPreview(message.id)}
+                    onClick={() => handleCancelPreviewWrapper(message.id)}
                     className="text-destructive border-destructive hover:bg-destructive/10"
                   >
                     <XCircle className="h-3 w-3 mr-1" />
@@ -483,7 +330,7 @@ ${result.yamlContent}
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handlePreviewWorkflow(result)}
+                  onClick={() => handlePreviewWorkflowWrapper(result)}
                 >
                   <Eye className="h-3 w-3 mr-1" />
                   DSL
@@ -491,7 +338,7 @@ ${result.yamlContent}
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleDownloadWorkflow(result)}
+                  onClick={() => handleDownloadWorkflowWrapper(result)}
                 >
                   <Download className="h-3 w-3 mr-1" />
                   Download
@@ -543,7 +390,7 @@ ${result.yamlContent}
           <Button
             size="sm"
             variant="outline"
-            onClick={handleOptimizeWorkflow}
+            onClick={handleOptimizeWorkflowWrapper}
             disabled={isGenerating || !dslFile}
             title="Optimize current workflow"
           >
@@ -562,12 +409,14 @@ ${result.yamlContent}
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map(renderMessage)}
-          <div ref={messagesEndRef} />
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto p-4 scroll-smooth">
+          <div className="space-y-4">
+            {messages.map(renderMessage)}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input */}
       <div className="p-4 border-t border-gray-200">

@@ -10,7 +10,8 @@ DSL Maker runs on Next.js with TypeScript. Routes, layouts, and server actions l
 - `npm run lint`: apply ESLint rules defined in `eslint.config.mjs`.
 - `npm test`: execute the Vitest unit suites.
 - `npx playwright test`: run browser automation from `tests/*.spec.ts` (spawns the dev server if needed).
-- `node test-complete-flow.js`: optional scripted smoke test; adjust base URLs and credentials before use.
+- `node test-complete-flow-final.js`: E2E smoke test with comprehensive workflow validation
+- `node test-real-llm.js`: LLM integration test with real API calls (requires API keys)
 
 ## Coding Style & Naming Conventions
 Author new logic in TypeScript with functional React components. Use two-space indentation, `kebab-case` filenames, and PascalCase exports. Prefer Tailwind utility classes with `clsx` for conditional styling, and import shared modules through the `@/` alias. Replace `any` with explicit interfaces—extend `NODE_TYPES` in `src/constants/node-types.ts` when adding workflow nodes.
