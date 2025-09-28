@@ -24,6 +24,7 @@ import { EndNode } from './nodes/EndNode'
 import { DefaultNode } from './nodes/DefaultNode'
 import { CustomEdge } from './edges/CustomEdge'
 import { ValidationPanel } from './validation-panel'
+import { performanceMonitor, monitorOperation } from '@/utils/performance-monitor'
 
 export function WorkflowEditor() {
   // Define custom node types
@@ -204,7 +205,52 @@ export function WorkflowEditor() {
 
     try {
       const content = await file.text()
-      await importDSL(content)
+
+      // Monitor the workflow import performance
+      const { result, metrics } = await monitorOperation(
+        'workflow-import',
+        async () => {
+          // Parse the content to get workflow data for metrics
+          let workflowData = null
+          try {
+            workflowData = JSON.parse(content)
+          } catch {
+            // If not JSON, might be YAML - we'll track it anyway
+            workflowData = { workflow: { graph: { nodes: [], edges: [] } } }
+          }
+
+          await importDSL(content)
+          return { success: true, fileName: file.name }
+        },
+        (() => {
+          try {
+            return JSON.parse(content)
+          } catch {
+            return { workflow: { graph: { nodes: [], edges: [] } } }
+          }
+        })()
+      )
+
+      // Log performance metrics to console for debugging
+      console.log('🚀 Workflow Import Performance Report:')
+      console.log(`├─ File: ${result.fileName}`)
+      console.log(`├─ Import Duration: ${metrics.timing.duration?.toFixed(2)}ms`)
+      console.log(`├─ Memory Usage: ${(metrics.memoryUsage.used / 1024 / 1024).toFixed(2)}MB`)
+      console.log(`├─ Workflow Complexity: ${metrics.workflowStats.complexityScore}`)
+      console.log(`├─ Node Count: ${metrics.workflowStats.nodeCount}`)
+      console.log(`└─ Iteration Nodes: ${metrics.workflowStats.iterationNodeCount}`)
+
+      // Store metrics for potential future analysis
+      const operationId = `import-${file.name}-${Date.now()}`
+      performanceMonitor.startMonitoring(operationId, (() => {
+        try {
+          return JSON.parse(content)
+        } catch {
+          return { workflow: { graph: { nodes: [], edges: [] } } }
+        }
+      })())
+      performanceMonitor.stopMonitoring(operationId)
+
     } catch (error) {
       console.error('Import failed:', error)
     } finally {

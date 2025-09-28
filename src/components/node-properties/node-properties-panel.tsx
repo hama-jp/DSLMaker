@@ -6,6 +6,10 @@ import { LLMNodeProperties } from "./llm-node-properties"
 import { StartNodeProperties } from "./start-node-properties"
 import { EndNodeProperties } from "./end-node-properties"
 import { DefaultNodeProperties } from "./default-node-properties"
+import { IfElseNodeProperties } from "./if-else-node-properties"
+import { TemplateTransformNodeProperties } from "./template-transform-node-properties"
+import { VariableAggregatorNodeProperties } from "./variable-aggregator-node-properties"
+import { IterationNodeProperties } from "./iteration-node-properties"
 import type { DifyNode } from "@/types/dify-workflow"
 
 interface NodePropertiesPanelProps {
@@ -49,6 +53,38 @@ export function NodePropertiesPanel({ node, onUpdate }: NodePropertiesPanelProps
       return (
         <EndNodeProperties
           node={node as any}
+          onUpdate={handleUpdate}
+        />
+      )
+
+    case NODE_TYPES.IF_ELSE:
+      return (
+        <IfElseNodeProperties
+          node={node}
+          onUpdate={handleUpdate}
+        />
+      )
+
+    case NODE_TYPES.TEMPLATE_TRANSFORM:
+      return (
+        <TemplateTransformNodeProperties
+          node={node}
+          onUpdate={handleUpdate}
+        />
+      )
+
+    case NODE_TYPES.VARIABLE_AGGREGATOR:
+      return (
+        <VariableAggregatorNodeProperties
+          node={node}
+          onUpdate={handleUpdate}
+        />
+      )
+
+    case NODE_TYPES.ITERATION:
+      return (
+        <IterationNodeProperties
+          node={node}
           onUpdate={handleUpdate}
         />
       )

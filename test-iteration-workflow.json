@@ -1,0 +1,182 @@
+{
+  "app": {
+    "description": "Product Review Processing with Iteration",
+    "icon": "🔄",
+    "icon_background": "#06b6d4",
+    "mode": "workflow",
+    "name": "Iteration Test Workflow"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": false
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "id": "edge-1",
+          "source": "start-1",
+          "target": "iteration-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "iteration",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-2-loop-out",
+          "source": "iteration-1",
+          "target": "llm-process",
+          "sourceHandle": "item_output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "iteration",
+            "targetType": "llm",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-3-loop-back",
+          "source": "llm-process",
+          "target": "iteration-1",
+          "sourceHandle": "output",
+          "targetHandle": "result_input",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "iteration",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-4-final",
+          "source": "iteration-1",
+          "target": "template-1",
+          "sourceHandle": "final_output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "iteration",
+            "targetType": "template-transform",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-5",
+          "source": "template-1",
+          "target": "end-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "template-transform",
+            "targetType": "end",
+            "isInIteration": false
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start-1",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "title": "Product Reviews Input",
+            "input_variables": {
+              "review_array": {
+                "type": "array",
+                "required": true,
+                "description": "Array of product reviews to process"
+              }
+            }
+          }
+        },
+        {
+          "id": "iteration-1",
+          "type": "iteration",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "title": "Process Each Review",
+            "iteration_mode": "sequential",
+            "input_array": "{{#start-1.review_array#}}",
+            "item_variable": "current_review",
+            "output_collection": "processed_reviews"
+          }
+        },
+        {
+          "id": "llm-process",
+          "type": "llm",
+          "position": {
+            "x": 600,
+            "y": 300
+          },
+          "data": {
+            "title": "Analyze Review",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4",
+              "completion_params": {
+                "temperature": 0.3
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Analyze this product review and extract sentiment score (0-1) and key themes: {{#iteration-1.current_review#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "template-1",
+          "type": "template-transform",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "title": "Format Results",
+            "template": "Review Analysis Summary:\n\nTotal Reviews Processed: {{#iteration-1.processed_count#}}\nResults:\n{{#iteration-1.processed_reviews#}}",
+            "output_format": "text"
+          }
+        },
+        {
+          "id": "end-1",
+          "type": "end",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Analysis Complete",
+            "outputs": {
+              "review_analysis": {
+                "type": "string",
+                "value": "{{#template-1.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

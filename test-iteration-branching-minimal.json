@@ -1,0 +1,185 @@
+{
+  "app": {
+    "description": "Minimal Iteration + Branching Test",
+    "icon": "🔄",
+    "icon_background": "#06b6d4",
+    "mode": "workflow",
+    "name": "Iteration-Branching Minimal Test"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": false
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "id": "edge-1",
+          "source": "start-1",
+          "target": "iteration-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "iteration",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-2-item-out",
+          "source": "iteration-1",
+          "target": "if-else-1",
+          "sourceHandle": "item_output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "iteration",
+            "targetType": "if-else",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-3-true-path",
+          "source": "if-else-1",
+          "target": "aggregator-1",
+          "sourceHandle": "true",
+          "targetHandle": "input1",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "variable-aggregator",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-4-false-path",
+          "source": "if-else-1",
+          "target": "aggregator-1",
+          "sourceHandle": "false",
+          "targetHandle": "input2",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "variable-aggregator",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-5-result-back",
+          "source": "aggregator-1",
+          "target": "iteration-1",
+          "sourceHandle": "output",
+          "targetHandle": "result_input",
+          "type": "custom",
+          "data": {
+            "sourceType": "variable-aggregator",
+            "targetType": "iteration",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-6-final",
+          "source": "iteration-1",
+          "target": "end-1",
+          "sourceHandle": "final_output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "iteration",
+            "targetType": "end",
+            "isInIteration": false
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start-1",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "title": "Data Input",
+            "input_variables": {
+              "data_array": {
+                "type": "array",
+                "required": true,
+                "description": "Array of items to process with conditional logic"
+              }
+            }
+          }
+        },
+        {
+          "id": "iteration-1",
+          "type": "iteration",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "title": "Process Each Item",
+            "iteration_mode": "sequential",
+            "input_array": "{{#start-1.data_array#}}",
+            "item_variable": "current_item",
+            "output_collection": "processed_items"
+          }
+        },
+        {
+          "id": "if-else-1",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "title": "Conditional Router",
+            "condition": "{{#iteration-1.current_item.value#}} > 50",
+            "true_description": "High value path",
+            "false_description": "Low value path"
+          }
+        },
+        {
+          "id": "aggregator-1",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "title": "Merge Results",
+            "aggregation_mode": "merge",
+            "output_variable": "merged_result"
+          }
+        },
+        {
+          "id": "end-1",
+          "type": "end",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Final Results",
+            "outputs": {
+              "processed_data": {
+                "type": "array",
+                "value": "{{#iteration-1.processed_items#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

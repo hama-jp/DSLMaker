@@ -1,0 +1,432 @@
+{
+  "app": {
+    "description": "Large-Scale Performance Test: Complex Iteration + Multi-Branch Processing",
+    "icon": "⚡",
+    "icon_background": "#f59e0b",
+    "mode": "workflow",
+    "name": "Large-Scale Iteration Performance Test"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": false
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "id": "edge-1",
+          "source": "start-1",
+          "target": "iteration-main",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "iteration",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-2-item-out",
+          "source": "iteration-main",
+          "target": "if-category",
+          "sourceHandle": "item_output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "iteration",
+            "targetType": "if-else",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-3a-category-a",
+          "source": "if-category",
+          "target": "if-priority-a",
+          "sourceHandle": "true",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "if-else",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-3b-category-b",
+          "source": "if-category",
+          "target": "if-priority-b",
+          "sourceHandle": "false",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "if-else",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-4a-high-priority",
+          "source": "if-priority-a",
+          "target": "llm-complex-analysis",
+          "sourceHandle": "true",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "llm",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-4b-low-priority",
+          "source": "if-priority-a",
+          "target": "template-simple",
+          "sourceHandle": "false",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "template-transform",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-4c-category-b-high",
+          "source": "if-priority-b",
+          "target": "llm-standard-analysis",
+          "sourceHandle": "true",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "llm",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-4d-category-b-low",
+          "source": "if-priority-b",
+          "target": "template-simple",
+          "sourceHandle": "false",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "template-transform",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-5a-complex-to-aggregator",
+          "source": "llm-complex-analysis",
+          "target": "aggregator-main",
+          "sourceHandle": "output",
+          "targetHandle": "input1",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "variable-aggregator",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-5b-standard-to-aggregator",
+          "source": "llm-standard-analysis",
+          "target": "aggregator-main",
+          "sourceHandle": "output",
+          "targetHandle": "input2",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "variable-aggregator",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-5c-simple-to-aggregator",
+          "source": "template-simple",
+          "target": "aggregator-main",
+          "sourceHandle": "output",
+          "targetHandle": "input3",
+          "type": "custom",
+          "data": {
+            "sourceType": "template-transform",
+            "targetType": "variable-aggregator",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-6-result-back",
+          "source": "aggregator-main",
+          "target": "iteration-main",
+          "sourceHandle": "output",
+          "targetHandle": "result_input",
+          "type": "custom",
+          "data": {
+            "sourceType": "variable-aggregator",
+            "targetType": "iteration",
+            "isInIteration": true
+          }
+        },
+        {
+          "id": "edge-7-final-analysis",
+          "source": "iteration-main",
+          "target": "llm-final-summary",
+          "sourceHandle": "final_output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "iteration",
+            "targetType": "llm",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-8-final-output",
+          "source": "llm-final-summary",
+          "target": "end-1",
+          "sourceHandle": "output",
+          "targetHandle": "input",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "end",
+            "isInIteration": false
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start-1",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "Large Dataset Input",
+            "input_variables": {
+              "large_dataset": {
+                "type": "array",
+                "required": true,
+                "description": "Array of 1000+ items for performance testing"
+              },
+              "processing_mode": {
+                "type": "string",
+                "required": true,
+                "description": "Performance test mode: standard, stress, memory"
+              }
+            }
+          }
+        },
+        {
+          "id": "iteration-main",
+          "type": "iteration",
+          "position": {
+            "x": 350,
+            "y": 300
+          },
+          "data": {
+            "title": "Main Processing Loop",
+            "iteration_mode": "sequential",
+            "input_array": "{{#start-1.large_dataset#}}",
+            "item_variable": "current_item",
+            "output_collection": "processed_results",
+            "batch_size": 100,
+            "error_handling": "continue_on_error"
+          }
+        },
+        {
+          "id": "if-category",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "title": "Category Router",
+            "condition": "{{#iteration-main.current_item.category#}} == 'premium'",
+            "true_description": "Premium processing path",
+            "false_description": "Standard processing path"
+          }
+        },
+        {
+          "id": "if-priority-a",
+          "type": "if-else",
+          "position": {
+            "x": 850,
+            "y": 100
+          },
+          "data": {
+            "title": "Premium Priority Check",
+            "condition": "{{#iteration-main.current_item.priority#}} > 8",
+            "true_description": "High priority premium",
+            "false_description": "Normal priority premium"
+          }
+        },
+        {
+          "id": "if-priority-b",
+          "type": "if-else",
+          "position": {
+            "x": 850,
+            "y": 300
+          },
+          "data": {
+            "title": "Standard Priority Check",
+            "condition": "{{#iteration-main.current_item.priority#}} > 5",
+            "true_description": "High priority standard",
+            "false_description": "Low priority standard"
+          }
+        },
+        {
+          "id": "llm-complex-analysis",
+          "type": "llm",
+          "position": {
+            "x": 1100,
+            "y": 50
+          },
+          "data": {
+            "title": "Complex AI Analysis",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4",
+              "completion_params": {
+                "temperature": 0.3,
+                "max_tokens": 1000
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "Perform deep analysis on premium high-priority items."
+              },
+              {
+                "role": "user",
+                "text": "Analyze item: {{#iteration-main.current_item#}}\nContext: {{#iteration-main.processed_results#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "llm-standard-analysis",
+          "type": "llm",
+          "position": {
+            "x": 1100,
+            "y": 250
+          },
+          "data": {
+            "title": "Standard AI Analysis",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-3.5-turbo",
+              "completion_params": {
+                "temperature": 0.5,
+                "max_tokens": 500
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Standard analysis for: {{#iteration-main.current_item#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "template-simple",
+          "type": "template-transform",
+          "position": {
+            "x": 1100,
+            "y": 450
+          },
+          "data": {
+            "title": "Simple Processing",
+            "template": "Item: {{#iteration-main.current_item.id#}}\nStatus: processed\nCategory: {{#iteration-main.current_item.category#}}\nPriority: {{#iteration-main.current_item.priority#}}",
+            "output_format": "text"
+          }
+        },
+        {
+          "id": "aggregator-main",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1350,
+            "y": 300
+          },
+          "data": {
+            "title": "Result Aggregator",
+            "aggregation_mode": "weighted_merge",
+            "weight_config": {
+              "input1": 3,
+              "input2": 2,
+              "input3": 1
+            },
+            "output_variable": "aggregated_result"
+          }
+        },
+        {
+          "id": "llm-final-summary",
+          "type": "llm",
+          "position": {
+            "x": 1600,
+            "y": 300
+          },
+          "data": {
+            "title": "Performance Summary",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4",
+              "completion_params": {
+                "temperature": 0.2
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "Create a comprehensive performance summary of the processed dataset."
+              },
+              {
+                "role": "user",
+                "text": "Results: {{#iteration-main.processed_results#}}\nTotal processed: {{#iteration-main.processed_count#}}\nMode: {{#start-1.processing_mode#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end-1",
+          "type": "end",
+          "position": {
+            "x": 1850,
+            "y": 300
+          },
+          "data": {
+            "title": "Performance Test Complete",
+            "outputs": {
+              "performance_summary": {
+                "type": "string",
+                "value": "{{#llm-final-summary.output#}}"
+              },
+              "processed_count": {
+                "type": "number",
+                "value": "{{#iteration-main.processed_count#}}"
+              },
+              "processing_mode": {
+                "type": "string",
+                "value": "{{#start-1.processing_mode#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": -50,
+        "y": -100,
+        "zoom": 0.8
+      }
+    }
+  }
+}
