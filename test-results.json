@@ -1,0 +1,68 @@
+{
+  "total": 10,
+  "successful": 10,
+  "failed": 0,
+  "failureRate": "0.00",
+  "results": [
+    {
+      "requirement": "Create a comprehensive customer service AI workflow with: user query classification, sentiment analy",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Build an advanced content moderation pipeline with: content ingestion, language detection, inappropr",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Design a multi-step e-commerce recommendation engine with: user behavior analysis, product catalog s",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a sophisticated document processing workflow with: file upload validation, format detection, ",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Build a complex lead qualification system with: lead data enrichment, company information lookup, sc",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a complex data processing workflow with 13 interconnected processing steps",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a complex user management workflow with 8 interconnected processing steps",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a complex content analysis workflow with 8 interconnected processing steps",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a complex order processing workflow with 9 interconnected processing steps",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a complex quality control workflow with 14 interconnected processing steps",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    }
+  ]
+}

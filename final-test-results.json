@@ -1,0 +1,308 @@
+{
+  "total": 50,
+  "successful": 50,
+  "failed": 0,
+  "failureRate": "0.00",
+  "results": [
+    {
+      "requirement": "Create a comprehensive customer service AI workflow with user query classification, sentiment analys",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Build an advanced content moderation pipeline with content ingestion, language detection, inappropri",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Design a multi-step e-commerce recommendation engine with user behavior analysis, product catalog se",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a sophisticated document processing workflow with file upload validation, format detection, O",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Build a complex lead qualification system with lead data enrichment, company information lookup, sco",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Develop an intelligent chatbot workflow with intent recognition, context management, knowledge retri",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a financial fraud detection pipeline with transaction analysis, risk scoring, pattern recogni",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Build a complex project management automation with task assignment, progress tracking, deadline moni",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Design a comprehensive hiring workflow with resume screening, candidate evaluation, interview schedu",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create an advanced social media monitoring system with content collection, sentiment analysis, trend",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 9-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 13-node retail workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 9-node manufacturing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node finance workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node finance workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 13-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 12-node healthcare workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 12-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node logistics workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 13-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 14-node finance workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 9-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 13-node healthcare workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node education workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node finance workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node education workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 12-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 11-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node education workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 11-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node education workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 13-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 11-node logistics workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 12-node logistics workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 8-node healthcare workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 12-node retail workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node logistics workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 9-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 9,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 14-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 12-node finance workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node hr workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 13-node healthcare workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 8,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 10-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 11,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 9-node marketing workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 12,
+      "yamlValid": true
+    },
+    {
+      "requirement": "Create a 11-node logistics workflow with complex data processing and decision logic",
+      "success": true,
+      "nodeCount": 10,
+      "yamlValid": true
+    }
+  ]
+}

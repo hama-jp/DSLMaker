@@ -1,0 +1,311 @@
+{
+  "summary": {
+    "total": 35,
+    "successful": 0,
+    "failed": 35,
+    "failureRate": "100.00",
+    "withErrorPatterns": 14,
+    "errorPatternSuccess": 0,
+    "errorPatternFailureRate": "100.00",
+    "results": [
+      {
+        "requirement": "Create a comprehensive customer service AI workflow with user query classification, sentiment analys",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a comprehensive custom ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Build an advanced content moderation pipeline with content ingestion, language detection, inappropri",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build an advanced content mod ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Design a multi-step e-commerce recommendation engine with user behavior analysis, product catalog se",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Design a multi-step e-commerc ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a sophisticated document processing workflow with file upload validation, format detection, O",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a sophisticated docume ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Build a complex lead qualification system with lead data enrichment, company information lookup, sco",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build a complex lead qualific ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Develop an intelligent chatbot workflow with intent recognition, context management, knowledge retri",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Develop an intelligent chatbo ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a financial fraud detection pipeline with transaction analysis, risk scoring, pattern recogni",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a financial fraud dete ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Build a complex project management automation with task assignment, progress tracking, deadline moni",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build a complex project manag ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Design a comprehensive hiring workflow with resume screening, candidate evaluation, interview schedu",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Design a comprehensive hiring ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create an advanced social media monitoring system with content collection, sentiment analysis, trend",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create an advanced social med ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a comprehensive customer service AI workflow with user query classification, sentiment analys",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a comprehensive custom ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Build an advanced content moderation pipeline with content ingestion, language detection, inappropri",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build an advanced content mod ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Design a multi-step e-commerce recommendation engine with user behavior analysis, product catalog se",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Design a multi-step e-commerc ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create a sophisticated document processing workflow with file upload validation, format detection, O",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a sophisticated docume ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Build a complex lead qualification system with lead data enrichment, company information lookup, sco",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build a complex lead qualific ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create exactly 8 nodes with conditional branching",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create exactly 8 nodes with c ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create exactly 8 nodes with conditional branching with error patterns",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create exactly 8 nodes with c ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Build a 12-node workflow with multiple API integrations",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build a 12-node workflow with ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Build a 12-node workflow with multiple API integrations with error patterns",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build a 12-node workflow with ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Design a workflow with nested conditions and loops",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Design a workflow with nested ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Design a workflow with nested conditions and loops with error patterns",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Design a workflow with nested ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create a complex data transformation pipeline",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a complex data transfo ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a complex data transformation pipeline with error patterns",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a complex data transfo ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Build an AI agent workflow with multiple tools",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build an AI agent workflow wi ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Build an AI agent workflow with multiple tools with error patterns",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build an AI agent workflow wi ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create a 9-node education workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 9-node education wor ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create a 11-node healthcare workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 11-node healthcare w ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a 13-node healthcare workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 13-node healthcare w ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a 13-node healthcare workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 13-node healthcare w ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create a 11-node retail workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 11-node retail workf ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a 10-node finance workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 10-node finance work ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a 10-node manufacturing workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 10-node manufacturin ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      },
+      {
+        "requirement": "Create a 8-node retail workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 8-node retail workfl ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a 10-node healthcare workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 10-node healthcare w ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": false
+      },
+      {
+        "requirement": "Create a 12-node retail workflow with complex processing",
+        "success": false,
+        "error": "YAML parsing failed: bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a 12-node retail workf ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'",
+        "yamlValid": false,
+        "hasRequiredStructure": false,
+        "hadErrorPatterns": true
+      }
+    ]
+  },
+  "successfulSamples": [],
+  "failedSamples": [
+    {
+      "requirement": "Create a comprehensive customer service AI workflo",
+      "yaml": "app: description: 'Create a comprehensive customer service AI workflow with user query classificati'\n  icon: '🤖'\n  icon_background: '#EFF1F5'\n  mode: workflow\n  name: 'Complex Workflow'\n\nkind: app\nversion: 0.1.5\n\nworkflow: environment_variables: []\n  features: {}\n  graph: edges: - id: edge-1\n        source: node-1\n        target: node-2\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: start\n          targetType: llm\n          isInIteration: false\n      - id: edge-2\n        source: node-2\n        target: node-3\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-3\n        source: node-3\n        target: node-4\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-4\n        source: node-4\n        target: node-5\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-5\n        source: node-5\n        target: node-6\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-6\n        source: node-6\n        target: node-7\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-7\n        source: node-7\n        target: node-8\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-8\n        source: node-8\n        target: node-9\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-9\n        source: node-9\n        target: node-10\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-10\n        source: node-10\n        target: node-11\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: end\n          isInIteration: false\n    nodes: - id: node-1\n        type: start\n        position: {x: 100, y: 300}\n        data: title: 'Start 1'\n          variables: - variable: user_input\n              type: string\n              label: User Input\n              required: true\n              description: User query or input\n      - id: node-2\n        type: llm\n        position: {x: 350, y: 300}\n        data: title: 'Llm 2'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-1.output#}}\"\n          variable: output\n      - id: node-3\n        type: llm\n        position: {x: 600, y: 300}\n        data: title: 'Llm 3'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-2.output#}}\"\n          variable: output\n      - id: node-4\n        type: code\n        position: {x: 850, y: 300}\n        data: title: 'Code 4'\n      - id: node-5\n        type: code\n        position: {x: 1100, y: 300}\n        data: title: 'Code 5'\n      - id: node-6\n        type: http-request\n        position: {x: 1350, y: 300}\n        data: title: 'Http-request 6'\n      - id: node-7\n        type: llm\n        position: {x: 1600, y: 300}\n        data: title: 'Llm 7'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-6.output#}}\"\n          variable: output\n      - id: node-8\n        type: llm\n        position: {x: 1850, y: 300}\n        data: title: 'Llm 8'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-7.output#}}\"\n          variable: output\n      - id: node-9\n        type: llm\n        position: {x: 2100, y: 300}\n        data: title: 'Llm 9'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-8.output#}}\"\n          variable: output\n      - id: node-10\n        type: template-transform\n        position: {x: 2350, y: 300}\n        data: title: 'Template-transform 10'\n      - id: node-11\n        type: end\n        position: {x: 2600, y: 300}\n        data: title: 'End 11'\n          outputs: result: type: string\n              children: - variable: node-10.output\n                  value_selector: [node-10, output]\n    viewport: x: 0\n      y: 0\n      zoom: 1",
+      "error": "bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Create a comprehensive custom ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'"
+    },
+    {
+      "requirement": "Build an advanced content moderation pipeline with",
+      "yaml": "app: description: 'Build an advanced content moderation pipeline with content ingestion, language d'\n  icon: '🤖'\n  icon_background: '#EFF1F5'\n  mode: workflow\n  name: 'Complex Workflow'\n\nkind: app\nversion: 0.1.5\n\nworkflow: environment_variables: []\n  features: {}\n  graph: edges: - id: edge-1\n        source: node-1\n        target: node-2\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: start\n          targetType: llm\n          isInIteration: false\n      - id: edge-2\n        source: node-2\n        target: node-3\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-3\n        source: node-3\n        target: node-4\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-4\n        source: node-4\n        target: node-5\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-5\n        source: node-5\n        target: node-6\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-6\n        source: node-6\n        target: node-7\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-7\n        source: node-7\n        target: node-8\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-8\n        source: node-8\n        target: node-9\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: end\n          isInIteration: false\n    nodes: - id: node-1\n        type: start\n        position: {x: 100, y: 300}\n        data: title: 'Start 1'\n          variables: - variable: user_input\n              type: string\n              label: User Input\n              required: true\n              description: User query or input\n      - id: node-2\n        type: llm\n        position: {x: 350, y: 300}\n        data: title: 'Llm 2'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-1.output#}}\"\n          variable: output\n      - id: node-3\n        type: if-else\n        position: {x: 600, y: 300}\n        data: title: 'If-else 3'\n      - id: node-4\n        type: http-request\n        position: {x: 850, y: 300}\n        data: title: 'Http-request 4'\n      - id: node-5\n        type: if-else\n        position: {x: 1100, y: 300}\n        data: title: 'If-else 5'\n      - id: node-6\n        type: http-request\n        position: {x: 1350, y: 300}\n        data: title: 'Http-request 6'\n      - id: node-7\n        type: code\n        position: {x: 1600, y: 300}\n        data: title: 'Code 7'\n      - id: node-8\n        type: http-request\n        position: {x: 1850, y: 300}\n        data: title: 'Http-request 8'\n      - id: node-9\n        type: end\n        position: {x: 2100, y: 300}\n        data: title: 'End 9'\n          outputs: result: type: string\n              children: - variable: node-8.output\n                  value_selector: [node-8, output]\n    viewport: x: 0\n      y: 0\n      zoom: 1",
+      "error": "bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Build an advanced content mod ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'"
+    },
+    {
+      "requirement": "Design a multi-step e-commerce recommendation engi",
+      "yaml": "app: description: 'Design a multi-step e-commerce recommendation engine with user behavior analysis'\n  icon: '🤖'\n  icon_background: '#EFF1F5'\n  mode: workflow\n  name: 'Complex Workflow'\n\nkind: app\nversion: 0.1.5\n\nworkflow: environment_variables: []\n  features: {}\n  graph: edges: - id: edge-1\n        source: node-1\n        target: node-2\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: start\n          targetType: llm\n          isInIteration: false\n      - id: edge-2\n        source: node-2\n        target: node-3\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-3\n        source: node-3\n        target: node-4\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-4\n        source: node-4\n        target: node-5\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-5\n        source: node-5\n        target: node-6\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-6\n        source: node-6\n        target: node-7\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-7\n        source: node-7\n        target: node-8\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-8\n        source: node-8\n        target: node-9\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-9\n        source: node-9\n        target: node-10\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-10\n        source: node-10\n        target: node-11\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: llm\n          isInIteration: false\n      - id: edge-11\n        source: node-11\n        target: node-12\n        sourceHandle: source\n        targetHandle: target\n        type: custom\n        data: sourceType: llm\n          targetType: end\n          isInIteration: false\n    nodes: - id: node-1\n        type: start\n        position: {x: 100, y: 300}\n        data: title: 'Start 1'\n          variables: - variable: user_input\n              type: string\n              label: User Input\n              required: true\n              description: User query or input\n      - id: node-2\n        type: code\n        position: {x: 350, y: 300}\n        data: title: 'Code 2'\n      - id: node-3\n        type: template-transform\n        position: {x: 600, y: 300}\n        data: title: 'Template-transform 3'\n      - id: node-4\n        type: if-else\n        position: {x: 850, y: 300}\n        data: title: 'If-else 4'\n      - id: node-5\n        type: http-request\n        position: {x: 1100, y: 300}\n        data: title: 'Http-request 5'\n      - id: node-6\n        type: code\n        position: {x: 1350, y: 300}\n        data: title: 'Code 6'\n      - id: node-7\n        type: code\n        position: {x: 1600, y: 300}\n        data: title: 'Code 7'\n      - id: node-8\n        type: code\n        position: {x: 1850, y: 300}\n        data: title: 'Code 8'\n      - id: node-9\n        type: template-transform\n        position: {x: 2100, y: 300}\n        data: title: 'Template-transform 9'\n      - id: node-10\n        type: llm\n        position: {x: 2350, y: 300}\n        data: title: 'Llm 10'\n          model: provider: openai\n            name: gpt-5-mini\n            mode: chat\n            completion_params: temperature: 0.7\n              max_tokens: 1000\n          prompt_template: - role: user\n              text: \"Process: {{#node-9.output#}}\"\n          variable: output\n      - id: node-11\n        type: http-request\n        position: {x: 2600, y: 300}\n        data: title: 'Http-request 11'\n      - id: node-12\n        type: end\n        position: {x: 2850, y: 300}\n        data: title: 'End 12'\n          outputs: result: type: string\n              children: - variable: node-11.output\n                  value_selector: [node-11, output]\n    viewport: x: 0\n      y: 0\n      zoom: 1",
+      "error": "bad indentation of a mapping entry (1:17)\n\n 1 | app: description: 'Design a multi-step e-commerc ...\n---------------------^\n 2 |   icon: '🤖'\n 3 |   icon_background: '#EFF1F5'"
+    }
+  ]
+}

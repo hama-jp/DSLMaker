@@ -1,0 +1,109 @@
+import React from 'react'
+import { Handle, Position, NodeProps } from '@xyflow/react'
+import {
+  Code,
+  Globe,
+  Tool,
+  Database,
+  GitBranch,
+  Zap,
+  Box
+} from 'lucide-react'
+
+const nodeStyles = {
+  code: {
+    gradient: 'from-yellow-50 to-amber-50',
+    borderSelected: 'border-yellow-600',
+    borderDefault: 'border-yellow-400',
+    bgIcon: 'bg-yellow-500',
+    icon: Code
+  },
+  http_request: {
+    gradient: 'from-blue-50 to-sky-50',
+    borderSelected: 'border-blue-600',
+    borderDefault: 'border-blue-400',
+    bgIcon: 'bg-blue-500',
+    icon: Globe
+  },
+  tool: {
+    gradient: 'from-gray-50 to-slate-50',
+    borderSelected: 'border-gray-600',
+    borderDefault: 'border-gray-400',
+    bgIcon: 'bg-gray-500',
+    icon: Tool
+  },
+  knowledge_retrieval: {
+    gradient: 'from-teal-50 to-cyan-50',
+    borderSelected: 'border-teal-600',
+    borderDefault: 'border-teal-400',
+    bgIcon: 'bg-teal-500',
+    icon: Database
+  },
+  if_else: {
+    gradient: 'from-orange-50 to-red-50',
+    borderSelected: 'border-orange-600',
+    borderDefault: 'border-orange-400',
+    bgIcon: 'bg-orange-500',
+    icon: GitBranch
+  },
+  template_transform: {
+    gradient: 'from-pink-50 to-rose-50',
+    borderSelected: 'border-pink-600',
+    borderDefault: 'border-pink-400',
+    bgIcon: 'bg-pink-500',
+    icon: Zap
+  },
+  default: {
+    gradient: 'from-gray-50 to-gray-100',
+    borderSelected: 'border-gray-600',
+    borderDefault: 'border-gray-400',
+    bgIcon: 'bg-gray-500',
+    icon: Box
+  }
+}
+
+export function DefaultNode({ data, selected, type }: NodeProps) {
+  const style = nodeStyles[type as keyof typeof nodeStyles] || nodeStyles.default
+  const Icon = style.icon
+
+  return (
+    <div
+      className={`
+        px-4 py-3 rounded-lg border-2 bg-gradient-to-r ${style.gradient}
+        ${selected ? style.borderSelected + ' shadow-lg' : style.borderDefault + ' shadow-md'}
+        transition-all duration-200 hover:shadow-lg min-w-[180px]
+      `}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`${style.bgIcon} p-2 rounded-full`}>
+          <Icon className="w-4 h-4 text-white" />
+        </div>
+        <div className="flex flex-col">
+          <div className="font-semibold text-gray-800 capitalize">
+            {type?.replace(/_/g, ' ') || 'Node'}
+          </div>
+          <div className="text-xs text-gray-600">{data?.title || data?.label || ''}</div>
+        </div>
+      </div>
+
+      {data?.description && (
+        <div className="mt-2 pt-2 border-t border-gray-200">
+          <p className="text-xs text-gray-600 line-clamp-2">{data.description}</p>
+        </div>
+      )}
+
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="target"
+        className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="source"
+        className={`w-3 h-3 ${style.bgIcon} border-2 border-white`}
+      />
+    </div>
+  )
+}
