@@ -1,0 +1,144 @@
+{
+  "compliance": {
+    "overall": {
+      "total": 5,
+      "passed": 5,
+      "rate": 100
+    },
+    "categories": {
+      "jsonParsing": {
+        "total": 5,
+        "passed": 5,
+        "rate": 100
+      },
+      "structureCompliance": {
+        "total": 5,
+        "passed": 5,
+        "rate": 100
+      },
+      "nodeTypeCompliance": {
+        "total": 5,
+        "passed": 5,
+        "rate": 100
+      },
+      "variableFlowCompliance": {
+        "total": 5,
+        "passed": 5,
+        "rate": 100
+      },
+      "businessLogicCompliance": {
+        "total": 5,
+        "passed": 5,
+        "rate": 100
+      },
+      "performanceCompliance": {
+        "total": 5,
+        "passed": 5,
+        "rate": 100
+      }
+    }
+  },
+  "details": [
+    {
+      "testIndex": 0,
+      "passed": true,
+      "message": "Validation completed",
+      "error": null,
+      "details": {
+        "complianceScore": 100,
+        "passedChecks": 6,
+        "totalChecks": 6,
+        "details": {
+          "jsonParsing": true,
+          "structureCompliance": true,
+          "nodeTypeCompliance": true,
+          "variableFlowCompliance": true,
+          "businessLogicCompliance": true,
+          "performanceCompliance": true
+        }
+      },
+      "timestamp": "2025-09-28T06:14:20.271Z"
+    },
+    {
+      "testIndex": 1,
+      "passed": true,
+      "message": "Validation completed",
+      "error": null,
+      "details": {
+        "complianceScore": 100,
+        "passedChecks": 6,
+        "totalChecks": 6,
+        "details": {
+          "jsonParsing": true,
+          "structureCompliance": true,
+          "nodeTypeCompliance": true,
+          "variableFlowCompliance": true,
+          "businessLogicCompliance": true,
+          "performanceCompliance": true
+        }
+      },
+      "timestamp": "2025-09-28T06:14:29.878Z"
+    },
+    {
+      "testIndex": 2,
+      "passed": true,
+      "message": "Validation completed",
+      "error": null,
+      "details": {
+        "complianceScore": 100,
+        "passedChecks": 6,
+        "totalChecks": 6,
+        "details": {
+          "jsonParsing": true,
+          "structureCompliance": true,
+          "nodeTypeCompliance": true,
+          "variableFlowCompliance": true,
+          "businessLogicCompliance": true,
+          "performanceCompliance": true
+        }
+      },
+      "timestamp": "2025-09-28T06:14:39.403Z"
+    },
+    {
+      "testIndex": 3,
+      "passed": true,
+      "message": "Validation completed",
+      "error": null,
+      "details": {
+        "complianceScore": 100,
+        "passedChecks": 6,
+        "totalChecks": 6,
+        "details": {
+          "jsonParsing": true,
+          "structureCompliance": true,
+          "nodeTypeCompliance": true,
+          "variableFlowCompliance": true,
+          "businessLogicCompliance": true,
+          "performanceCompliance": true
+        }
+      },
+      "timestamp": "2025-09-28T06:14:50.094Z"
+    },
+    {
+      "testIndex": 4,
+      "passed": true,
+      "message": "Validation completed",
+      "error": null,
+      "details": {
+        "complianceScore": 100,
+        "passedChecks": 6,
+        "totalChecks": 6,
+        "details": {
+          "jsonParsing": true,
+          "structureCompliance": true,
+          "nodeTypeCompliance": true,
+          "variableFlowCompliance": true,
+          "businessLogicCompliance": true,
+          "performanceCompliance": true
+        }
+      },
+      "timestamp": "2025-09-28T06:15:04.464Z"
+    }
+  ],
+  "timestamp": "2025-09-28T06:15:07.467Z"
+}

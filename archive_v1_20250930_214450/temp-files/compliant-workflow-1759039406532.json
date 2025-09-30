@@ -1,0 +1,184 @@
+{
+  "app": {
+    "description": "Enterprise Document Processing Pipeline",
+    "icon": "📄",
+    "icon_background": "#4f46e5",
+    "mode": "workflow",
+    "name": "Document Processing Automation"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "document_extractor"
+        },
+        {
+          "source": "document_extractor",
+          "target": "if_validation"
+        },
+        {
+          "source": "if_validation",
+          "target": "llm_analysis",
+          "condition": "valid"
+        },
+        {
+          "source": "if_validation",
+          "target": "end_node",
+          "condition": "invalid"
+        },
+        {
+          "source": "llm_analysis",
+          "target": "knowledge_retrieval"
+        },
+        {
+          "source": "knowledge_retrieval",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "variables": {
+            "user_query": {
+              "type": "string",
+              "required": true
+            },
+            "context_data": {
+              "type": "string",
+              "required": false
+            },
+            "workflow_params": {
+              "type": "object",
+              "required": false
+            }
+          }
+        },
+        {
+          "id": "document_extractor",
+          "type": "document-extractor",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "variables": {
+            "extracted_content": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "id": "if_validation",
+          "type": "if-else",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "conditions": [
+            {
+              "condition": "{{#document_extractor.extracted_content#}} != ''",
+              "true": "valid",
+              "false": "invalid"
+            }
+          ]
+        },
+        {
+          "id": "llm_analysis",
+          "type": "llm",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "parameters": {
+            "model": "gpt-3.5-turbo",
+            "prompt": "Analyze the extracted content: {{#document_extractor.extracted_content#}}",
+            "temperature": 0.7,
+            "max_tokens": 150
+          },
+          "variables": {
+            "analysis_result": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "id": "knowledge_retrieval",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "parameters": {
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.7
+          },
+          "variables": {
+            "contextual_data": {
+              "type": "array"
+            }
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "template": {
+            "content": "Processed Document Analysis: {{#llm_analysis.analysis_result#}} with context: {{#knowledge_retrieval.contextual_data#}}",
+            "format": "text"
+          },
+          "variables": {
+            "formatted_output": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "variables": {
+            "final_output": {
+              "type": "string",
+              "source": "{{#template_transform.formatted_output#}}"
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

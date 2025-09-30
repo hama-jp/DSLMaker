@@ -1,0 +1,314 @@
+{
+  "app": {
+    "description": "Complex RAG workflow with proper data flow references",
+    "icon": "🔄",
+    "icon_background": "#EFF1F5",
+    "mode": "workflow",
+    "name": "Fixed Complex Workflow"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {},
+    "graph": {
+      "edges": [
+        {
+          "id": "edge-1-start-to-extractor",
+          "source": "start-1",
+          "target": "parameter-extractor-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "parameter-extractor",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-2-extractor-to-knowledge",
+          "source": "parameter-extractor-1",
+          "target": "knowledge-retrieval-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "parameter-extractor",
+            "targetType": "knowledge-retrieval",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-3-knowledge-to-ifelse",
+          "source": "knowledge-retrieval-1",
+          "target": "if-else-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "knowledge-retrieval",
+            "targetType": "if-else",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-4-ifelse-to-llm-true",
+          "source": "if-else-1",
+          "target": "llm-1",
+          "sourceHandle": "true",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "llm",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-5-ifelse-to-llm-false",
+          "source": "if-else-1",
+          "target": "llm-2",
+          "sourceHandle": "false",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "if-else",
+            "targetType": "llm",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-6-llm1-to-template",
+          "source": "llm-1",
+          "target": "template-transform-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "template-transform",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-7-llm2-to-template",
+          "source": "llm-2",
+          "target": "template-transform-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "template-transform",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-8-template-to-end",
+          "source": "template-transform-1",
+          "target": "end-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "template-transform",
+            "targetType": "end",
+            "isInIteration": false
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start-1",
+          "type": "start",
+          "position": { "x": 100, "y": 200 },
+          "data": {
+            "title": "User Input",
+            "variables": [
+              {
+                "variable": "user_query",
+                "type": "string",
+                "label": "User Query",
+                "required": true,
+                "description": "Enter your question"
+              }
+            ]
+          }
+        },
+        {
+          "id": "parameter-extractor-1",
+          "type": "parameter-extractor",
+          "position": { "x": 350, "y": 200 },
+          "data": {
+            "title": "Extract Parameters",
+            "query": "{{#start-1.user_query#}}",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-5-mini",
+              "completion_params": {
+                "temperature": 0.0
+              }
+            },
+            "parameters": [
+              {
+                "name": "intent",
+                "type": "string",
+                "required": true,
+                "description": "User's main intention"
+              },
+              {
+                "name": "topic",
+                "type": "string",
+                "required": true,
+                "description": "Main topic of the query"
+              }
+            ],
+            "inference_mode": "function_call"
+          }
+        },
+        {
+          "id": "knowledge-retrieval-1",
+          "type": "knowledge-retrieval",
+          "position": { "x": 600, "y": 200 },
+          "data": {
+            "title": "Knowledge Search",
+            "query": "{{#parameter-extractor-1.topic#}}",
+            "dataset_ids": ["default-knowledge-base"],
+            "retrieval_mode": "multiple",
+            "multiple_retrieval_config": {
+              "top_k": 3,
+              "score_threshold": 0.5,
+              "reranking_enable": true,
+              "reranking_mode": "reranking_model",
+              "reranking_model": {
+                "provider": "openai",
+                "model": "gpt-5-mini"
+              }
+            }
+          }
+        },
+        {
+          "id": "if-else-1",
+          "type": "if-else",
+          "position": { "x": 850, "y": 200 },
+          "data": {
+            "title": "Intent Router",
+            "logical_operator": "and",
+            "conditions": [
+              {
+                "id": "condition-1",
+                "variable_selector": ["parameter-extractor-1", "intent"],
+                "comparison_operator": "contains",
+                "value": "detailed_analysis"
+              }
+            ]
+          }
+        },
+        {
+          "id": "llm-1",
+          "type": "llm",
+          "position": { "x": 1100, "y": 150 },
+          "data": {
+            "title": "Detailed Analysis",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-5-mini",
+              "mode": "chat",
+              "completion_params": {
+                "temperature": 0.7,
+                "max_tokens": 2000
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are an expert analyst. Provide detailed analysis based on the retrieved knowledge and user query."
+              },
+              {
+                "role": "user",
+                "text": "Query: {{#start-1.user_query#}}\nKnowledge: {{#knowledge-retrieval-1.result#}}\nIntent: {{#parameter-extractor-1.intent#}}"
+              }
+            ],
+            "variable": "detailed_response"
+          }
+        },
+        {
+          "id": "llm-2",
+          "type": "llm",
+          "position": { "x": 1100, "y": 250 },
+          "data": {
+            "title": "Quick Answer",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-5-mini",
+              "mode": "chat",
+              "completion_params": {
+                "temperature": 0.3,
+                "max_tokens": 500
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a helpful assistant. Provide concise, direct answers based on the available knowledge."
+              },
+              {
+                "role": "user",
+                "text": "Query: {{#start-1.user_query#}}\nKnowledge: {{#knowledge-retrieval-1.result#}}"
+              }
+            ],
+            "variable": "quick_response"
+          }
+        },
+        {
+          "id": "template-transform-1",
+          "type": "template-transform",
+          "position": { "x": 1350, "y": 200 },
+          "data": {
+            "title": "Format Response",
+            "template": "# Response to: {{#start-1.user_query#}}\n\n## Analysis\n{{#llm-1.text#}}{{#llm-2.text#}}\n\n## Context\n**Intent**: {{#parameter-extractor-1.intent#}}\n**Knowledge Sources**: {{#knowledge-retrieval-1.result#}}",
+            "variables": [
+              {
+                "variable": "query",
+                "value_selector": ["start-1", "user_query"]
+              },
+              {
+                "variable": "intent",
+                "value_selector": ["parameter-extractor-1", "intent"]
+              },
+              {
+                "variable": "knowledge",
+                "value_selector": ["knowledge-retrieval-1", "result"]
+              },
+              {
+                "variable": "response",
+                "value_selector": ["llm-1", "text"]
+              }
+            ]
+          }
+        },
+        {
+          "id": "end-1",
+          "type": "end",
+          "position": { "x": 1600, "y": 200 },
+          "data": {
+            "title": "Final Output",
+            "outputs": {
+              "final_answer": {
+                "type": "string",
+                "children": [
+                  {
+                    "variable": "template-transform-1.output",
+                    "value_selector": ["template-transform-1", "output"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "viewport": { "x": 0, "y": 0, "zoom": 1 }
+    }
+  }
+}

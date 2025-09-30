@@ -1,0 +1,405 @@
+app:
+  description: 'Advanced content analysis pipeline with parallel processing, sentiment analysis, and comprehensive reporting'
+  icon: 📊
+  icon_background: '#F59E0B'
+  mode: workflow
+  name: 'Content Analysis Pipeline'
+
+kind: app
+version: 0.1.5
+
+workflow:
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: true
+      number_limits: 5
+      max_size_mb: 50
+    retriever_resource:
+      enabled: false
+    opening_statement: 'I can analyze your content for sentiment, key themes, readability, and generate comprehensive reports.'
+    suggested_questions:
+      - 'Analyze this document for sentiment and key themes'
+      - 'Evaluate the readability of my content'
+      - 'Generate a comprehensive content analysis report'
+    text_to_speech:
+      enabled: false
+  graph:
+    edges:
+      # Start to parallel analysis nodes
+      - id: start-to-sentiment
+        source: start-1
+        target: sentiment-llm
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: start
+          targetType: llm
+      - id: start-to-themes
+        source: start-1
+        target: themes-llm
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: start
+          targetType: llm
+      - id: start-to-readability
+        source: start-1
+        target: readability-code
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: start
+          targetType: code
+      # Parallel nodes to aggregator
+      - id: sentiment-to-aggregator
+        source: sentiment-llm
+        target: aggregator-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: llm
+          targetType: variable_aggregator
+      - id: themes-to-aggregator
+        source: themes-llm
+        target: aggregator-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: llm
+          targetType: variable_aggregator
+      - id: readability-to-aggregator
+        source: readability-code
+        target: aggregator-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: code
+          targetType: variable_aggregator
+      # Aggregator to report generator
+      - id: aggregator-to-report
+        source: aggregator-1
+        target: report-template
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: variable_aggregator
+          targetType: template_transform
+      # Report to final LLM
+      - id: report-to-final
+        source: report-template
+        target: final-llm
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: template_transform
+          targetType: llm
+      # Final LLM to end
+      - id: final-to-end
+        source: final-llm
+        target: end-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: llm
+          targetType: end
+    nodes:
+      - id: start-1
+        type: start
+        position: { x: 100, y: 300 }
+        data:
+          title: '🚀 Content Input'
+          variables:
+            - variable: content_text
+              type: paragraph
+              label: 'Content to analyze'
+              required: true
+              max_length: 10000
+            - variable: analysis_type
+              type: select
+              label: 'Analysis focus'
+              required: false
+              options:
+                - Comprehensive
+                - Marketing Focus
+                - Academic Focus
+                - Technical Focus
+            - variable: target_audience
+              type: text-input
+              label: 'Target audience'
+              required: false
+              max_length: 200
+      # Parallel Analysis Nodes
+      - id: sentiment-llm
+        type: llm
+        position: { x: 400, y: 100 }
+        data:
+          title: '😊 Sentiment Analysis'
+          model:
+            provider: openai
+            name: gpt-4
+            mode: chat
+            completion_params:
+              temperature: 0.1
+              max_tokens: 800
+          prompt_template:
+            - role: system
+              text: |
+                You are an expert in sentiment analysis. Analyze the provided content and provide detailed sentiment insights.
+
+                Provide your analysis in JSON format with:
+                - overall_sentiment: positive/negative/neutral/mixed
+                - confidence_score: 0.0-1.0
+                - emotional_tone: array of detected emotions
+                - sentiment_distribution: breakdown by sections if applicable
+                - key_sentiment_indicators: specific phrases or elements driving sentiment
+            - role: user
+              text: |
+                Please analyze the sentiment of this content:
+
+                Content: {{#start-1.content_text#}}
+
+                Target Audience: {{#start-1.target_audience#}}
+
+                Return only valid JSON format.
+          memory:
+            enabled: false
+          variable: sentiment_analysis
+      - id: themes-llm
+        type: llm
+        position: { x: 400, y: 300 }
+        data:
+          title: '🎯 Theme Extraction'
+          model:
+            provider: openai
+            name: gpt-4
+            mode: chat
+            completion_params:
+              temperature: 0.2
+              max_tokens: 1000
+          prompt_template:
+            - role: system
+              text: |
+                You are an expert in content analysis and theme extraction. Identify the main themes, topics, and key concepts in the content.
+
+                Provide your analysis in JSON format with:
+                - main_themes: array of primary themes with importance scores
+                - supporting_topics: array of secondary topics
+                - key_concepts: important concepts or terms identified
+                - content_structure: how themes are organized in the content
+                - keyword_density: most frequent important terms
+            - role: user
+              text: |
+                Please extract themes and key concepts from this content:
+
+                Content: {{#start-1.content_text#}}
+                Analysis Type: {{#start-1.analysis_type#}}
+
+                Return only valid JSON format.
+          memory:
+            enabled: false
+          variable: theme_analysis
+      - id: readability-code
+        type: code
+        position: { x: 400, y: 500 }
+        data:
+          title: '📖 Readability Analysis'
+          code_language: python3
+          code: |
+            import re
+            import json
+
+            def analyze_readability(text):
+                # Basic readability metrics
+                sentences = len(re.findall(r'[.!?]+', text))
+                words = len(text.split())
+                characters = len(text.replace(' ', ''))
+
+                # Avoid division by zero
+                avg_words_per_sentence = words / sentences if sentences > 0 else 0
+                avg_chars_per_word = characters / words if words > 0 else 0
+
+                # Simple readability score (Flesch-like approximation)
+                if sentences > 0 and words > 0:
+                    readability_score = 206.835 - (1.015 * avg_words_per_sentence) - (84.6 * (characters / words))
+                else:
+                    readability_score = 0
+
+                # Readability level
+                if readability_score >= 90:
+                    level = "Very Easy"
+                elif readability_score >= 80:
+                    level = "Easy"
+                elif readability_score >= 70:
+                    level = "Fairly Easy"
+                elif readability_score >= 60:
+                    level = "Standard"
+                elif readability_score >= 50:
+                    level = "Fairly Difficult"
+                elif readability_score >= 30:
+                    level = "Difficult"
+                else:
+                    level = "Very Difficult"
+
+                return {
+                    "readability_score": round(readability_score, 2),
+                    "readability_level": level,
+                    "word_count": words,
+                    "sentence_count": sentences,
+                    "avg_words_per_sentence": round(avg_words_per_sentence, 2),
+                    "avg_chars_per_word": round(avg_chars_per_word, 2),
+                    "estimated_reading_time": round(words / 200, 1)  # 200 WPM average
+                }
+
+            # Main execution
+            content = {{#start-1.content_text#}}
+            result = analyze_readability(str(content))
+            print(json.dumps(result))
+          inputs:
+            content_text:
+              type: string
+              variable_selector:
+                - start-1
+                - content_text
+          outputs:
+            readability_metrics:
+              type: string
+          variable: readability_result
+      # Data Aggregation
+      - id: aggregator-1
+        type: variable_aggregator
+        position: { x: 700, y: 300 }
+        data:
+          title: '📊 Data Aggregator'
+          variables:
+            - variable: sentiment_analysis
+              value_selector:
+                - sentiment-llm
+                - sentiment_analysis
+            - variable: theme_analysis
+              value_selector:
+                - themes-llm
+                - theme_analysis
+            - variable: readability_result
+              value_selector:
+                - readability-code
+                - readability_result
+          output_type: object
+          variable: aggregated_analysis
+      # Report Template
+      - id: report-template
+        type: template_transform
+        position: { x: 1000, y: 300 }
+        data:
+          title: '📋 Report Template'
+          template: |
+            # Content Analysis Report
+
+            ## Executive Summary
+            **Analysis Type**: {{#start-1.analysis_type#}}
+            **Target Audience**: {{#start-1.target_audience#}}
+            **Content Length**: {{ aggregated_analysis.readability_result.word_count }} words
+            **Estimated Reading Time**: {{ aggregated_analysis.readability_result.estimated_reading_time }} minutes
+
+            ## Sentiment Analysis
+            **Overall Sentiment**: {{ aggregated_analysis.sentiment_analysis.overall_sentiment }}
+            **Confidence Score**: {{ aggregated_analysis.sentiment_analysis.confidence_score }}
+            **Emotional Tone**: {{ aggregated_analysis.sentiment_analysis.emotional_tone }}
+
+            ## Theme Analysis
+            **Main Themes**:
+            {% for theme in aggregated_analysis.theme_analysis.main_themes %}
+            - {{ theme.name }} (Importance: {{ theme.score }})
+            {% endfor %}
+
+            **Key Concepts**: {{ aggregated_analysis.theme_analysis.key_concepts | join(', ') }}
+
+            ## Readability Metrics
+            **Readability Score**: {{ aggregated_analysis.readability_result.readability_score }}
+            **Reading Level**: {{ aggregated_analysis.readability_result.readability_level }}
+            **Average Words per Sentence**: {{ aggregated_analysis.readability_result.avg_words_per_sentence }}
+
+            ---
+            *Generated by Content Analysis Pipeline*
+          variables:
+            - variable: analysis_data
+              value_selector:
+                - aggregator-1
+                - aggregated_analysis
+          variable: formatted_report
+      # Final Enhancement
+      - id: final-llm
+        type: llm
+        position: { x: 1300, y: 300 }
+        data:
+          title: '✨ Report Enhancement'
+          model:
+            provider: openai
+            name: gpt-4
+            mode: chat
+            completion_params:
+              temperature: 0.3
+              max_tokens: 1500
+          prompt_template:
+            - role: system
+              text: |
+                You are a content analysis expert. Review the generated report and enhance it with:
+                1. Professional insights and interpretation
+                2. Actionable recommendations for improvement
+                3. Context-aware suggestions based on the target audience
+                4. Summary of key findings and their implications
+
+                Keep the original report structure but add valuable insights and recommendations.
+            - role: user
+              text: |
+                Please enhance this content analysis report with professional insights and recommendations:
+
+                {{#report-template.formatted_report#}}
+
+                Analysis Type: {{#start-1.analysis_type#}}
+                Target Audience: {{#start-1.target_audience#}}
+
+                Provide an enhanced version with actionable insights.
+          memory:
+            enabled: false
+          variable: enhanced_report
+      - id: end-1
+        type: end
+        position: { x: 1600, y: 300 }
+        data:
+          title: '🏁 Analysis Complete'
+          outputs:
+            final_report:
+              type: string
+              children: null
+            analysis_data:
+              type: object
+              children: null
+    viewport:
+      x: -50
+      y: 50
+      zoom: 0.7
+
+# Source: Created based on advanced content analysis and parallel processing patterns
+# Pattern: Parallel processing with data aggregation and multi-stage reporting
+# Complexity: Complex to Enterprise
+# Node Count: 9 (Start, 3x LLM, Code, Aggregator, Template, LLM, End)
+# Use Cases: Content marketing analysis, document evaluation, academic content review

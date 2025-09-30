@@ -1,0 +1,211 @@
+{
+  "app": {
+    "description": "Enterprise document processing pipeline with OCR extraction, content analysis, validation, and formatted output.",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Enterprise Document Processing"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "knowledge_retrieval"
+        },
+        {
+          "source": "knowledge_retrieval",
+          "target": "llm_node"
+        },
+        {
+          "source": "llm_node",
+          "target": "if_else_node"
+        },
+        {
+          "source": "if_else_node",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "title": "Start",
+            "inputs": {
+              "user_query": {
+                "type": "string",
+                "required": true
+              },
+              "context": {
+                "type": "string",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "title": "Extract Parameters",
+            "parameters": [
+              {
+                "name": "extracted_query",
+                "description": "User query",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Extract the main query from: {{#start_node.user_query#}}"
+          }
+        },
+        {
+          "id": "knowledge_retrieval",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "title": "Knowledge Search",
+            "dataset_ids": [
+              "default"
+            ],
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.6,
+            "query": "{{#parameter_extractor.extracted_query#}}"
+          }
+        },
+        {
+          "id": "llm_node",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "title": "AI Processing",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-3.5-turbo",
+              "mode": "chat",
+              "completion_params": {
+                "temperature": 0.7
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Based on this context: {{#knowledge_retrieval.result#}}, provide a response"
+              }
+            ]
+          }
+        },
+        {
+          "id": "if_else_node",
+          "type": "if-else",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Quality Check",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "llm_node",
+                  "text"
+                ],
+                "comparison_operator": "not empty",
+                "value": ""
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "title": "Format Output",
+            "template": "Result: {{#llm_node.text#}}\n\nContext: {{#knowledge_retrieval.result#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "llm_node",
+                  "text"
+                ],
+                "variable": "response"
+              },
+              {
+                "value_selector": [
+                  "knowledge_retrieval",
+                  "result"
+                ],
+                "variable": "context"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "title": "End",
+            "outputs": {
+              "final_result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

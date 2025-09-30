@@ -1,0 +1,743 @@
+{
+  "app": {
+    "description": "Financial Fraud Detection Workflow with Advanced Error Handling, Scalability & Compliance",
+    "icon": "🏦",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Financial Fraud Detection"
+  },
+  "kind": "app",
+  "version": "2.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout milliseconds",
+        "type": "number",
+        "default": "20000"
+      },
+      {
+        "key": "CACHE_TTL",
+        "name": "Cache TTL seconds",
+        "type": "number",
+        "default": "300"
+      },
+      {
+        "key": "CIRCUIT_BREAKER_THRESHOLD",
+        "name": "Circuit breaker threshold",
+        "type": "number",
+        "default": "5"
+      },
+      {
+        "key": "SCALE_FACTOR",
+        "name": "Auto-scaling factor",
+        "type": "number",
+        "default": "2"
+      },
+      {
+        "key": "CREDIT_BUREAU_API_KEY",
+        "name": "Credit Bureau API Key",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "FRAUD_SERVICE_API_KEY",
+        "name": "External Fraud Service API Key",
+        "type": "string",
+        "default": ""
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 100,
+        "max_size_mb": 500
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "cache_manager"
+        },
+        {
+          "source": "cache_manager",
+          "target": "load_balancer"
+        },
+        {
+          "source": "load_balancer",
+          "target": "error_handler_layer_1"
+        },
+        {
+          "source": "load_balancer",
+          "target": "ml_risk_scorer"
+        },
+        {
+          "source": "load_balancer",
+          "target": "rule_compliance_checker"
+        },
+        {
+          "source": "load_balancer",
+          "target": "credit_bureau_verifier"
+        },
+        {
+          "source": "load_balancer",
+          "target": "balance_validator"
+        },
+        {
+          "source": "load_balancer",
+          "target": "geo_risk_assessor"
+        },
+        {
+          "source": "error_handler_layer_1",
+          "target": "circuit_breaker"
+        },
+        {
+          "source": "ml_risk_scorer",
+          "target": "performance_monitor_ml"
+        },
+        {
+          "source": "rule_compliance_checker",
+          "target": "performance_monitor_rule"
+        },
+        {
+          "source": "credit_bureau_verifier",
+          "target": "performance_monitor_credit"
+        },
+        {
+          "source": "balance_validator",
+          "target": "performance_monitor_balance"
+        },
+        {
+          "source": "geo_risk_assessor",
+          "target": "performance_monitor_geo"
+        },
+        {
+          "source": "performance_monitor_ml",
+          "target": "aggregator_resilience"
+        },
+        {
+          "source": "performance_monitor_rule",
+          "target": "aggregator_resilience"
+        },
+        {
+          "source": "performance_monitor_credit",
+          "target": "aggregator_resilience"
+        },
+        {
+          "source": "performance_monitor_balance",
+          "target": "aggregator_resilience"
+        },
+        {
+          "source": "performance_monitor_geo",
+          "target": "aggregator_resilience"
+        },
+        {
+          "source": "circuit_breaker",
+          "target": "fallback_processor"
+        },
+        {
+          "source": "aggregator_resilience",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "fallback_processor",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "scalability_optimizer",
+          "target": "security_validator_advanced"
+        },
+        {
+          "source": "security_validator_advanced",
+          "target": "error_handler_layer_2"
+        },
+        {
+          "source": "error_handler_layer_2",
+          "target": "final_processor_optimized"
+        },
+        {
+          "source": "final_processor_optimized",
+          "target": "cache_updater"
+        },
+        {
+          "source": "cache_updater",
+          "target": "template_transform_performance"
+        },
+        {
+          "source": "template_transform_performance",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "Fraud Detection Start",
+            "inputs": {
+              "transaction_payload": {
+                "type": "object",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              },
+              "performance_requirements": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "data": {
+            "title": "Transaction Parameter Extractor",
+            "parameters": [
+              {
+                "name": "transaction_id",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "amount",
+                "type": "number",
+                "required": true
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "account_id",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "merchant_location",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "timestamp",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Extract fields from {{#start_node.transaction_payload#}}"
+          }
+        },
+        {
+          "id": "cache_manager",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 300
+          },
+          "data": {
+            "title": "Cache Manager",
+            "code": "import hashlib, json\n\ndef main(params):\n    key = hashlib.sha256(json.dumps(params, sort_keys=True).encode()).hexdigest()\n    ttl = int('{{#env.CACHE_TTL#}}')\n    hit = hash(key) % 10 < 3\n    if hit:\n        return {'cache_status': 'HIT', 'cached_result': {'risk_score': 0.2}, 'cache_key': key}\n    else:\n        return {'cache_status': 'MISS', 'cache_key': key, 'requires_processing': True, 'ttl_seconds': ttl}",
+            "outputs": {
+              "cache_status": "string",
+              "cache_key": "string",
+              "requires_processing": "boolean"
+            }
+          }
+        },
+        {
+          "id": "load_balancer",
+          "type": "code",
+          "position": {
+            "x": 700,
+            "y": 300
+          },
+          "data": {
+            "title": "Load Balancer",
+            "code": "import random\n\ndef main(cache_result, params):\n    instances = [{'id': f'inst_{i}', 'load': random.random()} for i in range(1,5)]\n    available = [i for i in instances if i['load'] < 0.85]\n    if not available:\n        return {'selected_instance': 'auto_scale', 'action': 'SCALE_UP'}\n    best = min(available, key=lambda x: x['load'])\n    return {'selected_instance': best['id'], 'routing': 'LEAST_LOADED'}",
+            "outputs": {
+              "selected_instance": "string",
+              "routing": "string",
+              "action": "string"
+            }
+          }
+        },
+        {
+          "id": "error_handler_layer_1",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 150
+          },
+          "data": {
+            "title": "Primary Error Handler with Retry",
+            "code": "import time, random\n\ndef main(load_balancer_result):\n    max_retries = int('{{#env.MAX_RETRIES#}}')\n    for attempt in range(max_retries):\n        try:\n            if random.random() < 0.1:\n                raise Exception('Transient failure')\n            return {'status': 'SUCCESS', 'attempt': attempt+1, 'error_handled': False}\n        except Exception:\n            if attempt == max_retries - 1:\n                return {'status': 'FAILED', 'error_handled': True, 'circuit_breaker_triggered': True}\n            time.sleep(0.1 * (2 ** attempt))\n    return {'status': 'FAILED', 'error_handled': True}",
+            "outputs": {
+              "status": "string",
+              "error_handled": "boolean",
+              "circuit_breaker_triggered": "boolean"
+            }
+          }
+        },
+        {
+          "id": "ml_risk_scorer",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 250
+          },
+          "data": {
+            "title": "ML Risk Scoring",
+            "code": "import random\n\ndef main(params):\n    score = random.uniform(0,1)\n    return {'ml_risk_score': score, 'model_version': 'v2.1'}",
+            "outputs": {
+              "ml_risk_score": "number",
+              "model_version": "string"
+            }
+          }
+        },
+        {
+          "id": "rule_compliance_checker",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 350
+          },
+          "data": {
+            "title": "Rule-Based Compliance Checker",
+            "code": "def main(params):\n    violations = []\n    if params.get('amount') > 10000:\n        violations.append('HIGH_AMOUNT')\n    if params.get('currency') not in ['USD','EUR','GBP']:\n        violations.append('UNSUPPORTED_CURRENCY')\n    return {'rule_violations': violations, 'compliant': len(violations)==0}",
+            "outputs": {
+              "rule_violations": "array",
+              "compliant": "boolean"
+            }
+          }
+        },
+        {
+          "id": "credit_bureau_verifier",
+          "type": "http-request",
+          "position": {
+            "x": 900,
+            "y": 450
+          },
+          "data": {
+            "title": "Credit Bureau Verification",
+            "method": "POST",
+            "url": "https://api.creditbureau.com/verify",
+            "headers": {
+              "Authorization": "Bearer {{#env.CREDIT_BUREAU_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "account_id": "{{#parameter_extractor.account_id#}}",
+              "transaction_id": "{{#parameter_extractor.transaction_id#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": 3,
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "balance_validator",
+          "type": "http-request",
+          "position": {
+            "x": 900,
+            "y": 550
+          },
+          "data": {
+            "title": "Real-Time Balance Validation",
+            "method": "GET",
+            "url": "https://api.bank.com/accounts/{{#parameter_extractor.account_id#}}/balance",
+            "headers": {
+              "Authorization": "Bearer {{#env.FRAUD_SERVICE_API_KEY#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": 2,
+              "backoff_strategy": "fixed"
+            }
+          }
+        },
+        {
+          "id": "geo_risk_assessor",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 650
+          },
+          "data": {
+            "title": "Geographical Risk Assessment",
+            "code": "def main(params):\n    high_risk_countries = ['NG', 'IR', 'KP']\n    country = params.get('merchant_location')[:2]\n    risk = country in high_risk_countries\n    return {'geo_risk': risk, 'country_code': country}",
+            "outputs": {
+              "geo_risk": "boolean",
+              "country_code": "string"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_ml",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 250
+          },
+          "data": {
+            "title": "Performance Monitor ML",
+            "code": "def main(result):\n    latency = result.get('ml_risk_score',0) * 100\n    grade = 'A' if latency < 50 else 'B' if latency < 100 else 'C'\n    return {'ml_latency_ms': latency, 'ml_grade': grade, 'optimized': True}",
+            "outputs": {
+              "ml_latency_ms": "number",
+              "ml_grade": "string",
+              "optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_rule",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 350
+          },
+          "data": {
+            "title": "Performance Monitor Rule",
+            "code": "def main(result):\n    checks = len(result.get('rule_violations',[]))\n    latency = checks * 20\n    return {'rule_latency_ms': latency, 'rule_checks': checks, 'optimized': True}",
+            "outputs": {
+              "rule_latency_ms": "number",
+              "rule_checks": "number",
+              "optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_credit",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 450
+          },
+          "data": {
+            "title": "Performance Monitor Credit Bureau",
+            "code": "def main(api_response):\n    status = api_response.get('status',200)\n    success = status == 200\n    latency = 30 if success else 200\n    return {'credit_status': 'SUCCESS' if success else 'FAIL', 'credit_latency_ms': latency, 'optimized': success}",
+            "outputs": {
+              "credit_status": "string",
+              "credit_latency_ms": "number",
+              "optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_balance",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 550
+          },
+          "data": {
+            "title": "Performance Monitor Balance",
+            "code": "def main(api_response):\n    balance = api_response.get('balance',0)\n    sufficient = balance >= {{#parameter_extractor.amount#}}\n    latency = 25\n    return {'balance_sufficient': sufficient, 'balance_latency_ms': latency, 'optimized': True}",
+            "outputs": {
+              "balance_sufficient": "boolean",
+              "balance_latency_ms": "number",
+              "optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_geo",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 650
+          },
+          "data": {
+            "title": "Performance Monitor Geo",
+            "code": "def main(result):\n    latency = 15 if result.get('geo_risk') else 5\n    return {'geo_latency_ms': latency, 'geo_risk_detected': result.get('geo_risk'), 'optimized': True}",
+            "outputs": {
+              "geo_latency_ms": "number",
+              "geo_risk_detected": "boolean",
+              "optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "aggregator_resilience",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1300,
+            "y": 350
+          },
+          "data": {
+            "title": "Resilient Aggregator",
+            "variables": [
+              {
+                "variable": "ml_score",
+                "value_selector": [
+                  "performance_monitor_ml",
+                  "ml_latency_ms"
+                ]
+              },
+              {
+                "variable": "rule_score",
+                "value_selector": [
+                  "performance_monitor_rule",
+                  "rule_latency_ms"
+                ]
+              },
+              {
+                "variable": "credit_score",
+                "value_selector": [
+                  "performance_monitor_credit",
+                  "credit_latency_ms"
+                ]
+              },
+              {
+                "variable": "balance_score",
+                "value_selector": [
+                  "performance_monitor_balance",
+                  "balance_latency_ms"
+                ]
+              },
+              {
+                "variable": "geo_score",
+                "value_selector": [
+                  "performance_monitor_geo",
+                  "geo_latency_ms"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "circuit_breaker",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 150
+          },
+          "data": {
+            "title": "Circuit Breaker",
+            "code": "def main(error_handler_result):\n    failures = 1 if error_handler_result.get('circuit_breaker_triggered') else 0\n    threshold = int('{{#env.CIRCUIT_BREAKER_THRESHOLD#}}')\n    if failures >= threshold:\n        return {'circuit_status': 'OPEN', 'fallback_needed': True}\n    return {'circuit_status': 'CLOSED', 'fallback_needed': False}",
+            "outputs": {
+              "circuit_status": "string",
+              "fallback_needed": "boolean"
+            }
+          }
+        },
+        {
+          "id": "fallback_processor",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 150
+          },
+          "data": {
+            "title": "Fallback Processor",
+            "code": "def main(circuit_result):\n    if circuit_result.get('fallback_needed'):\n        return {'fallback_used': True, 'fallback_reason': 'Circuit Open'}\n    return {'fallback_used': False}",
+            "outputs": {
+              "fallback_used": "boolean",
+              "fallback_reason": "string"
+            }
+          }
+        },
+        {
+          "id": "scalability_optimizer",
+          "type": "code",
+          "position": {
+            "x": 1500,
+            "y": 250
+          },
+          "data": {
+            "title": "Scalability Optimizer",
+            "code": "def main(aggregated_data, fallback_data=None):\n    avg_latency = sum(aggregated_data.values()) / len(aggregated_data)\n    scale_factor = float('{{#env.SCALE_FACTOR#}}')\n    recommendation = 'MAINTAIN'\n    if avg_latency > 150:\n        recommendation = 'SCALE_UP'\n    elif avg_latency < 80:\n        recommendation = 'SCALE_DOWN'\n    return {'avg_latency_ms': avg_latency, 'scale_recommendation': recommendation, 'auto_scaling_enabled': True}",
+            "outputs": {
+              "avg_latency_ms": "number",
+              "scale_recommendation": "string",
+              "auto_scaling_enabled": "boolean"
+            }
+          }
+        },
+        {
+          "id": "security_validator_advanced",
+          "type": "code",
+          "position": {
+            "x": 1700,
+            "y": 250
+          },
+          "data": {
+            "title": "Advanced Security Validator",
+            "code": "import time, hashlib\n\ndef main(scalability_data, aggregated_data):\n    audit = {\n        'timestamp': time.time(),\n        'hash': hashlib.sha256(str(aggregated_data).encode()).hexdigest(),\n        'security_checks': {\n            'latency_within_sla': scalability_data.get('avg_latency_ms',0) < 200,\n            'data_integrity': True\n        }\n    }\n    score = sum(audit['security_checks'].values()) / len(audit['security_checks'])\n    return {'validated': score == 1.0, 'security_score': score, 'audit': audit}",
+            "outputs": {
+              "validated": "boolean",
+              "security_score": "number",
+              "audit": "object"
+            }
+          }
+        },
+        {
+          "id": "error_handler_layer_2",
+          "type": "if-else",
+          "position": {
+            "x": 1900,
+            "y": 250
+          },
+          "data": {
+            "title": "Secondary Error Handler",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "security_validator_advanced",
+                  "validated"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              },
+              {
+                "variable_selector": [
+                  "scalability_optimizer",
+                  "auto_scaling_enabled"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "final_processor_optimized",
+          "type": "llm",
+          "position": {
+            "x": 2100,
+            "y": 250
+          },
+          "data": {
+            "title": "Final Fraud Decision Processor",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0,
+                "max_tokens": 800,
+                "timeout": 20
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Based on the aggregated risk data (ML score: {{#ml_risk_scorer.ml_risk_score#}}, rule compliance: {{#rule_compliance_checker.compliant#}}, credit bureau result: {{#credit_bureau_verifier.response.status#}}, balance sufficient: {{#balance_validator.response.balance_sufficient#}}, geo risk: {{#geo_risk_assessor.geo_risk#}}) and security validation {{#security_validator_advanced.validated#}}, generate a JSON decision with fields: decision (APPROVE/REVIEW/DECLINE), risk_level (LOW/MEDIUM/HIGH), and recommended actions."
+              }
+            ]
+          }
+        },
+        {
+          "id": "cache_updater",
+          "type": "code",
+          "position": {
+            "x": 2300,
+            "y": 250
+          },
+          "data": {
+            "title": "Cache Updater",
+            "code": "def main(final_result, cache_info, scalability_data):\n    ttl = int('{{#env.CACHE_TTL#}}')\n    adjusted_ttl = ttl * 2 if scalability_data.get('avg_latency_ms',0) < 100 else ttl\n    return {'cache_updated': True, 'cache_key': cache_info.get('cache_key','default'), 'ttl_seconds': adjusted_ttl}",
+            "outputs": {
+              "cache_updated": "boolean",
+              "cache_key": "string",
+              "ttl_seconds": "number"
+            }
+          }
+        },
+        {
+          "id": "template_transform_performance",
+          "type": "template-transform",
+          "position": {
+            "x": 2500,
+            "y": 250
+          },
+          "data": {
+            "title": "Output Formatter",
+            "template": "🏦 FRAUD DETECTION RESULT:\nDecision: {{#final_processor_optimized.text#}}\nAverage Latency: {{#scalability_optimizer.avg_latency_ms#}} ms\nSecurity Score: {{#security_validator_advanced.security_score#}}\nScaling Recommendation: {{#scalability_optimizer.scale_recommendation#}}\nCache Status: {{#cache_manager.cache_status#}}\nTimestamp: {{#current_time#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "final_processor_optimized",
+                  "text"
+                ],
+                "variable": "decision_output"
+              },
+              {
+                "value_selector": [
+                  "scalability_optimizer",
+                  "avg_latency_ms"
+                ],
+                "variable": "avg_latency"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2700,
+            "y": 250
+          },
+          "data": {
+            "title": "Fraud Detection End",
+            "outputs": {
+              "fraud_result": {
+                "type": "string",
+                "value": "{{#template_transform_performance.output#}}"
+              },
+              "audit_log": {
+                "type": "object",
+                "value": "{{#security_validator_advanced.audit#}}"
+              },
+              "performance_metrics": {
+                "type": "object",
+                "value": {
+                  "avg_latency_ms": "{{#scalability_optimizer.avg_latency_ms#}}",
+                  "scale_recommendation": "{{#scalability_optimizer.scale_recommendation#}}"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+      }
+    }
+  }
+}

@@ -1,0 +1,544 @@
+{
+  "app": {
+    "description": "Manufacturing Quality Control Enterprise Workflow with IoT, SPC, CAPA, Compliance, and Predictive Maintenance",
+    "icon": "🏭",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Manufacturing QC Workflow"
+  },
+  "kind": "app",
+  "version": "2.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "IOT_API_TOKEN",
+        "name": "IoT API Bearer Token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "DEFECT_API_KEY",
+        "name": "Defect Management API Key",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout milliseconds",
+        "type": "number",
+        "default": "30000"
+      },
+      {
+        "key": "CACHE_TTL",
+        "name": "Cache TTL seconds",
+        "type": "number",
+        "default": "300"
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 20,
+        "max_size_mb": 100
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "iot_gateway"
+        },
+        {
+          "source": "iot_gateway",
+          "target": "data_normalizer"
+        },
+        {
+          "source": "data_normalizer",
+          "target": "statistical_spc"
+        },
+        {
+          "source": "statistical_spc",
+          "target": "parallel_inspection"
+        },
+        {
+          "source": "statistical_spc",
+          "target": "parallel_defect_tracker"
+        },
+        {
+          "source": "statistical_spc",
+          "target": "parallel_supplier_quality"
+        },
+        {
+          "source": "statistical_spc",
+          "target": "parallel_predictive_maintenance"
+        },
+        {
+          "source": "parallel_inspection",
+          "target": "compliance_tracker"
+        },
+        {
+          "source": "parallel_defect_tracker",
+          "target": "compliance_tracker"
+        },
+        {
+          "source": "parallel_supplier_quality",
+          "target": "compliance_tracker"
+        },
+        {
+          "source": "parallel_predictive_maintenance",
+          "target": "compliance_tracker"
+        },
+        {
+          "source": "compliance_tracker",
+          "target": "aggregator_node"
+        },
+        {
+          "source": "aggregator_node",
+          "target": "security_validator"
+        },
+        {
+          "source": "security_validator",
+          "target": "error_handler"
+        },
+        {
+          "source": "error_handler",
+          "target": "final_report_generator"
+        },
+        {
+          "source": "final_report_generator",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "QC Workflow Start",
+            "inputs": {
+              "user_input": {
+                "type": "string",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "data": {
+            "title": "Parameter Extraction",
+            "parameters": [
+              {
+                "name": "production_line_id",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "batch_id",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "config_rules",
+                "type": "object",
+                "required": true
+              }
+            ],
+            "instruction": "Extract production_line_id, batch_id and config_rules from: {{#start_node.user_input#}}"
+          }
+        },
+        {
+          "id": "iot_gateway",
+          "type": "http-request",
+          "position": {
+            "x": 500,
+            "y": 300
+          },
+          "data": {
+            "title": "IoT Sensor Integration",
+            "method": "GET",
+            "url": "https://iot.enterprise.com/sensors/{{#parameter_extractor.production_line_id#}}/data",
+            "headers": {
+              "Authorization": "Bearer {{#env.IOT_API_TOKEN#}}",
+              "Accept": "application/json"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "data_normalizer",
+          "type": "code",
+          "position": {
+            "x": 700,
+            "y": 300
+          },
+          "data": {
+            "title": "Sensor Data Normalizer",
+            "code": "import json, datetime\n\ndef main(iot_response):\n    raw = json.loads(iot_response)\n    # Example normalization: convert timestamps, units\n    for entry in raw.get('readings', []):\n        entry['timestamp'] = datetime.datetime.fromisoformat(entry['timestamp']).timestamp()\n        entry['temperature_c'] = (entry['temperature_f'] - 32) * 5/9\n    return {'normalized_data': raw, 'record_count': len(raw.get('readings', []))}",
+            "outputs": {
+              "normalized_data": "object",
+              "record_count": "number"
+            }
+          }
+        },
+        {
+          "id": "statistical_spc",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 300
+          },
+          "data": {
+            "title": "Statistical Process Control",
+            "code": "import numpy as np\n\ndef main(normalized_data, config_rules):\n    temps = [r['temperature_c'] for r in normalized_data.get('readings', [])]\n    if not temps:\n        raise Exception('No temperature data')\n    mean = np.mean(temps)\n    std = np.std(temps)\n    ucl = mean + 3*std\n    lcl = mean - 3*std\n    out_of_control = any(t > ucl or t < lcl for t in temps)\n    metrics = {'mean_temp': mean, 'std_temp': std, 'UCL': ucl, 'LCL': lcl, 'out_of_control': out_of_control}\n    return {'spc_status': 'ALERT' if out_of_control else 'NORMAL', 'spc_metrics': metrics}",
+            "outputs": {
+              "spc_status": "string",
+              "spc_metrics": "object"
+            }
+          }
+        },
+        {
+          "id": "parallel_inspection",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 150
+          },
+          "data": {
+            "title": "Automated Inspection Processor",
+            "code": "def main(spc_status, batch_id):\n    # Simulate inspection logic based on SPC status\n    if spc_status == 'ALERT':\n        result = 'REJECTED'\n        notes = 'Inspection failed due to SPC alert'\n    else:\n        result = 'PASSED'\n        notes = 'All checks passed'\n    return {'inspection_result': result, 'inspection_notes': notes, 'batch_id': batch_id}",
+            "outputs": {
+              "inspection_result": "string",
+              "inspection_notes": "string"
+            }
+          }
+        },
+        {
+          "id": "parallel_defect_tracker",
+          "type": "http-request",
+          "position": {
+            "x": 1100,
+            "y": 250
+          },
+          "data": {
+            "title": "Defect Management Integration",
+            "method": "POST",
+            "url": "https://defects.enterprise.com/api/v1/defects",
+            "headers": {
+              "Authorization": "ApiKey {{#env.DEFECT_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "batch_id": "{{#parameter_extractor.batch_id#}}",
+              "spc_status": "{{#statistical_spc.spc_status#}}",
+              "details": "Automated defect report from QC workflow"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "parallel_supplier_quality",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 1100,
+            "y": 350
+          },
+          "data": {
+            "title": "Supplier Quality Knowledge Base",
+            "dataset_ids": [
+              "supplier_quality_kb"
+            ],
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.75,
+            "query": "Supplier performance for batch {{#parameter_extractor.batch_id#}}"
+          }
+        },
+        {
+          "id": "parallel_predictive_maintenance",
+          "type": "llm",
+          "position": {
+            "x": 1100,
+            "y": 450
+          },
+          "data": {
+            "title": "Predictive Maintenance Recommendation",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.2,
+                "max_tokens": 400,
+                "timeout": 30
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Based on SPC metrics {{#statistical_spc.spc_metrics#}} and recent sensor readings {{#data_normalizer.normalized_data#}}, provide a concise predictive maintenance recommendation."
+              }
+            ]
+          }
+        },
+        {
+          "id": "compliance_tracker",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 300
+          },
+          "data": {
+            "title": "ISO 9001 Compliance Evaluation",
+            "code": "def main(spc_status, inspection_result, defect_response, supplier_quality, predictive_recommendation, config_rules):\n    compliance = True\n    reasons = []\n    if spc_status != 'NORMAL':\n        compliance = False\n        reasons.append('SPC out of control')\n    if inspection_result != 'PASSED':\n        compliance = False\n        reasons.append('Inspection failed')\n    if defect_response.get('status', 200) != 200:\n        compliance = False\n        reasons.append('Defect API error')\n    if not supplier_quality.get('results'):\n        compliance = False\n        reasons.append('Supplier data insufficient')\n    # Additional rule checks from config_rules could be added here\n    return {'compliance_status': 'COMPLIANT' if compliance else 'NON_COMPLIANT', 'compliance_reasons': reasons, 'audit_log': {'timestamp': __import__('time').time(), 'details': reasons}}",
+            "outputs": {
+              "compliance_status": "string",
+              "compliance_reasons": "array",
+              "audit_log": "object"
+            }
+          }
+        },
+        {
+          "id": "aggregator_node",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1500,
+            "y": 300
+          },
+          "data": {
+            "title": "Result Aggregator",
+            "variables": [
+              {
+                "variable": "spc_metrics",
+                "value_selector": [
+                  "statistical_spc",
+                  "spc_metrics"
+                ]
+              },
+              {
+                "variable": "inspection",
+                "value_selector": [
+                  "parallel_inspection",
+                  "inspection_result"
+                ]
+              },
+              {
+                "variable": "defect_status",
+                "value_selector": [
+                  "parallel_defect_tracker",
+                  "status"
+                ]
+              },
+              {
+                "variable": "supplier_quality",
+                "value_selector": [
+                  "parallel_supplier_quality",
+                  "result"
+                ]
+              },
+              {
+                "variable": "maintenance_reco",
+                "value_selector": [
+                  "parallel_predictive_maintenance",
+                  "text"
+                ]
+              },
+              {
+                "variable": "compliance",
+                "value_selector": [
+                  "compliance_tracker",
+                  "compliance_status"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 1700,
+            "y": 300
+          },
+          "data": {
+            "title": "Security & Audit Validation",
+            "code": "import hashlib, time\n\ndef main(security_context, audit_log, aggregated_data):\n    if not security_context.get('user'):\n        raise Exception('Missing security context')\n    audit_hash = hashlib.sha256(str(audit_log).encode()).hexdigest()\n    validated = True\n    return {'validated': validated, 'audit_hash': audit_hash, 'security_timestamp': time.time()}",
+            "outputs": {
+              "validated": "boolean",
+              "audit_hash": "string",
+              "security_timestamp": "number"
+            }
+          }
+        },
+        {
+          "id": "error_handler",
+          "type": "if-else",
+          "position": {
+            "x": 1900,
+            "y": 300
+          },
+          "data": {
+            "title": "Error & Compliance Handler",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "security_validator",
+                  "validated"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              },
+              {
+                "variable_selector": [
+                  "compliance_tracker",
+                  "compliance_status"
+                ],
+                "comparison_operator": "is",
+                "value": "COMPLIANT"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "final_report_generator",
+          "type": "llm",
+          "position": {
+            "x": 2100,
+            "y": 300
+          },
+          "data": {
+            "title": "Final QC Report Generator",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.1,
+                "max_tokens": 800,
+                "timeout": 20
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Create a comprehensive quality control report for batch {{#parameter_extractor.batch_id#}}. Include SPC metrics {{#statistical_spc.spc_metrics#}}, inspection result {{#parallel_inspection.inspection_result#}}, defect status {{#parallel_defect_tracker.status#}}, supplier quality summary {{#parallel_supplier_quality.result#}}, predictive maintenance recommendation {{#parallel_predictive_maintenance.text#}}, and compliance status {{#compliance_tracker.compliance_status#}}."
+              }
+            ]
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 2300,
+            "y": 300
+          },
+          "data": {
+            "title": "Report Formatter",
+            "template": "🏭 **Manufacturing Quality Control Report**\n\n**Batch ID:** {{#parameter_extractor.batch_id#}}\n**Production Line:** {{#parameter_extractor.production_line_id#}}\n\n---\n**SPC Metrics:**\n{{#statistical_spc.spc_metrics#}}\n\n**Inspection Result:** {{#parallel_inspection.inspection_result#}}\n**Defect API Status:** {{#parallel_defect_tracker.status#}}\n**Supplier Quality Summary:** {{#parallel_supplier_quality.result#}}\n**Predictive Maintenance:** {{#parallel_predictive_maintenance.text#}}\n\n**Compliance:** {{#compliance_tracker.compliance_status#}}\n{{#if compliance_tracker.compliance_status == 'NON_COMPLIANT'}}\n**Reasons:** {{#compliance_tracker.compliance_reasons#}}\n{{/if}}\n\n---\n**Security Audit Hash:** {{#security_validator.audit_hash#}}\n**Generated At:** {{#current_time#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "final_report_generator",
+                  "text"
+                ],
+                "variable": "final_report_text"
+              }
+            ]
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 2500,
+            "y": 300
+          },
+          "data": {
+            "title": "Audit Logger",
+            "code": "def main(security_timestamp, audit_hash, final_report):\n    log_entry = {\n        'timestamp': security_timestamp,\n        'audit_hash': audit_hash,\n        'report_snapshot': final_report[:200]\n    }\n    # In a real system this would be persisted to an audit store\n    return {'audit_entry': log_entry, 'logged': True}",
+            "outputs": {
+              "audit_entry": "object",
+              "logged": "boolean"
+            }
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2700,
+            "y": 300
+          },
+          "data": {
+            "title": "QC Workflow End",
+            "outputs": {
+              "final_report": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              },
+              "audit_record": {
+                "type": "object",
+                "value": "{{#audit_logger.audit_entry#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+      }
+    }
+  }
+}

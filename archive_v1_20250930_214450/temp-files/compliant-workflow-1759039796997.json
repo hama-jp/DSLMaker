@@ -1,0 +1,239 @@
+{
+  "app": {
+    "description": "Enterprise multi‑stage customer service automation with sentiment analysis, knowledge base retrieval, escalation handling, response generation and quality scoring.",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Enterprise Customer Service AI"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": false,
+        "number_limits": 0,
+        "max_size_mb": 0
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "nodes": [
+        {
+          "id": "start_1",
+          "type": "start",
+          "data": {
+            "variables": [
+              {
+                "name": "user_query",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "business_context",
+                "type": "string",
+                "required": false
+              },
+              {
+                "name": "config_params",
+                "type": "object",
+                "required": false
+              }
+            ]
+          },
+          "position": {
+            "x": 100,
+            "y": 200
+          }
+        },
+        {
+          "id": "param_extractor_2",
+          "type": "parameter-extractor",
+          "data": {
+            "input": "{{#start_1.user_query#}}",
+            "schema": {
+              "intent": "string",
+              "ticket_type": "string",
+              "priority": "string"
+            },
+            "output_variable": "extracted_params"
+          },
+          "position": {
+            "x": 350,
+            "y": 200
+          }
+        },
+        {
+          "id": "sentiment_3",
+          "type": "sentiment-analysis",
+          "data": {
+            "input": "{{#start_1.user_query#}}",
+            "output_variable": "sentiment"
+          },
+          "position": {
+            "x": 600,
+            "y": 200
+          }
+        },
+        {
+          "id": "escalation_if_4",
+          "type": "if-else",
+          "data": {
+            "conditions": [
+              {
+                "expression": "{{#param_extractor_2.extracted_params.priority#}} == 'high' or {{#sentiment_3.sentiment.label#}} == 'negative'",
+                "target": "true"
+              }
+            ],
+            "default_target": "false",
+            "output_variable": "result"
+          },
+          "position": {
+            "x": 850,
+            "y": 200
+          }
+        },
+        {
+          "id": "knowledge_retrieval_5",
+          "type": "knowledge-retrieval",
+          "data": {
+            "query": "{{#start_1.user_query#}}",
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.6,
+            "output_variable": "kb_results"
+          },
+          "position": {
+            "x": 1100,
+            "y": 200
+          }
+        },
+        {
+          "id": "quality_score_6",
+          "type": "code",
+          "data": {
+            "language": "python",
+            "code": "sentiment = {{#sentiment_3.sentiment.score#}}\nkb_scores = [doc['score'] for doc in {{#knowledge_retrieval_5.kb_results#}}]\nkb_avg = sum(kb_scores) / len(kb_scores) if kb_scores else 0\nquality = (sentiment * 0.5) + (kb_avg * 0.5)\noutput = {'quality_score': round(quality, 2)}",
+            "output_variable": "quality"
+          },
+          "position": {
+            "x": 1350,
+            "y": 200
+          }
+        },
+        {
+          "id": "llm_response_7",
+          "type": "llm",
+          "data": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.2,
+            "max_tokens": 500,
+            "prompt": "You are a customer service assistant. Use the following context to craft a helpful response.\n\nUser Query: {{#start_1.user_query#}}\nIntent: {{#param_extractor_2.extracted_params.intent#}}\nTicket Type: {{#param_extractor_2.extracted_params.ticket_type#}}\nPriority: {{#param_extractor_2.extracted_params.priority#}}\n\nRelevant Knowledge Base Articles:\n{% for doc in {{#knowledge_retrieval_5.kb_results#}} %}\n- {{doc.title}}: {{doc.snippet}}\n{% endfor %}\n\nSentiment: {{#sentiment_3.sentiment.label#}} (score {{#sentiment_3.sentiment.score#}})\nQuality Score: {{#quality_score_6.quality.quality_score#}}\n\nProvide a concise, friendly response.",
+            "output_variable": "assistant_reply"
+          },
+          "position": {
+            "x": 1600,
+            "y": 200
+          }
+        },
+        {
+          "id": "template_transform_8",
+          "type": "template-transform",
+          "data": {
+            "template": "{\n  \"response\": \"{{#llm_response_7.assistant_reply#}}\",\n  \"quality_score\": {{#quality_score_6.quality.quality_score#}},\n  \"escalated\": {{#escalation_if_4.result#}},\n  \"metadata\": {\n    \"sentiment\": \"{{#sentiment_3.sentiment.label#}}\",\n    \"priority\": \"{{#param_extractor_2.extracted_params.priority#}}\"\n  }\n}",
+            "output_variable": "final_output"
+          },
+          "position": {
+            "x": 1850,
+            "y": 200
+          }
+        },
+        {
+          "id": "crm_http_9",
+          "type": "http-request",
+          "data": {
+            "method": "POST",
+            "url": "https://api.crm.example.com/tickets",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": "{\n  \"user_query\": \"{{#start_1.user_query#}}\",\n  \"priority\": \"{{#param_extractor_2.extracted_params.priority#}}\",\n  \"sentiment\": \"{{#sentiment_3.sentiment.label#}}\"\n}",
+            "output_variable": "crm_response",
+            "retry_policy": {
+              "retries": 2,
+              "delay_seconds": 2
+            }
+          },
+          "position": {
+            "x": 2100,
+            "y": 350
+          }
+        },
+        {
+          "id": "end_10",
+          "type": "end",
+          "data": {
+            "output": "{{#template_transform_8.final_output#}}"
+          },
+          "position": {
+            "x": 2350,
+            "y": 200
+          }
+        }
+      ],
+      "edges": [
+        {
+          "source": "start_1",
+          "target": "param_extractor_2"
+        },
+        {
+          "source": "param_extractor_2",
+          "target": "sentiment_3"
+        },
+        {
+          "source": "sentiment_3",
+          "target": "escalation_if_4"
+        },
+        {
+          "source": "escalation_if_4",
+          "target": "crm_http_9",
+          "condition": "true"
+        },
+        {
+          "source": "escalation_if_4",
+          "target": "knowledge_retrieval_5",
+          "condition": "false"
+        },
+        {
+          "source": "knowledge_retrieval_5",
+          "target": "quality_score_6"
+        },
+        {
+          "source": "quality_score_6",
+          "target": "llm_response_7"
+        },
+        {
+          "source": "llm_response_7",
+          "target": "template_transform_8"
+        },
+        {
+          "source": "template_transform_8",
+          "target": "end_10"
+        },
+        {
+          "source": "crm_http_9",
+          "target": "end_10"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

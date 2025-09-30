@@ -1,0 +1,780 @@
+{
+  "app": {
+    "description": "Real-time Financial Fraud Detection Workflow",
+    "icon": "💳",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Financial Fraud Detection"
+  },
+  "kind": "app",
+  "version": "2.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout milliseconds",
+        "type": "number",
+        "default": "30000"
+      },
+      {
+        "key": "CREDIT_API_KEY",
+        "name": "Credit Bureau API Key",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "RULES_CONFIG_URL",
+        "name": "Dynamic Rules Config URL",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "CACHE_TTL",
+        "name": "Cache TTL seconds",
+        "type": "number",
+        "default": "300"
+      },
+      {
+        "key": "CIRCUIT_BREAKER_THRESHOLD",
+        "name": "Circuit breaker threshold",
+        "type": "number",
+        "default": "5"
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "config_loader"
+        },
+        {
+          "source": "config_loader",
+          "target": "cache_manager"
+        },
+        {
+          "source": "cache_manager",
+          "target": "load_balancer"
+        },
+        {
+          "source": "load_balancer",
+          "target": "error_handler_primary"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "circuit_breaker"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "parallel_ml_scoring"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "parallel_rule_engine"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "parallel_credit_bureau"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "parallel_balance_check"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "parallel_geo_risk"
+        },
+        {
+          "source": "parallel_ml_scoring",
+          "target": "performance_monitor_ml"
+        },
+        {
+          "source": "parallel_rule_engine",
+          "target": "performance_monitor_rule"
+        },
+        {
+          "source": "parallel_credit_bureau",
+          "target": "performance_monitor_api"
+        },
+        {
+          "source": "parallel_balance_check",
+          "target": "performance_monitor_balance"
+        },
+        {
+          "source": "parallel_geo_risk",
+          "target": "performance_monitor_geo"
+        },
+        {
+          "source": "performance_monitor_ml",
+          "target": "aggregator_results"
+        },
+        {
+          "source": "performance_monitor_rule",
+          "target": "aggregator_results"
+        },
+        {
+          "source": "performance_monitor_api",
+          "target": "aggregator_results"
+        },
+        {
+          "source": "performance_monitor_balance",
+          "target": "aggregator_results"
+        },
+        {
+          "source": "performance_monitor_geo",
+          "target": "aggregator_results"
+        },
+        {
+          "source": "circuit_breaker",
+          "target": "fallback_processor"
+        },
+        {
+          "source": "fallback_processor",
+          "target": "aggregator_results"
+        },
+        {
+          "source": "aggregator_results",
+          "target": "security_audit_logger"
+        },
+        {
+          "source": "security_audit_logger",
+          "target": "decision_router"
+        },
+        {
+          "source": "decision_router",
+          "target": "human_review_queue"
+        },
+        {
+          "source": "decision_router",
+          "target": "final_processor"
+        },
+        {
+          "source": "human_review_queue",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "cache_updater"
+        },
+        {
+          "source": "cache_updater",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "Fraud Detection Start",
+            "inputs": {
+              "transaction_data": {
+                "type": "object",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "data": {
+            "title": "Transaction Parameter Extractor",
+            "parameters": [
+              {
+                "name": "transaction_id",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "amount",
+                "type": "number",
+                "required": true
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "merchant_country",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "cardholder_country",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "timestamp",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Extract fields from {{#start_node.transaction_data#}}"
+          }
+        },
+        {
+          "id": "config_loader",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 300
+          },
+          "data": {
+            "title": "Dynamic Rules Loader",
+            "code": "import requests, json, os\nurl = os.getenv('RULES_CONFIG_URL')\nresp = requests.get(url, timeout=5)\nif resp.status_code != 200:\n    raise Exception('Failed to load rules')\nrules = resp.json()\nreturn {'rules': rules, 'rules_version': rules.get('version', 'unknown')}",
+            "outputs": {
+              "rules": "object",
+              "rules_version": "string"
+            }
+          }
+        },
+        {
+          "id": "cache_manager",
+          "type": "code",
+          "position": {
+            "x": 700,
+            "y": 300
+          },
+          "data": {
+            "title": "Cache Manager",
+            "code": "import hashlib, json, os\nkey = hashlib.sha256(json.dumps({\n    'transaction_id': '{{#parameter_extractor.transaction_id#}}',\n    'amount': '{{#parameter_extractor.amount#}}'\n}, sort_keys=True).encode()).hexdigest()\n# Simulated cache hit logic\nhit = int(key[-1], 16) % 5 == 0\nif hit:\n    return {'cache_status': 'HIT', 'cached_result': {'risk_score': 0.2}, 'cache_key': key}\nelse:\n    return {'cache_status': 'MISS', 'cache_key': key, 'requires_processing': True}",
+            "outputs": {
+              "cache_status": "string",
+              "cached_result": "object",
+              "cache_key": "string",
+              "requires_processing": "boolean"
+            }
+          }
+        },
+        {
+          "id": "load_balancer",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 300
+          },
+          "data": {
+            "title": "Load Balancer & Routing",
+            "code": "import random\ninstances = [f'instance_{i}' for i in range(1,5)]\nselected = random.choice(instances)\nreturn {'selected_instance': selected, 'routing_strategy': 'RANDOM'}",
+            "outputs": {
+              "selected_instance": "string",
+              "routing_strategy": "string"
+            }
+          }
+        },
+        {
+          "id": "error_handler_primary",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Primary Error Handler with Retry",
+            "code": "import time, random, os\nmax_retries = int(os.getenv('MAX_RETRIES', '3'))\nfor attempt in range(max_retries):\n    try:\n        # Simulated transient error probability\n        if random.random() < 0.1:\n            raise Exception('Transient failure')\n        return {'status': 'SUCCESS', 'attempt': attempt+1, 'error_handled': False}\n    except Exception as e:\n        if attempt == max_retries - 1:\n            return {'status': 'FAILED', 'error': str(e), 'error_handled': True, 'circuit_breaker_triggered': True}\n        time.sleep(0.1 * (2 ** attempt))\nreturn {'status': 'FAILED', 'error_handled': True}",
+            "outputs": {
+              "status": "string",
+              "attempt": "number",
+              "error_handled": "boolean",
+              "circuit_breaker_triggered": "boolean",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "circuit_breaker",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 100
+          },
+          "data": {
+            "title": "Circuit Breaker",
+            "code": "import os\nfailure_count = 1 if {{#error_handler_primary.circuit_breaker_triggered#}} else 0\nthreshold = int(os.getenv('CIRCUIT_BREAKER_THRESHOLD', '5'))\nif failure_count >= threshold:\n    return {'circuit_status': 'OPEN', 'fallback_required': True}\nelse:\n    return {'circuit_status': 'CLOSED', 'fallback_required': False}",
+            "outputs": {
+              "circuit_status": "string",
+              "fallback_required": "boolean"
+            }
+          }
+        },
+        {
+          "id": "fallback_processor",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 100
+          },
+          "data": {
+            "title": "Fallback Processor",
+            "code": "return {'fallback_result': {'risk_score': 0.5, 'reason': 'circuit_breaker'}, 'fallback_applied': True}",
+            "outputs": {
+              "fallback_result": "object",
+              "fallback_applied": "boolean"
+            }
+          }
+        },
+        {
+          "id": "parallel_ml_scoring",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 300
+          },
+          "data": {
+            "title": "ML Risk Scoring",
+            "code": "import random\n# Simulated ML model output\nscore = round(random.uniform(0, 1), 3)\nreturn {'ml_risk_score': score, 'model_version': 'v2.1'}",
+            "outputs": {
+              "ml_risk_score": "number",
+              "model_version": "string"
+            }
+          }
+        },
+        {
+          "id": "parallel_rule_engine",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 400
+          },
+          "data": {
+            "title": "Rule Engine Compliance Check",
+            "code": "rules = {{#config_loader.rules#}}\n# Simplified rule evaluation\namount = float('{{#parameter_extractor.amount#}}')\nif amount > rules.get('max_transaction_amount', 10000):\n    compliant = False\nelse:\n    compliant = True\nreturn {'compliance_pass': compliant, 'triggered_rules': [] if compliant else ['MAX_AMOUNT']}",
+            "outputs": {
+              "compliance_pass": "boolean",
+              "triggered_rules": "array"
+            }
+          }
+        },
+        {
+          "id": "parallel_credit_bureau",
+          "type": "http-request",
+          "position": {
+            "x": 1100,
+            "y": 500
+          },
+          "data": {
+            "title": "Credit Bureau Verification",
+            "method": "POST",
+            "url": "https://api.creditbureau.com/verify",
+            "headers": {
+              "Authorization": "Bearer {{#env.CREDIT_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "transaction_id": "{{#parameter_extractor.transaction_id#}}",
+              "amount": "{{#parameter_extractor.amount#}}",
+              "currency": "{{#parameter_extractor.currency#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": 2,
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "parallel_balance_check",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 600
+          },
+          "data": {
+            "title": "Real-time Balance Validation",
+            "code": "import random\n# Simulated balance check\navailable = random.choice([True, False])\nreturn {'balance_sufficient': available, 'available_balance': random.uniform(0, 50000)}",
+            "outputs": {
+              "balance_sufficient": "boolean",
+              "available_balance": "number"
+            }
+          }
+        },
+        {
+          "id": "parallel_geo_risk",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 700
+          },
+          "data": {
+            "title": "Geographical Risk Assessment",
+            "code": "high_risk_countries = ['NG', 'IR', 'KP']\ncard_country = '{{#parameter_extractor.cardholder_country#}}'\nmerchant_country = '{{#parameter_extractor.merchant_country#}}'\ngeo_risk = 1 if card_country in high_risk_countries or merchant_country in high_risk_countries else 0\nreturn {'geo_risk_flag': geo_risk, 'card_country': card_country, 'merchant_country': merchant_country}",
+            "outputs": {
+              "geo_risk_flag": "number",
+              "card_country": "string",
+              "merchant_country": "string"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_ml",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 300
+          },
+          "data": {
+            "title": "Performance Monitor ML",
+            "code": "processing_time_ms = 45  # simulated constant\nreturn {'ml_processing_time_ms': processing_time_ms}",
+            "outputs": {
+              "ml_processing_time_ms": "number"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_rule",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 400
+          },
+          "data": {
+            "title": "Performance Monitor Rule Engine",
+            "code": "processing_time_ms = 30\nreturn {'rule_processing_time_ms': processing_time_ms}",
+            "outputs": {
+              "rule_processing_time_ms": "number"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_api",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 500
+          },
+          "data": {
+            "title": "Performance Monitor Credit API",
+            "code": "latency_ms = 120\nstatus_code = {{#parallel_credit_bureau.status#}} if hasattr({{#parallel_credit_bureau#}}, 'status') else 200\nreturn {'api_latency_ms': latency_ms, 'api_status_code': status_code}",
+            "outputs": {
+              "api_latency_ms": "number",
+              "api_status_code": "number"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_balance",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 600
+          },
+          "data": {
+            "title": "Performance Monitor Balance Check",
+            "code": "processing_time_ms = 20\nreturn {'balance_check_time_ms': processing_time_ms}",
+            "outputs": {
+              "balance_check_time_ms": "number"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_geo",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 700
+          },
+          "data": {
+            "title": "Performance Monitor Geo Risk",
+            "code": "processing_time_ms = 15\nreturn {'geo_check_time_ms': processing_time_ms}",
+            "outputs": {
+              "geo_check_time_ms": "number"
+            }
+          }
+        },
+        {
+          "id": "aggregator_results",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1500,
+            "y": 400
+          },
+          "data": {
+            "title": "Result Aggregator",
+            "variables": [
+              {
+                "variable": "ml_score",
+                "value_selector": [
+                  "parallel_ml_scoring",
+                  "ml_risk_score"
+                ]
+              },
+              {
+                "variable": "compliance_pass",
+                "value_selector": [
+                  "parallel_rule_engine",
+                  "compliance_pass"
+                ]
+              },
+              {
+                "variable": "credit_status",
+                "value_selector": [
+                  "parallel_credit_bureau",
+                  "response"
+                ]
+              },
+              {
+                "variable": "balance_ok",
+                "value_selector": [
+                  "parallel_balance_check",
+                  "balance_sufficient"
+                ]
+              },
+              {
+                "variable": "geo_risk",
+                "value_selector": [
+                  "parallel_geo_risk",
+                  "geo_risk_flag"
+                ]
+              },
+              {
+                "variable": "fallback",
+                "value_selector": [
+                  "fallback_processor",
+                  "fallback_result"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "security_audit_logger",
+          "type": "code",
+          "position": {
+            "x": 1700,
+            "y": 400
+          },
+          "data": {
+            "title": "Security Audit Logger",
+            "code": "import time, json\naudit = {\n    'timestamp': time.time(),\n    'transaction_id': '{{#parameter_extractor.transaction_id#}}',\n    'request_id': '{{#parameter_extractor.transaction_id#}}',\n    'risk_components': {{#aggregator_results#}},\n    'cache_status': '{{#cache_manager.cache_status#}}',\n    'selected_instance': '{{#load_balancer.selected_instance#}}',\n    'security_context': {{#start_node.security_context#}}\n}\n# In real deployment, this would be persisted to an immutable store\nreturn {'audit_log': audit, 'audit_saved': True}",
+            "outputs": {
+              "audit_log": "object",
+              "audit_saved": "boolean"
+            }
+          }
+        },
+        {
+          "id": "decision_router",
+          "type": "if-else",
+          "position": {
+            "x": 1900,
+            "y": 400
+          },
+          "data": {
+            "title": "Risk Decision Router",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "aggregator_results",
+                  "ml_score"
+                ],
+                "comparison_operator": "greater than",
+                "value": 0.7
+              },
+              {
+                "variable_selector": [
+                  "aggregator_results",
+                  "compliance_pass"
+                ],
+                "comparison_operator": "is",
+                "value": false
+              },
+              {
+                "variable_selector": [
+                  "aggregator_results",
+                  "credit_status"
+                ],
+                "comparison_operator": "contains",
+                "value": "\"declined\""
+              },
+              {
+                "variable_selector": [
+                  "aggregator_results",
+                  "balance_ok"
+                ],
+                "comparison_operator": "is",
+                "value": false
+              },
+              {
+                "variable_selector": [
+                  "aggregator_results",
+                  "geo_risk"
+                ],
+                "comparison_operator": "is",
+                "value": 1
+              }
+            ],
+            "logical_operator": "or"
+          }
+        },
+        {
+          "id": "human_review_queue",
+          "type": "http-request",
+          "position": {
+            "x": 2100,
+            "y": 300
+          },
+          "data": {
+            "title": "Escalate to Human Review",
+            "method": "POST",
+            "url": "https://internal.review-system.com/queue",
+            "headers": {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer {{#env.REVIEW_API_TOKEN#}}"
+            },
+            "body": {
+              "transaction_id": "{{#parameter_extractor.transaction_id#}}",
+              "risk_details": "{{#aggregator_results#}}",
+              "audit_log": "{{#security_audit_logger.audit_log#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}"
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 2100,
+            "y": 500
+          },
+          "data": {
+            "title": "Final Response Generator",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0,
+                "max_tokens": 500,
+                "timeout": 20
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a fraud detection system. Generate a concise JSON response indicating transaction approval status, risk score, and any actions."
+              },
+              {
+                "role": "user",
+                "text": "Transaction ID: {{#parameter_extractor.transaction_id#}}\nAggregated Results: {{#aggregator_results#}}\nAudit Log: {{#security_audit_logger.audit_log#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "cache_updater",
+          "type": "code",
+          "position": {
+            "x": 2300,
+            "y": 500
+          },
+          "data": {
+            "title": "Cache Updater",
+            "code": "return {'cache_updated': True, 'cache_key': '{{#cache_manager.cache_key#}}', 'ttl_seconds': int('{{#env.CACHE_TTL#}}')}",
+            "outputs": {
+              "cache_updated": "boolean",
+              "cache_key": "string",
+              "ttl_seconds": "number"
+            }
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 2500,
+            "y": 500
+          },
+          "data": {
+            "title": "Output Formatter",
+            "template": "FINANCIAL FRAUD DETECTION RESULT\n\nTransaction ID: {{#parameter_extractor.transaction_id#}}\nStatus: {{#final_processor.text#}}\nRisk Score (ML): {{#aggregator_results.ml_score#}}\nCompliance: {{#aggregator_results.compliance_pass#}}\nCredit Check: {{#aggregator_results.credit_status#}}\nBalance OK: {{#aggregator_results.balance_ok#}}\nGeo Risk Flag: {{#aggregator_results.geo_risk#}}\nCache: {{#cache_manager.cache_status#}}\nInstance: {{#load_balancer.selected_instance#}}\nTimestamp: {{#current_time#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "final_processor",
+                  "text"
+                ],
+                "variable": "final_response"
+              },
+              {
+                "value_selector": [
+                  "aggregator_results",
+                  "ml_score"
+                ],
+                "variable": "ml_score"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2700,
+            "y": 500
+          },
+          "data": {
+            "title": "Fraud Detection End",
+            "outputs": {
+              "detection_result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              },
+              "audit_record": {
+                "type": "object",
+                "value": "{{#security_audit_logger.audit_log#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+      }
+    }
+  }
+}

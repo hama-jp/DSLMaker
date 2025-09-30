@@ -1,0 +1,663 @@
+{
+  "app": {
+    "description": "Enterprise workflow for real-time financial fraud detection",
+    "icon": "🏦",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Fraud Detection Solution"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "dynamic_rule_updater"
+        },
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "error_handler_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "risk_scoring_ml"
+        },
+        {
+          "source": "param_extractor",
+          "target": "compliance_rules"
+        },
+        {
+          "source": "param_extractor",
+          "target": "balance_check"
+        },
+        {
+          "source": "param_extractor",
+          "target": "credit_bureau_api"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_2"
+        },
+        {
+          "source": "dynamic_rule_updater",
+          "target": "compliance_rules"
+        },
+        {
+          "source": "risk_scoring_ml",
+          "target": "aggregator"
+        },
+        {
+          "source": "compliance_rules",
+          "target": "aggregator"
+        },
+        {
+          "source": "balance_check",
+          "target": "aggregator"
+        },
+        {
+          "source": "credit_bureau_api",
+          "target": "failover_manager"
+        },
+        {
+          "source": "failover_manager",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_2",
+          "target": "aggregator"
+        },
+        {
+          "source": "error_handler_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "error_handler_2"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "cache_optimizer"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "human_escalation"
+        },
+        {
+          "source": "cache_optimizer",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "end_node"
+        },
+        {
+          "source": "human_escalation",
+          "target": "template_transform"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 200,
+            "y": 200
+          },
+          "data": {
+            "inputs": {
+              "transaction": {
+                "type": "object",
+                "required": true,
+                "description": "Raw transaction payload with payer, payee, amount, geo, timestamp, account_id"
+              },
+              "context": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "dynamic_rule_updater",
+          "type": "config-updater",
+          "position": {
+            "x": 100,
+            "y": 80
+          },
+          "data": {
+            "description": "Hot reload dynamic rules without downtime",
+            "sources": [
+              "s3://enterprise-configs/fraud-rules",
+              "{{#start_node.context.rule_version#}}"
+            ],
+            "cache": true,
+            "async": true,
+            "outputs": {
+              "rules_version": "string",
+              "rules_payload": "object"
+            },
+            "optimize": "hot_reload",
+            "pool": "config_update_pool"
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 400,
+            "y": 200
+          },
+          "data": {
+            "parameters": [
+              {
+                "name": "extracted_data",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "status",
+                "type": "string",
+                "required": true,
+                "default": "received"
+              }
+            ],
+            "instruction": "Normalize and validate transaction: {{#start_node.transaction#}} and attach status and audit id",
+            "outputs": {
+              "extracted_data": "object",
+              "status": "string",
+              "audit_id": "string"
+            }
+          }
+        },
+        {
+          "id": "format_validator",
+          "type": "code",
+          "position": {
+            "x": 200,
+            "y": 120
+          },
+          "data": {
+            "code": "def validate_format(tx):\n    # ensure consistent schema and produce normalized object\n    return {'status': 'success', 'normalized': tx}\n\nresult = validate_format({{#start_node.transaction#}})\n",
+            "outputs": {
+              "status": "string",
+              "normalized": "object"
+            },
+            "cache": true,
+            "pool": "validation_pool",
+            "optimize": "schema_cache"
+          }
+        },
+        {
+          "id": "risk_scoring_ml",
+          "type": "ml-model",
+          "position": {
+            "x": 600,
+            "y": 120
+          },
+          "data": {
+            "model": {
+              "provider": "internal",
+              "name": "fast-risk-scoring-v2"
+            },
+            "inputs": {
+              "transaction": "{{#param_extractor.extracted_data#}}",
+              "rules_version": "{{#dynamic_rule_updater.rules_version#}}"
+            },
+            "timeout": 150,
+            "async": true,
+            "batch": "auto",
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "linear"
+            },
+            "outputs": {
+              "score": "number",
+              "status": "string",
+              "explain": "object"
+            },
+            "cache": true,
+            "pool": "ml_inference_pool",
+            "optimize": "quantized_models"
+          }
+        },
+        {
+          "id": "compliance_rules",
+          "type": "rule-engine",
+          "position": {
+            "x": 400,
+            "y": 120
+          },
+          "data": {
+            "rules_source": "{{#dynamic_rule_updater.rules_payload#}}",
+            "transaction": "{{#param_extractor.extracted_data#}}",
+            "outputs": {
+              "compliance_status": "string",
+              "violations": "array"
+            },
+            "cache": "enabled",
+            "optimize": "rule_indexing",
+            "pool": "rules_evaluation_pool",
+            "timeout": 50,
+            "async": true
+          }
+        },
+        {
+          "id": "balance_check",
+          "type": "http-request",
+          "position": {
+            "x": 200,
+            "y": 280
+          },
+          "data": {
+            "method": "GET",
+            "url": "https://internal-ledger.example.com/accounts/{{#param_extractor.extracted_data.account_id#}}/balance",
+            "timeout": 80,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "headers": {
+              "Authorization": "Bearer {{#start_node.context.ledger_token#}}"
+            },
+            "cache": true,
+            "pool": "ledger_connection_pool",
+            "optimize": "read_replica",
+            "outputs": {
+              "balance": "number",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "credit_bureau_api",
+          "type": "http-request",
+          "position": {
+            "x": 500,
+            "y": 280
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://credit-bureau.example.com/verify",
+            "timeout": 120,
+            "retry": {
+              "max_attempts": 4,
+              "strategy": "exponential",
+              "on_error": "retry_if_timeout_or_5xx"
+            },
+            "body": {
+              "account_id": "{{#param_extractor.extracted_data.account_id#}}",
+              "pii_hash": "{{#param_extractor.extracted_data.pii_hash#}}"
+            },
+            "auth": {
+              "type": "api_key",
+              "key": "{{#start_node.context.credit_api_key#}}"
+            },
+            "cache": false,
+            "pool": "external_api_pool",
+            "optimize": "circuit_breaker",
+            "outputs": {
+              "bureau_score": "number",
+              "status": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "failover_manager",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 200
+          },
+          "data": {
+            "code": "def call_with_failover(response):\n    if response.get('status')=='error':\n        # try backup bureau\n        fallback = call_backup_bureau()\n        return {'status': 'fallback', 'bureau_score': fallback.get('bureau_score'), 'error': response.get('error')}\n    return response\n\nresult = call_with_failover({{#credit_bureau_api#}})",
+            "outputs": {
+              "bureau_score": "number",
+              "status": "string",
+              "error": "string",
+              "fallback": "string"
+            },
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "linear"
+            },
+            "fallback": "backup_bureau_flow",
+            "pool": "failover_pool",
+            "optimize": "sequential_failover"
+          }
+        },
+        {
+          "id": "parallel_1",
+          "type": "http-request",
+          "position": {
+            "x": 500,
+            "y": 350
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://thirdparty-fraud1.example.com/process",
+            "timeout": 30,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "body": {
+              "data": "{{#param_extractor.extracted_data#}}",
+              "audit_id": "{{#param_extractor.audit_id#}}"
+            },
+            "cache": true,
+            "pool": "connection_pool_enabled",
+            "optimize": "parallel_calls",
+            "outputs": {
+              "response": "object",
+              "status": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "parallel_2",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "code": "try:\n    result = process_async_batch({{#param_extractor.extracted_data#}})\n    cache_optimize(result)\n    return {'status': 'success', 'result': result}\nexcept Exception as e:\n    # provide fallback to ensure non-blocking flow\n    return {'status': 'error', 'fallback': 'reduced_check', 'error': str(e)}",
+            "outputs": {
+              "status": "string",
+              "result": "object",
+              "error": "string",
+              "fallback": "string"
+            },
+            "async": true,
+            "batch": "processing_enabled",
+            "timeout": 100,
+            "pool": "async_batch_pool",
+            "optimize": "async_inference"
+          }
+        },
+        {
+          "id": "error_handler_1",
+          "type": "if-else",
+          "position": {
+            "x": 300,
+            "y": 350
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "param_extractor",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              }
+            ],
+            "logical_operator": "and",
+            "true_branch": "continue",
+            "false_branch": "raise_alert",
+            "outputs": {
+              "result_status": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 400,
+            "y": 500
+          },
+          "data": {
+            "variables": [
+              {
+                "variable": "ml_score",
+                "value_selector": [
+                  "risk_scoring_ml",
+                  "score"
+                ]
+              },
+              {
+                "variable": "compliance",
+                "value_selector": [
+                  "compliance_rules",
+                  "compliance_status"
+                ]
+              },
+              {
+                "variable": "ledger_balance",
+                "value_selector": [
+                  "balance_check",
+                  "balance"
+                ]
+              },
+              {
+                "variable": "thirdparty",
+                "value_selector": [
+                  "parallel_1",
+                  "response"
+                ]
+              },
+              {
+                "variable": "async_result",
+                "value_selector": [
+                  "parallel_2",
+                  "result"
+                ]
+              },
+              {
+                "variable": "bureau_score",
+                "value_selector": [
+                  "failover_manager",
+                  "bureau_score"
+                ]
+              }
+            ],
+            "output_type": "object",
+            "outputs": {
+              "combined": "object",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "error_handler_2",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 350
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "parallel_2",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "parallel_1",
+                  "status"
+                ],
+                "comparison_operator": "not equal",
+                "value": "error"
+              }
+            ],
+            "logical_operator": "and",
+            "true_branch": "proceed_to_cache",
+            "false_branch": "escalate_or_fallback",
+            "outputs": {
+              "result": "string",
+              "escalation_flag": "boolean"
+            }
+          }
+        },
+        {
+          "id": "cache_optimizer",
+          "type": "code",
+          "position": {
+            "x": 200,
+            "y": 350
+          },
+          "data": {
+            "code": "import asyncio\n\ndef optimize_cache_performance(data):\n    cache_key = generate_cache_key(data)\n    pool_connection = get_connection_pool()\n    optimize_strategy = 'async_batch_processing'\n    timeout = 30\n    # store for fast reads\n    return {'cached_result': data, 'cache_optimized': True, 'pool': pool_connection, 'optimize': optimize_strategy}\n\nresult = optimize_cache_performance({{#aggregator.combined#}})",
+            "outputs": {
+              "cached_result": "object",
+              "cache_optimized": "boolean",
+              "pool": "string",
+              "optimize": "string"
+            },
+            "timeout": 30,
+            "cache": true,
+            "pool": "cache_pool",
+            "optimize": "lru_cache_async"
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 300,
+            "y": 500
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Synthesize fraud decision using combined signals: ML score {{#aggregator.ml_score#}}, compliance {{#aggregator.compliance#}}, balance {{#aggregator.ledger_balance#}}, bureau {{#aggregator.bureau_score#}}. Provide recommended action and short justification."
+              }
+            ],
+            "inputs": {
+              "cached": "{{#cache_optimizer.cached_result#}}"
+            },
+            "timeout": 150,
+            "async": false,
+            "cache": false,
+            "pool": "llm_pool",
+            "optimize": "prompt_compaction"
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 500,
+            "y": 500
+          },
+          "data": {
+            "template": "Transaction Audit ID: {{#param_extractor.audit_id#}}\\nFinal Decision: {{#final_processor.text#}}\\nStatus: {{#error_handler_2.result#}}\\nCachedOptimized: {{#cache_optimizer.cache_optimized#}}\\nPool: {{#cache_optimizer.pool#}}\\nBureauFallback: {{#failover_manager.fallback#}}",
+            "cache": "enabled",
+            "async": true,
+            "batch": "processing_enabled"
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "logger",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "level": "INFO",
+            "message_template": "AUDIT {{#param_extractor.audit_id#}} - decision: {{#final_processor.text#}} - signals: {{#aggregator.combined#}} - rules: {{#dynamic_rule_updater.rules_version#}}",
+            "outputs": {
+              "log_id": "string"
+            },
+            "async": true,
+            "batch": "enabled",
+            "cache": false,
+            "pool": "audit_log_pool",
+            "optimize": "batch_flush_every_1000"
+          }
+        },
+        {
+          "id": "human_escalation",
+          "type": "notification",
+          "position": {
+            "x": 500,
+            "y": 440
+          },
+          "data": {
+            "channel": "ops_queue",
+            "message": "High risk transaction requires human review - Audit ID: {{#param_extractor.audit_id#}} - score: {{#aggregator.ml_score#}} - bureau: {{#aggregator.bureau_score#}} - violations: {{#compliance_rules.violations#}}",
+            "priority": "high",
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "fallback": "create_incident_ticket",
+            "async": true,
+            "pool": "notification_pool"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 600,
+            "y": 500
+          },
+          "data": {
+            "outputs": {
+              "result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              },
+              "audit_log": {
+                "type": "string",
+                "value": "{{#audit_logger.log_id#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

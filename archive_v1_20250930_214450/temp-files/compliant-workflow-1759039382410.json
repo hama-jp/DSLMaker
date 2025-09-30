@@ -1,0 +1,187 @@
+{
+  "app": {
+    "description": "Sophisticated Customer Service AI Workflow",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Customer Service Automation"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "sentiment_analysis"
+        },
+        {
+          "source": "sentiment_analysis",
+          "target": "if_else_node"
+        },
+        {
+          "source": "if_else_node",
+          "target": "knowledge_retrieval"
+        },
+        {
+          "source": "knowledge_retrieval",
+          "target": "llm_node"
+        },
+        {
+          "source": "llm_node",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "input_variables": {
+              "user_query": {
+                "type": "string",
+                "required": true
+              },
+              "context_data": {
+                "type": "string",
+                "required": false
+              },
+              "workflow_params": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "extraction_rules": {
+              "user_query": "{{#start_node.user_query#}}",
+              "context_data": "{{#start_node.context_data#}}"
+            }
+          }
+        },
+        {
+          "id": "sentiment_analysis",
+          "type": "sentiment-analysis",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "input": "{{#param_extractor.user_query#}}",
+            "output": {
+              "sentiment_score": "number",
+              "sentiment_label": "string"
+            }
+          }
+        },
+        {
+          "id": "if_else_node",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "condition": "{{#sentiment_analysis.sentiment_score#}} < 0.5",
+                "true": "escalate",
+                "false": "handle"
+              }
+            ]
+          }
+        },
+        {
+          "id": "knowledge_retrieval",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 600,
+            "y": 350
+          },
+          "data": {
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.7,
+            "query": "{{#param_extractor.user_query#}}"
+          }
+        },
+        {
+          "id": "llm_node",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "prompt": "Generate a response based on the user query: {{#param_extractor.user_query#}} and knowledge base: {{#knowledge_retrieval.results#}}",
+            "model": "gpt-3.5-turbo",
+            "temperature": 0.7
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "template": "Response: {{#llm_node.response#}}",
+            "output_format": "text"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "output": {
+              "final_response": "{{#template_transform.output#}}",
+              "quality_score": "{{#sentiment_analysis.sentiment_score#}}"
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

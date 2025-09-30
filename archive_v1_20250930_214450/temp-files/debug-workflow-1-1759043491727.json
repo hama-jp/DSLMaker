@@ -1,0 +1,483 @@
+{
+  "app": {
+    "description": "Enterprise workflow",
+    "icon": "🏥",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Healthcare Patient Management"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "error_handler_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_2"
+        },
+        {
+          "source": "error_handler_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_2",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "error_handler_2"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "cache_optimizer"
+        },
+        {
+          "source": "cache_optimizer",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "final_processor",
+          "target": "security_validator"
+        },
+        {
+          "source": "security_validator",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "insurance_verification"
+        },
+        {
+          "source": "insurance_verification",
+          "target": "appointment_scheduler"
+        },
+        {
+          "source": "appointment_scheduler",
+          "target": "prescription_manager"
+        },
+        {
+          "source": "prescription_manager",
+          "target": "billing_integration"
+        },
+        {
+          "source": "billing_integration",
+          "target": "follow_up_care"
+        },
+        {
+          "source": "follow_up_care",
+          "target": "emergency_handler"
+        },
+        {
+          "source": "emergency_handler",
+          "target": "end_node"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "inputs": {
+              "patient_intake_form": {
+                "type": "string",
+                "required": true
+              },
+              "metadata": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "parameters": [
+              {
+                "name": "extracted_data",
+                "type": "object",
+                "required": true
+              }
+            ],
+            "instruction": "Extract patient data from: {{#start_node.patient_intake_form#}} with error handling and retry logic"
+          }
+        },
+        {
+          "id": "error_handler_1",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "param_extractor",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "parallel_1",
+          "type": "http-request",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://ehr.example.com/patient",
+            "timeout": 30,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "body": {
+              "data": "{{#param_extractor.extracted_data#}}"
+            },
+            "cache": true,
+            "pool": "ehr_connection_pool"
+          }
+        },
+        {
+          "id": "parallel_2",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 300
+          },
+          "data": {
+            "code": "try:\n    result = process_async_batch(input_data)\n    return {'status': 'success', 'result': result}\nexcept Exception as e:\n    return {'status': 'error', 'fallback': 'default_value', 'error': str(e)}",
+            "outputs": {
+              "status": "string",
+              "result": "object",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "variables": [
+              {
+                "variable": "api_result",
+                "value_selector": [
+                  "parallel_1",
+                  "response"
+                ]
+              },
+              {
+                "variable": "process_result",
+                "value_selector": [
+                  "parallel_2",
+                  "result"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "error_handler_2",
+          "type": "if-else",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "parallel_2",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "parallel_1",
+                  "status"
+                ],
+                "comparison_operator": "not equal",
+                "value": "error"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "cache_optimizer",
+          "type": "code",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "code": "import asyncio\n\ndef optimize_cache_performance(data):\n    cache_key = generate_cache_key(data)\n    pool_connection = get_connection_pool()\n    optimize_strategy = 'async_batch_processing'\n    return {'cached_result': data, 'cache_optimized': True, 'pool': pool_connection}",
+            "outputs": {
+              "cached_result": "object",
+              "cache_optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Generate a care plan for patient data: {{#cache_optimizer.cached_result#}} with error handling and fallback mechanisms"
+              }
+            ]
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1850,
+            "y": 200
+          },
+          "data": {
+            "template": "Care Plan: {{#final_processor.text#}}\nStatus: {{#error_handler_2.result#}}\nOptimized: {{#cache_optimizer.cache_optimized#}}"
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 2350,
+            "y": 200
+          },
+          "data": {
+            "code": "def validate_security(payload):\n    if not is_encrypted(payload):\n        return {'status': 'error', 'fallback': 'encrypt_payload', 'error': 'Data not encrypted'}\n    return {'status': 'success'}",
+            "outputs": {
+              "status": "string",
+              "fallback": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 2600,
+            "y": 200
+          },
+          "data": {
+            "code": "def log_audit(event):\n    cache_write(event)  # cache used for quick audit lookup\n    return {'logged': True}",
+            "outputs": {
+              "logged": "boolean"
+            }
+          }
+        },
+        {
+          "id": "insurance_verification",
+          "type": "http-request",
+          "position": {
+            "x": 2850,
+            "y": 200
+          },
+          "data": {
+            "method": "GET",
+            "url": "https://insurance.example.com/verify",
+            "timeout": 20,
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "linear"
+            },
+            "query": {
+              "patient_id": "{{#param_extractor.extracted_data.id#}}"
+            },
+            "cache": true
+          }
+        },
+        {
+          "id": "appointment_scheduler",
+          "type": "http-request",
+          "position": {
+            "x": 3100,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://scheduler.example.com/appointments",
+            "async": true,
+            "batch": true,
+            "body": {
+              "patient": "{{#param_extractor.extracted_data#}}",
+              "insurance_status": "{{#insurance_verification.response.status#}}"
+            },
+            "timeout": 15,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "prescription_manager",
+          "type": "code",
+          "position": {
+            "x": 3350,
+            "y": 200
+          },
+          "data": {
+            "code": "def manage_prescription(data):\n    try:\n        check_interactions(data['medications'])\n        return {'status': 'success'}\n    except Exception as e:\n        return {'status': 'error', 'fallback': 'manual_review', 'error': str(e)}",
+            "outputs": {
+              "status": "string",
+              "fallback": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "billing_integration",
+          "type": "http-request",
+          "position": {
+            "x": 3600,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://billing.example.com/charge",
+            "timeout": 25,
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "linear"
+            },
+            "body": {
+              "patient_id": "{{#param_extractor.extracted_data.id#}}",
+              "services": "{{#appointment_scheduler.response.services#}}"
+            },
+            "cache": false
+          }
+        },
+        {
+          "id": "follow_up_care",
+          "type": "code",
+          "position": {
+            "x": 3850,
+            "y": 200
+          },
+          "data": {
+            "code": "def schedule_follow_up(data):\n    cache_store('follow_up', data)\n    return {'scheduled': True, 'optimize': True}",
+            "outputs": {
+              "scheduled": "boolean",
+              "optimize": "boolean"
+            }
+          }
+        },
+        {
+          "id": "emergency_handler",
+          "type": "if-else",
+          "position": {
+            "x": 4100,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "prescription_manager",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "error"
+              }
+            ],
+            "logical_operator": "or",
+            "fallback": "escalate_to_emergency_team"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 4350,
+            "y": 200
+          },
+          "data": {
+            "outputs": {
+              "result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

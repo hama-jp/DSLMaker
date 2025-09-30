@@ -1,0 +1,280 @@
+{
+  "app": {
+    "description": "Enterprise document processing pipeline with OCR, analysis, validation, and automated reporting.",
+    "icon": "📄",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Enterprise Document Processor"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "data": {
+            "title": "Start",
+            "variables": [
+              {
+                "name": "document_file",
+                "type": "file",
+                "required": true
+              },
+              {
+                "name": "user_query",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "context_data",
+                "type": "object",
+                "required": false
+              }
+            ]
+          },
+          "position": {
+            "x": 100,
+            "y": 200
+          }
+        },
+        {
+          "id": "ocr",
+          "type": "document-extractor",
+          "data": {
+            "title": "OCR Extraction",
+            "config": {
+              "ocr_engine": "tesseract",
+              "language": "eng"
+            },
+            "output": [
+              {
+                "name": "extracted_text",
+                "type": "string"
+              },
+              {
+                "name": "ocr_confidence",
+                "type": "number"
+              }
+            ]
+          },
+          "position": {
+            "x": 350,
+            "y": 200
+          }
+        },
+        {
+          "id": "knowledge",
+          "type": "knowledge-retrieval",
+          "data": {
+            "title": "Context Retrieval",
+            "config": {
+              "retrieval_mode": "hybrid",
+              "reranking_enable": true,
+              "top_k": 7,
+              "score_threshold": 0.6
+            },
+            "input": [
+              {
+                "name": "query",
+                "type": "string",
+                "value": "{{#ocr.extracted_text#}} {{#start.user_query#}}"
+              }
+            ],
+            "output": [
+              {
+                "name": "retrieved_docs",
+                "type": "array"
+              }
+            ]
+          },
+          "position": {
+            "x": 600,
+            "y": 200
+          }
+        },
+        {
+          "id": "analysis",
+          "type": "llm",
+          "data": {
+            "title": "Content Analysis",
+            "model": {
+              "provider": "openai",
+              "model_name": "gpt-4o-mini"
+            },
+            "prompt": "You are an enterprise document analyst. Given the extracted text and retrieved context, produce a concise analysis, identify key entities, and compute a quality score (0-1). Return JSON with fields: summary, entities, quality_score.\nExtracted Text: {{#ocr.extracted_text#}}\nContext Docs: {{#knowledge.retrieved_docs#}}\nUser Query: {{#start.user_query#}}",
+            "temperature": 0.2,
+            "output_format": "json",
+            "output": [
+              {
+                "name": "analysis_result",
+                "type": "object"
+              },
+              {
+                "name": "quality_score",
+                "type": "number"
+              }
+            ]
+          },
+          "position": {
+            "x": 850,
+            "y": 200
+          }
+        },
+        {
+          "id": "validation",
+          "type": "if-else",
+          "data": {
+            "title": "Validation & Approval",
+            "conditions": [
+              {
+                "expression": "{{#analysis.quality_score#}} >= 0.8 and {{#ocr.ocr_confidence#}} >= 0.9",
+                "target": "true"
+              }
+            ],
+            "fallback_target": "false"
+          },
+          "position": {
+            "x": 1100,
+            "y": 200
+          }
+        },
+        {
+          "id": "format",
+          "type": "template-transform",
+          "data": {
+            "title": "Report Formatting",
+            "variables": [
+              {
+                "name": "analysis_result",
+                "value": "{{#analysis.analysis_result#}}"
+              },
+              {
+                "name": "quality_score",
+                "value": "{{#analysis.quality_score#}}"
+              },
+              {
+                "name": "ocr_confidence",
+                "value": "{{#ocr.ocr_confidence#}}"
+              }
+            ],
+            "template": "{% set summary = analysis_result.summary %}\n{% set entities = analysis_result.entities %}\n---\n**Document Analysis Report**\n\n**Summary:** {{ summary }}\n\n**Key Entities:** {{ entities | join(', ') }}\n\n**Quality Score:** {{ quality_score }}\n\n**OCR Confidence:** {{ ocr_confidence }}\n\n*Generated by automated workflow*",
+            "output": [
+              {
+                "name": "final_report",
+                "type": "string"
+              }
+            ]
+          },
+          "position": {
+            "x": 1350,
+            "y": 200
+          }
+        },
+        {
+          "id": "error_fallback",
+          "type": "code",
+          "data": {
+            "title": "Error Handling",
+            "language": "python",
+            "code": "def run(context):\n    return {'final_report': f\"⚠️ Document processing failed. Quality score: {context.get('analysis', {}).get('quality_score', 'N/A')}, OCR confidence: {context.get('ocr', {}).get('ocr_confidence', 'N/A')}. Please review manually.\"}",
+            "output": [
+              {
+                "name": "final_report",
+                "type": "string"
+              }
+            ]
+          },
+          "position": {
+            "x": 1100,
+            "y": 350
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "data": {
+            "title": "End",
+            "output": [
+              {
+                "name": "final_report",
+                "type": "string"
+              }
+            ]
+          },
+          "position": {
+            "x": 1600,
+            "y": 200
+          }
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "sourceHandle": "default",
+          "target": "ocr",
+          "targetHandle": "default"
+        },
+        {
+          "source": "ocr",
+          "sourceHandle": "default",
+          "target": "knowledge",
+          "targetHandle": "default"
+        },
+        {
+          "source": "knowledge",
+          "sourceHandle": "default",
+          "target": "analysis",
+          "targetHandle": "default"
+        },
+        {
+          "source": "analysis",
+          "sourceHandle": "default",
+          "target": "validation",
+          "targetHandle": "default"
+        },
+        {
+          "source": "validation",
+          "sourceHandle": "true",
+          "target": "format",
+          "targetHandle": "default"
+        },
+        {
+          "source": "validation",
+          "sourceHandle": "false",
+          "target": "error_fallback",
+          "targetHandle": "default"
+        },
+        {
+          "source": "format",
+          "sourceHandle": "default",
+          "target": "end",
+          "targetHandle": "default"
+        },
+        {
+          "source": "error_fallback",
+          "sourceHandle": "default",
+          "target": "end",
+          "targetHandle": "default"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

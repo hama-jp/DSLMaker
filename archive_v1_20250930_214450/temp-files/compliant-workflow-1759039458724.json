@@ -1,0 +1,179 @@
+{
+  "app": {
+    "description": "Advanced Content Generation System with Research Automation and SEO Optimization",
+    "icon": "📝",
+    "icon_background": "#4f46e5",
+    "mode": "workflow",
+    "name": "Content Generation Automation"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "knowledge_retrieval"
+        },
+        {
+          "source": "knowledge_retrieval",
+          "target": "llm_node"
+        },
+        {
+          "source": "llm_node",
+          "target": "if_else_node"
+        },
+        {
+          "source": "if_else_node",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "input_variables": {
+              "user_query": {
+                "type": "string",
+                "required": true
+              },
+              "context_data": {
+                "type": "string",
+                "required": false
+              },
+              "config_params": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "extraction_rules": {
+              "user_query": "{{#start_node.user_query#}}",
+              "context_data": "{{#start_node.context_data#}}"
+            }
+          }
+        },
+        {
+          "id": "knowledge_retrieval",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.7,
+            "query": "{{#param_extractor.user_query#}}"
+          }
+        },
+        {
+          "id": "llm_node",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "provider": "openai",
+            "model": "gpt-3.5-turbo",
+            "parameters": {
+              "temperature": 0.7,
+              "max_tokens": 500,
+              "prompt": "Generate content based on the following query: {{#knowledge_retrieval.output#}}"
+            }
+          }
+        },
+        {
+          "id": "if_else_node",
+          "type": "if-else",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "condition": "{{#llm_node.output#}} is not empty",
+                "true": {
+                  "next_node": "template_transform"
+                },
+                "false": {
+                  "next_node": "end_node"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "template": "Content generated: {{#llm_node.output#}}. SEO optimized content.",
+            "output_format": "text"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "output": {
+              "final_content": "{{#template_transform.output#}}",
+              "quality_metrics": {
+                "validation": "Passed",
+                "SEO_score": "Optimized"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

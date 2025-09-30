@@ -1,0 +1,610 @@
+{
+  "app": {
+    "description": "Automated Cybersecurity Incident Response Workflow",
+    "icon": "🛡️",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Cybersecurity Incident Response"
+  },
+  "kind": "app",
+  "version": "1.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout (ms)",
+        "type": "number",
+        "default": "30000"
+      },
+      {
+        "key": "SIEM_TOKEN",
+        "name": "SIEM API token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "CONTAINMENT_API_KEY",
+        "name": "Containment API key",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "REGULATORY_ENDPOINT",
+        "name": "Regulatory reporting endpoint",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "THREAT_INTEL_API_KEY",
+        "name": "Threat Intel API key",
+        "type": "string",
+        "default": ""
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 50,
+        "max_size_mb": 200
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "security_validator"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "siem_fetcher"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "threat_intel_lookup"
+        },
+        {
+          "source": "siem_fetcher",
+          "target": "ai_classifier"
+        },
+        {
+          "source": "threat_intel_lookup",
+          "target": "ai_classifier"
+        },
+        {
+          "source": "ai_classifier",
+          "target": "severity_check_high"
+        },
+        {
+          "source": "severity_check_high",
+          "target": "containment_action"
+        },
+        {
+          "source": "severity_check_high",
+          "target": "severity_check_medium"
+        },
+        {
+          "source": "severity_check_medium",
+          "target": "containment_action"
+        },
+        {
+          "source": "severity_check_medium",
+          "target": "dashboard_updater"
+        },
+        {
+          "source": "containment_action",
+          "target": "forensic_collector"
+        },
+        {
+          "source": "forensic_collector",
+          "target": "regulatory_reporter"
+        },
+        {
+          "source": "regulatory_reporter",
+          "target": "dashboard_updater"
+        },
+        {
+          "source": "dashboard_updater",
+          "target": "aggregator_node"
+        },
+        {
+          "source": "aggregator_node",
+          "target": "error_handler"
+        },
+        {
+          "source": "error_handler",
+          "target": "fallback_handler"
+        },
+        {
+          "source": "error_handler",
+          "target": "final_processor"
+        },
+        {
+          "source": "fallback_handler",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "Incident Start",
+            "inputs": {
+              "incident_event": {
+                "type": "string",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              },
+              "incident_id": {
+                "type": "string",
+                "required": true
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "data": {
+            "title": "Extract Incident Details",
+            "parameters": [
+              {
+                "name": "raw_event",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "source",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "event_timestamp",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Parse the incoming event JSON from {{#start_node.incident_event#}} and extract raw_event, source, and event_timestamp."
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 200
+          },
+          "data": {
+            "title": "Security Context Validation",
+            "code": "import hashlib, time, json\n\nctx = json.loads('{{#start_node.security_context#}}')\nif not ctx.get('auth_token'):\n    raise Exception('Missing auth token')\n\naudit = {\n    'timestamp': time.time(),\n    'event_hash': hashlib.sha256('{{#parameter_extractor.raw_event#}}'.encode()).hexdigest(),\n    'validation': 'passed'\n}\n\nresult = {'validated': True, 'audit': audit}",
+            "outputs": {
+              "validated": "boolean",
+              "audit": "object"
+            }
+          }
+        },
+        {
+          "id": "siem_fetcher",
+          "type": "http-request",
+          "position": {
+            "x": 500,
+            "y": 300
+          },
+          "data": {
+            "title": "Fetch Detailed SIEM Record",
+            "method": "GET",
+            "url": "https://siem.enterprise.com/api/events/{{#start_node.incident_id#}}",
+            "headers": {
+              "Authorization": "Bearer {{#env.SIEM_TOKEN#}}",
+              "Accept": "application/json"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "threat_intel_lookup",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 500,
+            "y": 400
+          },
+          "data": {
+            "title": "Threat Intelligence Enrichment",
+            "dataset_ids": [
+              "threat_intel_feed"
+            ],
+            "retrieval_mode": "hybrid",
+            "top_k": 5,
+            "score_threshold": 0.75,
+            "query": "{{#parameter_extractor.raw_event#}}",
+            "api_key": "{{#env.THREAT_INTEL_API_KEY#}}"
+          }
+        },
+        {
+          "id": "ai_classifier",
+          "type": "llm",
+          "position": {
+            "x": 750,
+            "y": 350
+          },
+          "data": {
+            "title": "AI Threat Severity Classification",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0,
+                "max_tokens": 200
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a cybersecurity analyst. Classify the severity of the incident as HIGH, MEDIUM, or LOW."
+              },
+              {
+                "role": "user",
+                "text": "SIEM data: {{#siem_fetcher.response#}}\nThreat intel: {{#threat_intel_lookup.result#}}\nRaw event: {{#parameter_extractor.raw_event#}}"
+              }
+            ],
+            "output_parser": {
+              "type": "json",
+              "schema": {
+                "severity": "string",
+                "confidence": "number"
+              }
+            }
+          }
+        },
+        {
+          "id": "severity_check_high",
+          "type": "if-else",
+          "position": {
+            "x": 950,
+            "y": 250
+          },
+          "data": {
+            "title": "Is Severity HIGH?",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "ai_classifier",
+                  "severity"
+                ],
+                "comparison_operator": "is",
+                "value": "HIGH"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "severity_check_medium",
+          "type": "if-else",
+          "position": {
+            "x": 950,
+            "y": 350
+          },
+          "data": {
+            "title": "Is Severity MEDIUM?",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "ai_classifier",
+                  "severity"
+                ],
+                "comparison_operator": "is",
+                "value": "MEDIUM"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "containment_action",
+          "type": "http-request",
+          "position": {
+            "x": 1150,
+            "y": 300
+          },
+          "data": {
+            "title": "Trigger Containment",
+            "method": "POST",
+            "url": "https://security.enterprise.com/api/containment",
+            "headers": {
+              "Authorization": "Bearer {{#env.CONTAINMENT_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "incident_id": "{{#start_node.incident_id#}}",
+              "severity": "{{#ai_classifier.severity#}}",
+              "action": "isolate_endpoint"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "forensic_collector",
+          "type": "code",
+          "position": {
+            "x": 1350,
+            "y": 300
+          },
+          "data": {
+            "title": "Start Forensic Data Collection",
+            "code": "import uuid, time\ncollection_id = str(uuid.uuid4())\nstatus = 'STARTED'\nresult = {'collection_id': collection_id, 'status': status, 'started_at': time.time()}\n",
+            "outputs": {
+              "collection_id": "string",
+              "status": "string",
+              "started_at": "number"
+            }
+          }
+        },
+        {
+          "id": "regulatory_reporter",
+          "type": "http-request",
+          "position": {
+            "x": 1550,
+            "y": 300
+          },
+          "data": {
+            "title": "Regulatory Reporting",
+            "method": "POST",
+            "url": "{{#env.REGULATORY_ENDPOINT#}}",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "incident_id": "{{#start_node.incident_id#}}",
+              "severity": "{{#ai_classifier.severity#}}",
+              "timestamp": "{{#parameter_extractor.event_timestamp#}}",
+              "collection_id": "{{#forensic_collector.collection_id#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "dashboard_updater",
+          "type": "code",
+          "position": {
+            "x": 1750,
+            "y": 300
+          },
+          "data": {
+            "title": "Update SOC Dashboard",
+            "code": "dashboard_payload = {\n    'incident_id': '{{#start_node.incident_id#}}',\n    'severity': '{{#ai_classifier.severity#}}',\n    'status': 'IN_PROGRESS',\n    'containment': '{{#containment_action.response#}}',\n    'forensics': '{{#forensic_collector.status#}}',\n    'regulatory': '{{#regulatory_reporter.response#}}'\n}\nresult = {'dashboard_update': dashboard_payload, 'updated': True}",
+            "outputs": {
+              "dashboard_update": "object",
+              "updated": "boolean"
+            }
+          }
+        },
+        {
+          "id": "aggregator_node",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1950,
+            "y": 300
+          },
+          "data": {
+            "title": "Aggregate Incident Results",
+            "variables": [
+              {
+                "variable": "containment_response",
+                "value_selector": [
+                  "containment_action",
+                  "response"
+                ]
+              },
+              {
+                "variable": "forensic_status",
+                "value_selector": [
+                  "forensic_collector",
+                  "status"
+                ]
+              },
+              {
+                "variable": "regulatory_status",
+                "value_selector": [
+                  "regulatory_reporter",
+                  "response"
+                ]
+              },
+              {
+                "variable": "dashboard_status",
+                "value_selector": [
+                  "dashboard_updater",
+                  "updated"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "error_handler",
+          "type": "if-else",
+          "position": {
+            "x": 2150,
+            "y": 250
+          },
+          "data": {
+            "title": "Detect Errors in Aggregated Results",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "aggregator_node",
+                  "containment_response"
+                ],
+                "comparison_operator": "not contains",
+                "value": "\"status\":\"success\""
+              },
+              {
+                "variable_selector": [
+                  "aggregator_node",
+                  "regulatory_status"
+                ],
+                "comparison_operator": "not contains",
+                "value": "\"status\":\"success\""
+              }
+            ],
+            "logical_operator": "or"
+          }
+        },
+        {
+          "id": "fallback_handler",
+          "type": "code",
+          "position": {
+            "x": 2150,
+            "y": 350
+          },
+          "data": {
+            "title": "Fallback Procedure",
+            "code": "fallback_actions = []\nif 'error' in '{{#aggregator_node.containment_response#}}':\n    fallback_actions.append('manual_containment')\nif 'error' in '{{#aggregator_node.regulatory_status#}}':\n    fallback_actions.append('escalate_regulatory')\nresult = {'fallback_executed': True, 'actions': fallback_actions}",
+            "outputs": {
+              "fallback_executed": "boolean",
+              "actions": "array"
+            }
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 2350,
+            "y": 300
+          },
+          "data": {
+            "title": "Generate Incident Summary",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.2,
+                "max_tokens": 600
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a senior SOC analyst. Summarize the incident, actions taken, and next steps."
+              },
+              {
+                "role": "user",
+                "text": "Severity: {{#ai_classifier.severity#}}\nContainment: {{#aggregator_node.containment_response#}}\nForensics: {{#aggregator_node.forensic_status#}}\nRegulatory: {{#aggregator_node.regulatory_status#}}\nDashboard: {{#aggregator_node.dashboard_status#}}\nAudit: {{#security_validator.audit#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 2550,
+            "y": 300
+          },
+          "data": {
+            "title": "Format Final Output",
+            "template": "🛡️ INCIDENT REPORT\n\nID: {{#start_node.incident_id#}}\nSeverity: {{#ai_classifier.severity#}}\nSummary:\n{{#final_processor.text#}}\n\nContainment Status: {{#aggregator_node.containment_response#}}\nForensic Collection ID: {{#forensic_collector.collection_id#}}\nRegulatory Response: {{#aggregator_node.regulatory_status#}}\nDashboard Updated: {{#aggregator_node.dashboard_status#}}\n\nAudit Trail: {{#security_validator.audit#}}\nTimestamp: {{#current_time#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "final_processor",
+                  "text"
+                ],
+                "variable": "incident_summary"
+              },
+              {
+                "value_selector": [
+                  "security_validator",
+                  "audit"
+                ],
+                "variable": "audit_info"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2750,
+            "y": 300
+          },
+          "data": {
+            "title": "Incident Workflow End",
+            "outputs": {
+              "incident_report": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              },
+              "audit_log": {
+                "type": "object",
+                "value": "{{#security_validator.audit#}}"
+              },
+              "fallback_actions": {
+                "type": "array",
+                "value": "{{#fallback_handler.actions#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+      }
+    }
+  }
+}

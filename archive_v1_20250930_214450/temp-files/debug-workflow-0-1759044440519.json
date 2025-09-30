@@ -1,0 +1,769 @@
+{
+  "app": {
+    "description": "Enterprise workflow",
+    "icon": "🏢",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Enterprise Solution"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "dynamic_rule_loader"
+        },
+        {
+          "source": "param_extractor",
+          "target": "security_validator"
+        },
+        {
+          "source": "param_extractor",
+          "target": "ml_risk_scoring"
+        },
+        {
+          "source": "param_extractor",
+          "target": "rule_based_checker"
+        },
+        {
+          "source": "param_extractor",
+          "target": "credit_bureau_api"
+        },
+        {
+          "source": "param_extractor",
+          "target": "balance_validator"
+        },
+        {
+          "source": "param_extractor",
+          "target": "geo_risk_service"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_2"
+        },
+        {
+          "source": "dynamic_rule_loader",
+          "target": "rule_based_checker"
+        },
+        {
+          "source": "security_validator",
+          "target": "audit_logger"
+        },
+        {
+          "source": "ml_risk_scoring",
+          "target": "aggregator"
+        },
+        {
+          "source": "rule_based_checker",
+          "target": "aggregator"
+        },
+        {
+          "source": "credit_bureau_api",
+          "target": "aggregator"
+        },
+        {
+          "source": "balance_validator",
+          "target": "aggregator"
+        },
+        {
+          "source": "geo_risk_service",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_2",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "decision_level_1"
+        },
+        {
+          "source": "decision_level_1",
+          "target": "decision_level_2"
+        },
+        {
+          "source": "decision_level_2",
+          "target": "escalator_human_review"
+        },
+        {
+          "source": "decision_level_2",
+          "target": "batch_processor"
+        },
+        {
+          "source": "escalator_human_review",
+          "target": "audit_logger"
+        },
+        {
+          "source": "batch_processor",
+          "target": "async_queue"
+        },
+        {
+          "source": "async_queue",
+          "target": "error_handler_1"
+        },
+        {
+          "source": "error_handler_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "error_handler_2"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "cache_optimizer"
+        },
+        {
+          "source": "cache_optimizer",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 200,
+            "y": 100
+          },
+          "data": {
+            "inputs": {
+              "transaction": {
+                "type": "object",
+                "required": true
+              },
+              "context": {
+                "type": "object",
+                "required": false
+              }
+            },
+            "description": "Incoming transaction stream (real-time, high throughput)"
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 400,
+            "y": 100
+          },
+          "data": {
+            "parameters": [
+              {
+                "name": "transaction_payload",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "session_context",
+                "type": "object",
+                "required": false
+              }
+            ],
+            "instruction": "Normalize and extract fields from incoming transaction: {{#start_node.transaction#}}; attach trace_id and initial status='received'; include audit metadata and retry counters"
+          }
+        },
+        {
+          "id": "dynamic_rule_loader",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "data": {
+            "code": "def load_rules():\n    # dynamic rule updates without downtime\n    rules = fetch_dynamic_rules_from_config_service()\n    return {'status': 'loaded', 'rules_version': rules.get('version')}\n\n# Use in downstream: {{#dynamic_rule_loader.rules_version#}}",
+            "outputs": {
+              "status": "string",
+              "rules_version": "string"
+            },
+            "cache": "rules_cache_enabled",
+            "optimize": "hot_reload",
+            "pool": "config_service_pool"
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 200,
+            "y": 200
+          },
+          "data": {
+            "code": "def validate_security(tx):\n    # perform auth, token checks, signature verification\n    ok = verify_signature(tx)\n    return {'status': 'ok' if ok else 'error', 'error': None if ok else 'invalid_signature'}",
+            "outputs": {
+              "status": "string",
+              "error": "string"
+            },
+            "cache": false,
+            "optimize": "secure_path",
+            "pool": "security_pool"
+          }
+        },
+        {
+          "id": "ml_risk_scoring",
+          "type": "ml",
+          "position": {
+            "x": 400,
+            "y": 200
+          },
+          "data": {
+            "model": {
+              "provider": "internal",
+              "name": "fraud-score-model-v3"
+            },
+            "inputs": {
+              "transaction": "{{#param_extractor.transaction_payload#}}",
+              "rules_version": "{{#dynamic_rule_loader.rules_version#}}"
+            },
+            "timeout": 120,
+            "async": true,
+            "batch": "inference_batching_enabled",
+            "outputs": {
+              "score": "number",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "rule_based_checker",
+          "type": "rule-engine",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "rules_source": "{{#dynamic_rule_loader.rules_version#}}",
+            "input": "{{#param_extractor.transaction_payload#}}",
+            "outputs": {
+              "result": "object",
+              "status": "string"
+            },
+            "timeout": 50,
+            "cache": true,
+            "optimize": "incremental_evaluation",
+            "pool": "rules_evaluation_pool"
+          }
+        },
+        {
+          "id": "credit_bureau_api",
+          "type": "http-request",
+          "position": {
+            "x": 200,
+            "y": 350
+          },
+          "data": {
+            "method": "GET",
+            "url": "https://api.creditbureau.example/verify",
+            "timeout": 100,
+            "retry": {
+              "max_attempts": 4,
+              "strategy": "exponential"
+            },
+            "auth": {
+              "type": "api_key",
+              "key": "{{#param_extractor.session_context.api_key#}}"
+            },
+            "params": {
+              "ssn": "{{#param_extractor.transaction_payload.ssn#}}",
+              "account": "{{#param_extractor.transaction_payload.account_id#}}"
+            },
+            "cache": true,
+            "pool": "credit_api_pool"
+          }
+        },
+        {
+          "id": "balance_validator",
+          "type": "http-request",
+          "position": {
+            "x": 400,
+            "y": 350
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://ledger.enterprise/api/check_balance",
+            "timeout": 80,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "fixed"
+            },
+            "body": {
+              "account": "{{#param_extractor.transaction_payload.account_id#}}",
+              "amount": "{{#param_extractor.transaction_payload.amount#}}"
+            },
+            "cache": false,
+            "pool": "ledger_pool",
+            "optimize": "short_circuit"
+          }
+        },
+        {
+          "id": "geo_risk_service",
+          "type": "http-request",
+          "position": {
+            "x": 600,
+            "y": 350
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://geo-risk.example/assess",
+            "timeout": 60,
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "exponential"
+            },
+            "body": {
+              "ip": "{{#param_extractor.transaction_payload.ip#}}",
+              "geo": "{{#param_extractor.transaction_payload.geo#}}"
+            },
+            "cache": true,
+            "pool": "geo_pool",
+            "optimize": "geo_cache"
+          }
+        },
+        {
+          "id": "parallel_1",
+          "type": "http-request",
+          "position": {
+            "x": 300,
+            "y": 500
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://external-fraud-1.example/check",
+            "timeout": 50,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "body": {
+              "transaction": "{{#param_extractor.transaction_payload#}}"
+            },
+            "cache": true,
+            "pool": "ext_fraud_pool",
+            "optimize": "multi_region",
+            "outputs": {
+              "response": "object",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "parallel_2",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 500
+          },
+          "data": {
+            "code": "def call_multiple_services(tx):\n    try:\n        # fan-out to multiple 3rd party fraud services with failover\n        results = fanout_services(tx, services=['f1','f2','f3','f4','f5'])\n        optimize_pool_usage(results)\n        return {'status': 'success', 'result': results}\n    except Exception as e:\n        # fallback and propagate error for aggregator\n        return {'status': 'error', 'fallback': {'reason':'service_unavailable'}, 'error': str(e)}",
+            "outputs": {
+              "status": "string",
+              "result": "object",
+              "error": "string",
+              "fallback": "object"
+            },
+            "async": true,
+            "batch": "fanout_batch",
+            "cache": false
+          }
+        },
+        {
+          "id": "batch_processor",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 500
+          },
+          "data": {
+            "code": "def batch_and_stream(results):\n    # Designed for < 200ms per transaction when sharded and optimized\n    batched = batchify(results, batch_size=1000)\n    async_enqueue(batched)\n    return {'status':'batched', 'batch_count': len(batched)}",
+            "outputs": {
+              "status": "string",
+              "batch_count": "number"
+            },
+            "batch": "true",
+            "async": true,
+            "optimize": "shard_by_account",
+            "pool": "batch_pool"
+          }
+        },
+        {
+          "id": "async_queue",
+          "type": "queue",
+          "position": {
+            "x": 400,
+            "y": 600
+          },
+          "data": {
+            "queue_name": "fraud_processing_async_queue",
+            "visibility_timeout": 30,
+            "retry": {
+              "max_attempts": 5,
+              "strategy": "linear"
+            },
+            "cache": false,
+            "pool": "queue_pool",
+            "timeout": 120
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "audit-logger",
+          "position": {
+            "x": 200,
+            "y": 600
+          },
+          "data": {
+            "log_store": "secure_audit_store",
+            "level": "info",
+            "format": "json",
+            "include": [
+              "trace_id",
+              "rules_version",
+              "ml_score",
+              "decision_path"
+            ],
+            "cache": "audit_cache",
+            "pool": "audit_pool",
+            "optimize": "compress_logs"
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 400,
+            "y": 350
+          },
+          "data": {
+            "variables": [
+              {
+                "variable": "ml_score",
+                "value_selector": [
+                  "ml_risk_scoring",
+                  "score"
+                ]
+              },
+              {
+                "variable": "rule_result",
+                "value_selector": [
+                  "rule_based_checker",
+                  "result"
+                ]
+              },
+              {
+                "variable": "credit_response",
+                "value_selector": [
+                  "credit_bureau_api",
+                  "response"
+                ]
+              },
+              {
+                "variable": "balance_status",
+                "value_selector": [
+                  "balance_validator",
+                  "status"
+                ]
+              },
+              {
+                "variable": "geo_risk",
+                "value_selector": [
+                  "geo_risk_service",
+                  "response"
+                ]
+              },
+              {
+                "variable": "external_results",
+                "value_selector": [
+                  "parallel_2",
+                  "result"
+                ]
+              },
+              {
+                "variable": "external_status",
+                "value_selector": [
+                  "parallel_1",
+                  "status"
+                ]
+              }
+            ],
+            "output_type": "object",
+            "description": "Aggregate results across all validation layers for final decisioning"
+          }
+        },
+        {
+          "id": "decision_level_1",
+          "type": "if-else",
+          "position": {
+            "x": 500,
+            "y": 350
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "ml_risk_scoring",
+                  "score"
+                ],
+                "comparison_operator": "greater than",
+                "value": 0.85
+              },
+              {
+                "variable_selector": [
+                  "rule_based_checker",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "violation"
+              }
+            ],
+            "logical_operator": "or",
+            "metadata": "Level 1: High risk fast path"
+          }
+        },
+        {
+          "id": "decision_level_2",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 350
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "parallel_2",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "error"
+              },
+              {
+                "variable_selector": [
+                  "parallel_1",
+                  "status"
+                ],
+                "comparison_operator": "not equal",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "balance_validator",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "insufficient"
+              }
+            ],
+            "logical_operator": "or",
+            "metadata": "Level 2: Handle external errors, insufficient funds, or non-success statuses"
+          }
+        },
+        {
+          "id": "escalator_human_review",
+          "type": "human-review",
+          "position": {
+            "x": 200,
+            "y": 400
+          },
+          "data": {
+            "queue": "fraud_escalation_queue",
+            "sla_minutes": 15,
+            "notify": [
+              "ops_team",
+              "compliance_team"
+            ],
+            "audit_trail_reference": "{{#aggregator.ml_score#}}-{{#param_extractor.transaction_payload.transaction_id#}}",
+            "fallback": "auto_hold",
+            "cache": false,
+            "pool": "escalation_pool"
+          }
+        },
+        {
+          "id": "error_handler_1",
+          "type": "if-else",
+          "position": {
+            "x": 300,
+            "y": 700
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "async_queue",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "failed"
+              },
+              {
+                "variable_selector": [
+                  "parallel_2",
+                  "error"
+                ],
+                "comparison_operator": "exists",
+                "value": true
+              }
+            ],
+            "logical_operator": "or",
+            "metadata": "Error handler for async/parallel failures with retry/fallback",
+            "on_error": {
+              "retry": {
+                "max_attempts": 3,
+                "strategy": "exponential"
+              },
+              "fallback": {
+                "action": "route_to_cache_optimizer",
+                "note": "use cached heuristics"
+              }
+            }
+          }
+        },
+        {
+          "id": "error_handler_2",
+          "type": "if-else",
+          "position": {
+            "x": 500,
+            "y": 500
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "parallel_2",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "parallel_1",
+                  "status"
+                ],
+                "comparison_operator": "not equal",
+                "value": "error"
+              }
+            ],
+            "logical_operator": "and",
+            "metadata": "Ensure at least one external fraud service succeeded or fallback"
+          }
+        },
+        {
+          "id": "cache_optimizer",
+          "type": "code",
+          "position": {
+            "x": 300,
+            "y": 350
+          },
+          "data": {
+            "code": "import asyncio\n\ndef optimize_cache_performance(data):\n    cache_key = generate_cache_key(data)\n    pool_connection = get_connection_pool()\n    optimize_strategy = 'async_batch_processing'\n    timeout = 30\n    # store summary, short-circuit common decisions\n    return {'cached_result': data, 'cache_optimized': True, 'pool': pool_connection, 'optimize': optimize_strategy}",
+            "outputs": {
+              "cached_result": "object",
+              "cache_optimized": "boolean",
+              "pool": "string",
+              "optimize": "string"
+            },
+            "cache": "decision_cache",
+            "pool": "cache_pool",
+            "optimize": "hot_cache"
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 300,
+            "y": 500
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Compose final decision report for transaction {{#param_extractor.transaction_payload.transaction_id#}} using aggregated variables: {{#aggregator.ml_score#}}, {{#aggregator.rule_result#}}, external: {{#aggregator.external_status#}}. Include audit ref {{#audit_logger.log_store#}} and cache status {{#cache_optimizer.cache_optimized#}}."
+              }
+            ],
+            "timeout": 30,
+            "async": false,
+            "cache": false
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 500,
+            "y": 500
+          },
+          "data": {
+            "template": "Fraud Decision Report:\nTransaction: {{#param_extractor.transaction_payload.transaction_id#}}\nScore: {{#aggregator.ml_score#}}\nRules: {{#aggregator.rule_result#}}\nExternalStatus: {{#aggregator.external_status#}}\nCacheOptimized: {{#cache_optimizer.cache_optimized#}}\nEscalated: {{#escalator_human_review.queue#}}\nFinalText: {{#final_processor.text#}}\nErrorState: {{#error_handler_2.result#}}",
+            "cache": "enabled",
+            "async": true,
+            "batch": "processing_enabled",
+            "optimize": "render_cache"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 600,
+            "y": 500
+          },
+          "data": {
+            "outputs": {
+              "result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              },
+              "audit_reference": {
+                "type": "string",
+                "value": "{{#audit_logger.log_store#}}:{{#param_extractor.transaction_payload.transaction_id#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

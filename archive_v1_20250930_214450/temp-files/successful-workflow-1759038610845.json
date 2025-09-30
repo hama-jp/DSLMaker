@@ -1,0 +1,197 @@
+{
+  "app": {
+    "description": "Document Processing Pipeline for Customer Service Automation",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Document Processing Pipeline"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "document_extractor"
+        },
+        {
+          "source": "document_extractor",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "if_else_node"
+        },
+        {
+          "source": "if_else_node",
+          "target": "llm_analysis"
+        },
+        {
+          "source": "llm_analysis",
+          "target": "knowledge_retrieval"
+        },
+        {
+          "source": "knowledge_retrieval",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "variables": {
+            "user_query": {
+              "type": "text",
+              "required": true
+            },
+            "customer_context": {
+              "type": "object",
+              "required": false
+            }
+          },
+          "position": {
+            "x": 100,
+            "y": 200
+          }
+        },
+        {
+          "id": "document_extractor",
+          "type": "document-extractor",
+          "inputs": {
+            "file": "{{#start_node.user_query#}}"
+          },
+          "outputs": {
+            "extracted_text": {
+              "type": "text"
+            }
+          },
+          "position": {
+            "x": 100,
+            "y": 200
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "inputs": {
+            "text": "{{#document_extractor.extracted_text#}}"
+          },
+          "outputs": {
+            "parameters": {
+              "type": "object"
+            }
+          },
+          "position": {
+            "x": 350,
+            "y": 200
+          }
+        },
+        {
+          "id": "if_else_node",
+          "type": "if-else",
+          "condition": "{{#parameter_extractor.parameters#}}.valid",
+          "true_branch": {
+            "next_node": "llm_analysis"
+          },
+          "false_branch": {
+            "next_node": "end_node"
+          },
+          "position": {
+            "x": 600,
+            "y": 200
+          }
+        },
+        {
+          "id": "llm_analysis",
+          "type": "llm",
+          "inputs": {
+            "text": "{{#parameter_extractor.parameters#}}.text"
+          },
+          "outputs": {
+            "classification": {
+              "type": "text"
+            },
+            "sentiment_score": {
+              "type": "number"
+            },
+            "automated_response": {
+              "type": "text"
+            }
+          },
+          "position": {
+            "x": 850,
+            "y": 200
+          }
+        },
+        {
+          "id": "knowledge_retrieval",
+          "type": "knowledge-retrieval",
+          "inputs": {
+            "query": "{{#llm_analysis.automated_response#}}"
+          },
+          "outputs": {
+            "knowledge_base_entry": {
+              "type": "object"
+            }
+          },
+          "position": {
+            "x": 1100,
+            "y": 200
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "inputs": {
+            "data": {
+              "classification": "{{#llm_analysis.classification#}}",
+              "sentiment_score": "{{#llm_analysis.sentiment_score#}}",
+              "response": "{{#llm_analysis.automated_response#}}"
+            }
+          },
+          "outputs": {
+            "formatted_output": {
+              "type": "text"
+            }
+          },
+          "position": {
+            "x": 1350,
+            "y": 200
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "inputs": {
+            "result": "{{#template_transform.formatted_output#}}"
+          },
+          "position": {
+            "x": 1600,
+            "y": 200
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,764 @@
+{
+  "app": {
+    "description": "Healthcare Patient Management Enterprise Workflow with HIPAA compliance, multi‑provider coordination, and emergency handling",
+    "icon": "🏥",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Healthcare Enterprise Patient Workflow"
+  },
+  "kind": "app",
+  "version": "2.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout milliseconds",
+        "type": "number",
+        "default": "30000"
+      },
+      {
+        "key": "CACHE_TTL",
+        "name": "Cache TTL seconds",
+        "type": "number",
+        "default": "300"
+      },
+      {
+        "key": "CIRCUIT_BREAKER_THRESHOLD",
+        "name": "Circuit breaker threshold",
+        "type": "number",
+        "default": "5"
+      },
+      {
+        "key": "SCALE_FACTOR",
+        "name": "Auto‑scaling factor",
+        "type": "number",
+        "default": "2"
+      },
+      {
+        "key": "INSURANCE_API_KEY",
+        "name": "Insurance API authentication token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "EHR_API_KEY",
+        "name": "EHR system API key",
+        "type": "string",
+        "default": ""
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 50,
+        "max_size_mb": 200
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "security_validator"
+        },
+        {
+          "source": "security_validator",
+          "target": "emergency_handler"
+        },
+        {
+          "source": "emergency_handler",
+          "target": "load_balancer",
+          "condition": "non_emergency"
+        },
+        {
+          "source": "emergency_handler",
+          "target": "final_processor",
+          "condition": "emergency"
+        },
+        {
+          "source": "load_balancer",
+          "target": "error_handler_primary"
+        },
+        {
+          "source": "load_balancer",
+          "target": "parallel_intake_processing"
+        },
+        {
+          "source": "load_balancer",
+          "target": "parallel_insurance_verification"
+        },
+        {
+          "source": "load_balancer",
+          "target": "parallel_ehr_fetch"
+        },
+        {
+          "source": "load_balancer",
+          "target": "parallel_med_interaction_check"
+        },
+        {
+          "source": "error_handler_primary",
+          "target": "circuit_breaker"
+        },
+        {
+          "source": "parallel_intake_processing",
+          "target": "performance_monitor_intake"
+        },
+        {
+          "source": "parallel_insurance_verification",
+          "target": "performance_monitor_insurance"
+        },
+        {
+          "source": "parallel_ehr_fetch",
+          "target": "performance_monitor_ehr"
+        },
+        {
+          "source": "parallel_med_interaction_check",
+          "target": "performance_monitor_med_interaction"
+        },
+        {
+          "source": "performance_monitor_intake",
+          "target": "aggregator"
+        },
+        {
+          "source": "performance_monitor_insurance",
+          "target": "aggregator"
+        },
+        {
+          "source": "performance_monitor_ehr",
+          "target": "aggregator"
+        },
+        {
+          "source": "performance_monitor_med_interaction",
+          "target": "aggregator"
+        },
+        {
+          "source": "circuit_breaker",
+          "target": "fallback_processor"
+        },
+        {
+          "source": "aggregator",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "fallback_processor",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "scalability_optimizer",
+          "target": "security_validator_advanced"
+        },
+        {
+          "source": "security_validator_advanced",
+          "target": "error_handler_secondary"
+        },
+        {
+          "source": "error_handler_secondary",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "cache_updater"
+        },
+        {
+          "source": "cache_updater",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "Healthcare Workflow Start",
+            "inputs": {
+              "patient_input": {
+                "type": "string",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              },
+              "request_timestamp": {
+                "type": "string",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "data": {
+            "title": "Patient Data Extractor",
+            "parameters": [
+              {
+                "name": "patient_info",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "insurance_details",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "requested_services",
+                "type": "array",
+                "required": true
+              },
+              {
+                "name": "emergency_flag",
+                "type": "boolean",
+                "required": true
+              },
+              {
+                "name": "request_id",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Parse incoming patient request: {{#start_node.patient_input#}}. Identify emergency status and requested services."
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 200
+          },
+          "data": {
+            "title": "HIPAA Audit Logger",
+            "code": "import json, time, hashlib\n\ndef main(patient_info, request_id, security_context):\n    audit_entry = {\n        'request_id': request_id,\n        'timestamp': time.time(),\n        'patient_hash': hashlib.sha256(json.dumps(patient_info, sort_keys=True).encode()).hexdigest(),\n        'action': 'intake_received',\n        'security_context': security_context\n    }\n    # In real deployment this would be written to a secure audit store\n    return {'audit_entry': audit_entry, 'audit_logged': True}\n",
+            "outputs": {
+              "audit_entry": "object",
+              "audit_logged": "boolean"
+            }
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 300
+          },
+          "data": {
+            "title": "HIPAA Security Validation",
+            "code": "def main(security_context, audit_logged):\n    if not security_context.get('authenticated'):\n        raise Exception('Unauthenticated request')\n    if not audit_logged:\n        raise Exception('Audit logging failed')\n    return {'validated': True, 'validation_timestamp': time.time()}\n",
+            "outputs": {
+              "validated": "boolean",
+              "validation_timestamp": "number"
+            }
+          }
+        },
+        {
+          "id": "emergency_handler",
+          "type": "if-else",
+          "position": {
+            "x": 700,
+            "y": 300
+          },
+          "data": {
+            "title": "Emergency Escalation Handler",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "parameter_extractor",
+                  "emergency_flag"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "load_balancer",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 300
+          },
+          "data": {
+            "title": "Provider Load Balancer",
+            "code": "import random\n\ndef main(requested_services):\n    # Simulate provider selection based on load and service capability\n    providers = [\n        {'id': 'prov_a', 'load': random.uniform(0.1, 0.9), 'services': ['consultation', 'lab']},\n        {'id': 'prov_b', 'load': random.uniform(0.1, 0.9), 'services': ['imaging', 'consultation']},\n        {'id': 'prov_c', 'load': random.uniform(0.1, 0.9), 'services': ['pharmacy', 'lab']}\n    ]\n    suitable = [p for p in providers if any(s in p['services'] for s in requested_services)]\n    selected = min(suitable, key=lambda x: x['load']) if suitable else providers[0]\n    return {'selected_provider': selected['id'], 'provider_load': selected['load']}\n",
+            "outputs": {
+              "selected_provider": "string",
+              "provider_load": "number"
+            }
+          }
+        },
+        {
+          "id": "error_handler_primary",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 150
+          },
+          "data": {
+            "title": "Primary Error Handler with Retry",
+            "code": "import time, random\n\ndef main(selected_provider):\n    max_retries = int('{{#env.MAX_RETRIES#}}')\n    for attempt in range(max_retries):\n        try:\n            if random.random() < 0.1:\n                raise Exception('Transient provider selection error')\n            return {'error_handled': False, 'attempts': attempt + 1}\n        except Exception as e:\n            if attempt == max_retries - 1:\n                return {'error_handled': True, 'error_message': str(e), 'attempts': attempt + 1}\n            time.sleep(0.2 * (2 ** attempt))\n    return {'error_handled': True, 'error_message': 'Unknown', 'attempts': max_retries}\n",
+            "outputs": {
+              "error_handled": "boolean",
+              "error_message": "string",
+              "attempts": "number"
+            }
+          }
+        },
+        {
+          "id": "parallel_intake_processing",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Intake Data Enrichment",
+            "code": "import time, random\n\ndef main(patient_info):\n    time.sleep(random.uniform(0.05, 0.15))\n    enriched = patient_info.copy()\n    enriched['risk_score'] = random.uniform(0.1, 0.9)\n    return {'enriched_patient': enriched, 'enrichment_time_ms': random.randint(50, 150)}\n",
+            "outputs": {
+              "enriched_patient": "object",
+              "enrichment_time_ms": "number"
+            }
+          }
+        },
+        {
+          "id": "parallel_insurance_verification",
+          "type": "http-request",
+          "position": {
+            "x": 1100,
+            "y": 300
+          },
+          "data": {
+            "title": "Insurance Verification API",
+            "method": "POST",
+            "url": "https://api.insurance.com/verify",
+            "headers": {
+              "Authorization": "Bearer {{#env.INSURANCE_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "insurance_details": "{{#parameter_extractor.insurance_details#}}",
+              "patient_id": "{{#parameter_extractor.patient_info.id#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "parallel_ehr_fetch",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 1100,
+            "y": 400
+          },
+          "data": {
+            "title": "EHR Record Retrieval",
+            "dataset_ids": [
+              "ehr_records"
+            ],
+            "retrieval_mode": "hybrid",
+            "reranking_enable": true,
+            "top_k": 5,
+            "score_threshold": 0.75,
+            "query": "{{#parameter_extractor.patient_info.id#}}"
+          }
+        },
+        {
+          "id": "parallel_med_interaction_check",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 1100,
+            "y": 500
+          },
+          "data": {
+            "title": "Medication Interaction Check",
+            "dataset_ids": [
+              "med_interaction_db"
+            ],
+            "retrieval_mode": "semantic",
+            "reranking_enable": true,
+            "top_k": 10,
+            "score_threshold": 0.8,
+            "query": "{{#parameter_extractor.requested_services#}}"
+          }
+        },
+        {
+          "id": "performance_monitor_intake",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 200
+          },
+          "data": {
+            "title": "Intake Performance Monitor",
+            "code": "def main(enrichment_time_ms):\n    grade = 'A' if enrichment_time_ms < 80 else 'B' if enrichment_time_ms < 130 else 'C'\n    return {'intake_latency_grade': grade, 'intake_optimized': True}\n",
+            "outputs": {
+              "intake_latency_grade": "string",
+              "intake_optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_insurance",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 300
+          },
+          "data": {
+            "title": "Insurance Performance Monitor",
+            "code": "def main(response):\n    status = response.get('status', 500)\n    success = status == 200\n    latency = response.get('latency_ms', 0)\n    grade = 'A' if latency < 200 else 'B' if latency < 500 else 'C'\n    return {'insurance_success': success, 'insurance_latency_grade': grade}\n",
+            "outputs": {
+              "insurance_success": "boolean",
+              "insurance_latency_grade": "string"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_ehr",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 400
+          },
+          "data": {
+            "title": "EHR Retrieval Performance Monitor",
+            "code": "def main(result):\n    retrieved = len(result.get('documents', [])) > 0\n    return {'ehr_retrieved': retrieved, 'ehr_quality_score': random.uniform(70, 95)}\n",
+            "outputs": {
+              "ehr_retrieved": "boolean",
+              "ehr_quality_score": "number"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_med_interaction",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 500
+          },
+          "data": {
+            "title": "Medication Interaction Performance Monitor",
+            "code": "def main(result):\n    interactions = result.get('documents', [])\n    risk = 'HIGH' if any('contraindication' in doc.lower() for doc in interactions) else 'LOW'\n    return {'med_interaction_risk': risk, 'interaction_checked': True}\n",
+            "outputs": {
+              "med_interaction_risk": "string",
+              "interaction_checked": "boolean"
+            }
+          }
+        },
+        {
+          "id": "circuit_breaker",
+          "type": "code",
+          "position": {
+            "x": 1500,
+            "y": 150
+          },
+          "data": {
+            "title": "Circuit Breaker",
+            "code": "def main(error_handled):\n    threshold = int('{{#env.CIRCUIT_BREAKER_THRESHOLD#}}')\n    if error_handled:\n        failures = 1\n    else:\n        failures = 0\n    status = 'OPEN' if failures >= threshold else 'CLOSED'\n    return {'circuit_status': status, 'fallback_needed': failures >= threshold}\n",
+            "outputs": {
+              "circuit_status": "string",
+              "fallback_needed": "boolean"
+            }
+          }
+        },
+        {
+          "id": "fallback_processor",
+          "type": "code",
+          "position": {
+            "x": 1500,
+            "y": 250
+          },
+          "data": {
+            "title": "Fallback Processor",
+            "code": "def main(fallback_needed):\n    if fallback_needed:\n        return {'fallback_used': True, 'fallback_message': 'Default care pathway applied'}\n    return {'fallback_used': False}\n",
+            "outputs": {
+              "fallback_used": "boolean",
+              "fallback_message": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1700,
+            "y": 300
+          },
+          "data": {
+            "title": "Result Aggregator",
+            "variables": [
+              {
+                "variable": "patient_enriched",
+                "value_selector": [
+                  "parallel_intake_processing",
+                  "enriched_patient"
+                ]
+              },
+              {
+                "variable": "insurance_status",
+                "value_selector": [
+                  "parallel_insurance_verification",
+                  "response"
+                ]
+              },
+              {
+                "variable": "ehr_records",
+                "value_selector": [
+                  "parallel_ehr_fetch",
+                  "result"
+                ]
+              },
+              {
+                "variable": "med_interactions",
+                "value_selector": [
+                  "parallel_med_interaction_check",
+                  "result"
+                ]
+              },
+              {
+                "variable": "intake_perf",
+                "value_selector": [
+                  "performance_monitor_intake",
+                  "intake_latency_grade"
+                ]
+              },
+              {
+                "variable": "insurance_perf",
+                "value_selector": [
+                  "performance_monitor_insurance",
+                  "insurance_latency_grade"
+                ]
+              },
+              {
+                "variable": "ehr_perf",
+                "value_selector": [
+                  "performance_monitor_ehr",
+                  "ehr_quality_score"
+                ]
+              },
+              {
+                "variable": "med_interaction_risk",
+                "value_selector": [
+                  "performance_monitor_med_interaction",
+                  "med_interaction_risk"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "scalability_optimizer",
+          "type": "code",
+          "position": {
+            "x": 1900,
+            "y": 300
+          },
+          "data": {
+            "title": "Scalability Optimizer",
+            "code": "def main(aggregated_data, fallback_used=False):\n    scores = []\n    for key in ['intake_perf', 'insurance_perf']:\n        grade = aggregated_data.get(key, 'C')\n        scores.append({'A':3,'B':2,'C':1}.get(grade,1))\n    scores.append(aggregated_data.get('ehr_perf',70)/10)\n    scores.append(5 if aggregated_data.get('med_interaction_risk') == 'LOW' else 2)\n    avg_score = sum(scores)/len(scores)\n    scale_factor = float('{{#env.SCALE_FACTOR#}}')\n    recommendation = 'SCALE_UP' if avg_score < 5 else 'MAINTAIN' if avg_score < 7 else 'SCALE_DOWN'\n    return {'overall_performance_score': avg_score, 'scale_recommendation': recommendation, 'auto_scaling_enabled': True}\n",
+            "outputs": {
+              "overall_performance_score": "number",
+              "scale_recommendation": "string",
+              "auto_scaling_enabled": "boolean"
+            }
+          }
+        },
+        {
+          "id": "security_validator_advanced",
+          "type": "code",
+          "position": {
+            "x": 2100,
+            "y": 300
+          },
+          "data": {
+            "title": "Advanced Security & Compliance Validator",
+            "code": "def main(validated, overall_performance_score):\n    compliance = validated and overall_performance_score >= 5\n    audit = {'compliance_passed': compliance, 'checked_at': time.time()}\n    return {'security_compliant': compliance, 'audit': audit}\n",
+            "outputs": {
+              "security_compliant": "boolean",
+              "audit": "object"
+            }
+          }
+        },
+        {
+          "id": "error_handler_secondary",
+          "type": "if-else",
+          "position": {
+            "x": 2300,
+            "y": 300
+          },
+          "data": {
+            "title": "Secondary Error Handler",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "security_validator_advanced",
+                  "security_compliant"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              },
+              {
+                "variable_selector": [
+                  "scalability_optimizer",
+                  "overall_performance_score"
+                ],
+                "comparison_operator": "greater than",
+                "value": 6
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 2500,
+            "y": 300
+          },
+          "data": {
+            "title": "Care Plan Generator",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.2,
+                "max_tokens": 800,
+                "timeout": 20
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a clinical decision support system. Generate a detailed care plan based on the aggregated patient data, insurance status, EHR records, medication interaction risk, and provider availability. Ensure HIPAA compliance and include follow‑up steps."
+              },
+              {
+                "role": "user",
+                "text": "Patient: {{#aggregator.patient_enriched#}}\nInsurance: {{#aggregator.insurance_status#}}\nEHR: {{#aggregator.ehr_records#}}\nMedication Interactions: {{#aggregator.med_interactions#}}\nProvider: {{#load_balancer.selected_provider#}}\nPerformance Score: {{#scalability_optimizer.overall_performance_score#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "cache_updater",
+          "type": "code",
+          "position": {
+            "x": 2700,
+            "y": 300
+          },
+          "data": {
+            "title": "Cache Updater",
+            "code": "def main(final_result, request_id):\n    cache_key = f'careplan:{request_id}'\n    ttl = int('{{#env.CACHE_TTL#}}')\n    # Simulated cache write\n    return {'cache_updated': True, 'cache_key': cache_key, 'ttl_seconds': ttl}\n",
+            "outputs": {
+              "cache_updated": "boolean",
+              "cache_key": "string",
+              "ttl_seconds": "number"
+            }
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 2900,
+            "y": 300
+          },
+          "data": {
+            "title": "Output Formatter",
+            "template": "🏥 **CARE PLAN SUMMARY**\n\n**Patient ID:** {{#parameter_extractor.patient_info.id#}}\n**Provider:** {{#load_balancer.selected_provider#}}\n**Risk Score:** {{#parallel_intake_processing.enriched_patient.risk_score#}}\n**Insurance Status:** {{#parallel_insurance_verification.response.status#}}\n**Medication Interaction Risk:** {{#performance_monitor_med_interaction.med_interaction_risk#}}\n**Overall Performance:** {{#scalability_optimizer.overall_performance_score#}} / 10\n**Scaling Recommendation:** {{#scalability_optimizer.scale_recommendation#}}\n\n**Generated Care Plan:**\n{{#final_processor.text#}}\n\n*Cache Key:* {{#cache_updater.cache_key#}}\n*Timestamp:* {{#current_time#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "final_processor",
+                  "text"
+                ],
+                "variable": "care_plan_text"
+              },
+              {
+                "value_selector": [
+                  "parameter_extractor",
+                  "patient_info.id"
+                ],
+                "variable": "patient_id"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 3100,
+            "y": 300
+          },
+          "data": {
+            "title": "Workflow End",
+            "outputs": {
+              "care_plan_result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              },
+              "audit_log": {
+                "type": "object",
+                "value": "{{#security_validator_advanced.audit#}}"
+              },
+              "performance_metrics": {
+                "type": "object",
+                "value": {
+                  "overall_score": "{{#scalability_optimizer.overall_performance_score#}}",
+                  "auto_scaling": "{{#scalability_optimizer.auto_scaling_enabled#}}"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+      }
+    }
+  }
+}

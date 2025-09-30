@@ -1,0 +1,630 @@
+{
+  "app": {
+    "description": "Healthcare patient management workflow with HIPAA compliance and multi-provider coordination",
+    "icon": "🏥",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Healthcare Patient Workflow"
+  },
+  "kind": "app",
+  "version": "2.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout milliseconds",
+        "type": "number",
+        "default": "30000"
+      },
+      {
+        "key": "INSURANCE_API_KEY",
+        "name": "Insurance API authentication token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "EHR_API_KEY",
+        "name": "EHR system API token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "SCHEDULING_API_KEY",
+        "name": "Scheduling API token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "BILLING_API_KEY",
+        "name": "Billing API token",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "CACHE_TTL",
+        "name": "Cache TTL seconds",
+        "type": "number",
+        "default": "300"
+      },
+      {
+        "key": "CIRCUIT_BREAKER_THRESHOLD",
+        "name": "Circuit breaker threshold",
+        "type": "number",
+        "default": "5"
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 20,
+        "max_size_mb": 100
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "patient_intake_extractor"
+        },
+        {
+          "source": "patient_intake_extractor",
+          "target": "security_validator"
+        },
+        {
+          "source": "security_validator",
+          "target": "emergency_handler"
+        },
+        {
+          "source": "security_validator",
+          "target": "insurance_verifier"
+        },
+        {
+          "source": "security_validator",
+          "target": "medical_history_analyzer"
+        },
+        {
+          "source": "security_validator",
+          "target": "medication_interaction_checker"
+        },
+        {
+          "source": "security_validator",
+          "target": "provider_selector"
+        },
+        {
+          "source": "provider_selector",
+          "target": "appointment_scheduler"
+        },
+        {
+          "source": "insurance_verifier",
+          "target": "aggregator_node"
+        },
+        {
+          "source": "medical_history_analyzer",
+          "target": "aggregator_node"
+        },
+        {
+          "source": "medication_interaction_checker",
+          "target": "aggregator_node"
+        },
+        {
+          "source": "appointment_scheduler",
+          "target": "aggregator_node"
+        },
+        {
+          "source": "emergency_handler",
+          "target": "emergency_response"
+        },
+        {
+          "source": "emergency_response",
+          "target": "final_formatter"
+        },
+        {
+          "source": "aggregator_node",
+          "target": "error_handler"
+        },
+        {
+          "source": "error_handler",
+          "target": "billing_integration"
+        },
+        {
+          "source": "error_handler",
+          "target": "fallback_insurance"
+        },
+        {
+          "source": "billing_integration",
+          "target": "prescription_manager"
+        },
+        {
+          "source": "fallback_insurance",
+          "target": "prescription_manager"
+        },
+        {
+          "source": "prescription_manager",
+          "target": "followup_coordinator"
+        },
+        {
+          "source": "followup_coordinator",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "scalability_optimizer",
+          "target": "final_formatter"
+        },
+        {
+          "source": "final_formatter",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "title": "Workflow Start",
+            "inputs": {
+              "patient_form": {
+                "type": "object",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "patient_intake_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 200
+          },
+          "data": {
+            "title": "Patient Intake Extraction",
+            "parameters": [
+              {
+                "name": "patient_data",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "emergency_flag",
+                "type": "boolean",
+                "required": true
+              }
+            ],
+            "instruction": "Extract patient details and emergency flag from {{#start_node.patient_form#}}"
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 150
+          },
+          "data": {
+            "title": "HIPAA Security Validation & Audit",
+            "code": "import hashlib, time, json\n\ndef main(patient_data, security_context):\n    if not security_context.get('authorized'):\n        raise Exception('Unauthorized access')\n    audit = {\n        'timestamp': time.time(),\n        'data_hash': hashlib.sha256(json.dumps(patient_data, sort_keys=True).encode()).hexdigest(),\n        'status': 'validated'\n    }\n    return {'validated': True, 'audit_log': audit}",
+            "outputs": {
+              "validated": "boolean",
+              "audit_log": "object"
+            }
+          }
+        },
+        {
+          "id": "emergency_handler",
+          "type": "if-else",
+          "position": {
+            "x": 500,
+            "y": 250
+          },
+          "data": {
+            "title": "Emergency Detection",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "patient_intake_extractor",
+                  "emergency_flag"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "emergency_response",
+          "type": "code",
+          "position": {
+            "x": 700,
+            "y": 250
+          },
+          "data": {
+            "title": "Emergency Escalation",
+            "code": "def main(audit_log):\n    # Immediate escalation logic (e.g., notify 911, priority flag)\n    return {'escalated': True, 'message': 'Emergency protocol activated', 'audit': audit_log}",
+            "outputs": {
+              "escalated": "boolean",
+              "message": "string",
+              "audit": "object"
+            }
+          }
+        },
+        {
+          "id": "insurance_verifier",
+          "type": "http-request",
+          "position": {
+            "x": 500,
+            "y": 350
+          },
+          "data": {
+            "title": "Insurance Verification",
+            "method": "POST",
+            "url": "https://api.insurance.com/verify",
+            "headers": {
+              "Authorization": "Bearer {{#env.INSURANCE_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "patient_id": "{{#patient_intake_extractor.patient_data.id#}}",
+              "plan": "{{#patient_intake_extractor.patient_data.insurance_plan#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "fallback_insurance",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 350
+          },
+          "data": {
+            "title": "Insurance Fallback",
+            "code": "def main():\n    # Use cached insurance data or manual verification\n    return {'status': 'manual_review', 'details': 'Insurance verification failed, requires manual processing'}",
+            "outputs": {
+              "status": "string",
+              "details": "string"
+            }
+          }
+        },
+        {
+          "id": "medical_history_analyzer",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 500,
+            "y": 450
+          },
+          "data": {
+            "title": "Medical History Retrieval",
+            "dataset_ids": [
+              "ehr_records"
+            ],
+            "retrieval_mode": "hybrid",
+            "top_k": 5,
+            "score_threshold": 0.75,
+            "query": "{{#patient_intake_extractor.patient_data.id#}}"
+          }
+        },
+        {
+          "id": "medication_interaction_checker",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 550
+          },
+          "data": {
+            "title": "Medication Interaction Check",
+            "code": "def main(medications):\n    # Simplified interaction check logic\n    interactions = []\n    for i, med1 in enumerate(medications):\n        for med2 in medications[i+1:]:\n            if med1 == med2:\n                interactions.append({'pair': [med1, med2], 'severity': 'high'})\n    return {'interactions': interactions, 'has_critical': any(i['severity']=='high' for i in interactions)}",
+            "outputs": {
+              "interactions": "object",
+              "has_critical": "boolean"
+            }
+          }
+        },
+        {
+          "id": "provider_selector",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 650
+          },
+          "data": {
+            "title": "Provider & Facility Selector",
+            "code": "import random\n\ndef main(patient_data, medical_history):\n    # Choose provider based on specialty and availability (mocked)\n    providers = ['Cardiology', 'General Practice', 'Dermatology']\n    selected = random.choice(providers)\n    return {'selected_provider': selected, 'facility_id': f'FAC-{random.randint(100,999)}'}",
+            "outputs": {
+              "selected_provider": "string",
+              "facility_id": "string"
+            }
+          }
+        },
+        {
+          "id": "appointment_scheduler",
+          "type": "http-request",
+          "position": {
+            "x": 700,
+            "y": 650
+          },
+          "data": {
+            "title": "Appointment Scheduling",
+            "method": "POST",
+            "url": "https://api.scheduling.com/book",
+            "headers": {
+              "Authorization": "Bearer {{#env.SCHEDULING_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "patient_id": "{{#patient_intake_extractor.patient_data.id#}}",
+              "provider": "{{#provider_selector.selected_provider#}}",
+              "facility_id": "{{#provider_selector.facility_id#}}",
+              "preferred_time": "{{#patient_intake_extractor.patient_data.preferred_time#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "aggregator_node",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 900,
+            "y": 200
+          },
+          "data": {
+            "title": "Result Aggregator",
+            "variables": [
+              {
+                "variable": "insurance_status",
+                "value_selector": [
+                  "insurance_verifier",
+                  "response"
+                ]
+              },
+              {
+                "variable": "medical_history",
+                "value_selector": [
+                  "medical_history_analyzer",
+                  "result"
+                ]
+              },
+              {
+                "variable": "med_interactions",
+                "value_selector": [
+                  "medication_interaction_checker",
+                  "interactions"
+                ]
+              },
+              {
+                "variable": "appointment_details",
+                "value_selector": [
+                  "appointment_scheduler",
+                  "response"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "error_handler",
+          "type": "if-else",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "title": "Global Error Handler",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "aggregator_node",
+                  "insurance_status"
+                ],
+                "comparison_operator": "contains",
+                "value": "error"
+              },
+              {
+                "variable_selector": [
+                  "med_interaction_checker",
+                  "has_critical"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              }
+            ],
+            "logical_operator": "or"
+          }
+        },
+        {
+          "id": "billing_integration",
+          "type": "http-request",
+          "position": {
+            "x": 1300,
+            "y": 150
+          },
+          "data": {
+            "title": "Billing System Integration",
+            "method": "POST",
+            "url": "https://api.billing.com/create_invoice",
+            "headers": {
+              "Authorization": "Bearer {{#env.BILLING_API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "patient_id": "{{#patient_intake_extractor.patient_data.id#}}",
+              "services": [
+                "consultation",
+                "tests"
+              ],
+              "amount": "{{#aggregator_node.insurance_status.amount_due#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": "{{#env.MAX_RETRIES#}}",
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "prescription_manager",
+          "type": "code",
+          "position": {
+            "x": 1500,
+            "y": 150
+          },
+          "data": {
+            "title": "Prescription Generation",
+            "code": "def main(med_interactions, medical_history):\n    # Simple logic: if no critical interactions, approve meds\n    if med_interactions.get('has_critical'):\n        return {'prescription_status': 'rejected', 'reason': 'critical drug interaction'}\n    return {'prescription_status': 'approved', 'meds': ['DrugA 10mg', 'DrugB 5mg']}",
+            "outputs": {
+              "prescription_status": "string",
+              "meds": "object",
+              "reason": "string"
+            }
+          }
+        },
+        {
+          "id": "followup_coordinator",
+          "type": "llm",
+          "position": {
+            "x": 1700,
+            "y": 150
+          },
+          "data": {
+            "title": "Follow-up Care Plan",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.2,
+                "max_tokens": 600
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Create a follow‑up care plan for patient {{#patient_intake_extractor.patient_data.id#}} based on medical history {{#medical_history_analyzer.result#}} and appointment {{#appointment_scheduler.response#}}. Include next visit recommendation and monitoring instructions."
+              }
+            ]
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 1900,
+            "y": 150
+          },
+          "data": {
+            "title": "Comprehensive Audit Logger",
+            "code": "def main(*args, **kwargs):\n    # Consolidate all previous logs into a single audit record (mocked)\n    return {'audit_record': 'complete', 'timestamp': kwargs.get('timestamp', None)}",
+            "outputs": {
+              "audit_record": "string",
+              "timestamp": "number"
+            }
+          }
+        },
+        {
+          "id": "scalability_optimizer",
+          "type": "code",
+          "position": {
+            "x": 2100,
+            "y": 150
+          },
+          "data": {
+            "title": "Scalability & Performance Optimizer",
+            "code": "def main(aggregated_data):\n    load = len(str(aggregated_data))\n    recommendation = 'SCALE_UP' if load > 5000 else 'MAINTAIN'\n    return {'scaling_action': recommendation, 'load_metric': load}",
+            "outputs": {
+              "scaling_action": "string",
+              "load_metric": "number"
+            }
+          }
+        },
+        {
+          "id": "final_formatter",
+          "type": "template-transform",
+          "position": {
+            "x": 2300,
+            "y": 150
+          },
+          "data": {
+            "title": "Final Output Formatter",
+            "template": "🏥 **Patient Care Summary**\n\n- **Patient ID**: {{#patient_intake_extractor.patient_data.id#}}\n- **Emergency**: {{#patient_intake_extractor.emergency_flag#}}\n- **Insurance Status**: {{#insurance_verifier.response.status#}}\n- **Appointment**: {{#appointment_scheduler.response.confirmation_id#}} at {{#appointment_scheduler.response.scheduled_time#}}\n- **Prescription**: {{#prescription_manager.prescription_status#}} {% if prescription_manager.prescription_status == 'approved' %}{{#prescription_manager.meds#}}{% else %}Reason: {{#prescription_manager.reason#}}{% endif %}\n- **Follow‑up Plan**: {{#followup_coordinator.text#}}\n- **Audit Record**: {{#audit_logger.audit_record#}}\n- **Scaling Action**: {{#scalability_optimizer.scaling_action#}}\n- **Generated At**: {{#current_time#}}",
+            "variables": [
+              {
+                "value_selector": [
+                  "patient_intake_extractor",
+                  "patient_data.id"
+                ],
+                "variable": "patient_id"
+              },
+              {
+                "value_selector": [
+                  "followup_coordinator",
+                  "text"
+                ],
+                "variable": "followup_text"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2500,
+            "y": 150
+          },
+          "data": {
+            "title": "Workflow End",
+            "outputs": {
+              "care_summary": {
+                "type": "string",
+                "value": "{{#final_formatter.output#}}"
+              },
+              "audit_log": {
+                "type": "object",
+                "value": "{{#audit_logger.audit_record#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.7
+      }
+    }
+  }
+}

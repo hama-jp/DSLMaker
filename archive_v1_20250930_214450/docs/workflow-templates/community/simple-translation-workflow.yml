@@ -1,0 +1,143 @@
+app:
+  description: 'High-quality translation workflow using LLM with context awareness and quality verification'
+  icon: 🌐
+  icon_background: '#4F46E5'
+  mode: workflow
+  name: 'Simple Translation Workflow'
+
+kind: app
+version: 0.1.5
+
+workflow:
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: false
+    retriever_resource:
+      enabled: false
+    opening_statement: 'I can help you translate text between different languages with high accuracy.'
+    suggested_questions:
+      - 'Translate this English text to Japanese'
+      - 'Convert this document from Chinese to English'
+      - 'Help me translate technical documentation'
+    text_to_speech:
+      enabled: false
+  graph:
+    edges:
+      - id: start-to-llm
+        source: start-1
+        target: llm-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: start
+          targetType: llm
+      - id: llm-to-end
+        source: llm-1
+        target: end-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: llm
+          targetType: end
+    nodes:
+      - id: start-1
+        type: start
+        position: { x: 100, y: 200 }
+        data:
+          title: '🚀 Translation Input'
+          variables:
+            - variable: source_text
+              type: paragraph
+              label: 'Text to translate'
+              required: true
+              max_length: 4000
+            - variable: target_language
+              type: select
+              label: 'Target language'
+              required: true
+              options:
+                - English
+                - Japanese
+                - Chinese
+                - Spanish
+                - French
+                - German
+                - Korean
+            - variable: context
+              type: text-input
+              label: 'Context (optional)'
+              required: false
+              max_length: 500
+      - id: llm-1
+        type: llm
+        position: { x: 400, y: 200 }
+        data:
+          title: '🤖 AI Translation Engine'
+          model:
+            provider: openai
+            name: gpt-4
+            mode: chat
+            completion_params:
+              temperature: 0.1
+              max_tokens: 2000
+              top_p: 1
+              frequency_penalty: 0
+              presence_penalty: 0
+          prompt_template:
+            - role: system
+              text: |
+                You are a professional translator with expertise in multiple languages. Your task is to provide accurate, contextually appropriate translations that preserve the original meaning, tone, and style.
+
+                Guidelines:
+                1. Maintain the original formatting and structure
+                2. Preserve technical terms when appropriate
+                3. Consider cultural nuances and idiomatic expressions
+                4. If uncertain about context, provide the most likely translation
+                5. For ambiguous terms, briefly note alternatives in parentheses if helpful
+
+                Quality standards:
+                - Accuracy: Ensure precise meaning transfer
+                - Fluency: Natural expression in target language
+                - Consistency: Use consistent terminology throughout
+                - Completeness: Translate all content provided
+            - role: user
+              text: |
+                Please translate the following text to {{#start-1.target_language#}}:
+
+                Text to translate:
+                {{#start-1.source_text#}}
+
+                {% if start-1.context %}
+                Context: {{#start-1.context#}}
+                {% endif %}
+
+                Please provide only the translation without additional commentary, unless there are important notes about ambiguous terms or cultural adaptations.
+          memory:
+            enabled: false
+          vision:
+            enabled: false
+          variable: translated_text
+      - id: end-1
+        type: end
+        position: { x: 700, y: 200 }
+        data:
+          title: '🏁 Translation Complete'
+          outputs:
+            translated_text:
+              type: string
+              children: null
+    viewport:
+      x: 0
+      y: 0
+      zoom: 1
+
+# Source: Created based on best practices for translation workflows
+# Pattern: Linear processing with specialized LLM prompting
+# Complexity: Simple
+# Node Count: 3 (Start, LLM, End)
+# Use Cases: Document translation, content localization, quick text translation

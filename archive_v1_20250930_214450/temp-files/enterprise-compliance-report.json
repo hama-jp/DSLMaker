@@ -1,0 +1,89 @@
+{
+  "compliance": {
+    "overall": {
+      "total": 5,
+      "passed": 0,
+      "rate": 0
+    },
+    "categories": {
+      "architecturalComplexity": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "errorHandlingCompliance": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "parallelProcessingCompliance": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "securityCompliance": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "integrationCompliance": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "scalabilityCompliance": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "businessLogicComplexity": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      },
+      "performanceOptimization": {
+        "total": 0,
+        "passed": 0,
+        "rate": 0
+      }
+    }
+  },
+  "details": [
+    {
+      "testIndex": 0,
+      "passed": false,
+      "message": "Test execution failed",
+      "error": "LLM API error: 400 Bad Request",
+      "timestamp": "2025-09-28T07:22:00.832Z"
+    },
+    {
+      "testIndex": 1,
+      "passed": false,
+      "message": "Test execution failed",
+      "error": "LLM API error: 400 Bad Request",
+      "timestamp": "2025-09-28T07:22:05.062Z"
+    },
+    {
+      "testIndex": 2,
+      "passed": false,
+      "message": "Test execution failed",
+      "error": "LLM API error: 400 Bad Request",
+      "timestamp": "2025-09-28T07:22:09.285Z"
+    },
+    {
+      "testIndex": 3,
+      "passed": false,
+      "message": "Test execution failed",
+      "error": "LLM API error: 400 Bad Request",
+      "timestamp": "2025-09-28T07:22:13.511Z"
+    },
+    {
+      "testIndex": 4,
+      "passed": false,
+      "message": "Test execution failed",
+      "error": "LLM API error: 400 Bad Request",
+      "timestamp": "2025-09-28T07:22:17.730Z"
+    }
+  ],
+  "timestamp": "2025-09-28T07:22:21.734Z"
+}

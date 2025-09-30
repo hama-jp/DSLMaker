@@ -1,0 +1,112 @@
+{
+  "app": {
+    "description": "Simple LLM test workflow for fixing configuration errors",
+    "icon": "🤖",
+    "icon_background": "#EFF1F5",
+    "mode": "workflow",
+    "name": "LLM Configuration Test"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {},
+    "graph": {
+      "edges": [
+        {
+          "id": "edge-1-start-to-llm",
+          "source": "start-1",
+          "target": "llm-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "llm",
+            "isInIteration": false
+          }
+        },
+        {
+          "id": "edge-2-llm-to-end",
+          "source": "llm-1",
+          "target": "end-1",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "llm",
+            "targetType": "end",
+            "isInIteration": false
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start-1",
+          "type": "start",
+          "position": { "x": 100, "y": 200 },
+          "data": {
+            "title": "User Input",
+            "variables": [
+              {
+                "variable": "user_query",
+                "type": "string",
+                "label": "User Question",
+                "required": true,
+                "description": "Enter your question"
+              }
+            ]
+          }
+        },
+        {
+          "id": "llm-1",
+          "type": "llm",
+          "position": { "x": 350, "y": 200 },
+          "data": {
+            "title": "AI Assistant",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-5-mini",
+              "mode": "chat",
+              "completion_params": {
+                "temperature": 0.7,
+                "max_tokens": 1000
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a helpful assistant. Analyze the user's question and provide a clear, helpful response."
+              },
+              {
+                "role": "user",
+                "text": "{{#start-1.user_query#}}"
+              }
+            ],
+            "variable": "llm_response"
+          }
+        },
+        {
+          "id": "end-1",
+          "type": "end",
+          "position": { "x": 600, "y": 200 },
+          "data": {
+            "title": "Output",
+            "outputs": {
+              "answer": {
+                "type": "string",
+                "children": [
+                  {
+                    "variable": "llm-1.text",
+                    "value_selector": ["llm-1", "text"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "viewport": { "x": 0, "y": 0, "zoom": 1 }
+    }
+  }
+}

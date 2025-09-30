@@ -1,0 +1,175 @@
+{
+  "app": {
+    "description": "Customer Service Automation Workflow",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "CustomerServiceAutomation"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": false,
+        "number_limits": 0,
+        "max_size_mb": 0
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "if_else_node"
+        },
+        {
+          "source": "if_else_node",
+          "target": "llm_classification"
+        },
+        {
+          "source": "llm_classification",
+          "target": "llm_sentiment"
+        },
+        {
+          "source": "llm_sentiment",
+          "target": "knowledge_retrieval"
+        },
+        {
+          "source": "knowledge_retrieval",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "variables": {
+            "user_query": {
+              "type": "text",
+              "required": true
+            },
+            "customer_context": {
+              "type": "object",
+              "required": false
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "variables": {
+            "extracted_query": "{{#start_node.user_query#}}",
+            "extracted_context": "{{#start_node.customer_context#}}"
+          }
+        },
+        {
+          "id": "if_else_node",
+          "type": "if-else",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "conditions": [
+            {
+              "condition": "{{#param_extractor.extracted_context#}} != null",
+              "true": "llm_classification",
+              "false": "llm_sentiment"
+            }
+          ]
+        },
+        {
+          "id": "llm_classification",
+          "type": "llm",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "parameters": {
+            "input": "{{#param_extractor.extracted_query#}}",
+            "model": "classification_model"
+          },
+          "output": {
+            "classification_result": "output"
+          }
+        },
+        {
+          "id": "llm_sentiment",
+          "type": "llm",
+          "position": {
+            "x": 600,
+            "y": 350
+          },
+          "parameters": {
+            "input": "{{#param_extractor.extracted_query#}}",
+            "model": "sentiment_model"
+          },
+          "output": {
+            "sentiment_score": "output"
+          }
+        },
+        {
+          "id": "knowledge_retrieval",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "parameters": {
+            "query": "{{#llm_classification.classification_result#}}"
+          },
+          "output": {
+            "automated_response": "output"
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "template": "Response: {{#knowledge_retrieval.automated_response#}}, Sentiment Score: {{#llm_sentiment.sentiment_score#}}",
+          "output": {
+            "final_response": "output"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "variables": {
+            "final_output": "{{#template_transform.final_response#}}"
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

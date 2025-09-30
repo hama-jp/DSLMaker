@@ -1,0 +1,183 @@
+{
+  "app": {
+    "description": "Enterprise data analysis workflow for customer service automation",
+    "icon": "🤖",
+    "icon_background": "#6366f1",
+    "mode": "workflow",
+    "name": "Customer Service Automation Workflow"
+  },
+  "kind": "app",
+  "version": "0.1.5",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 5,
+        "max_size_mb": 20
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "if_else_node"
+        },
+        {
+          "source": "if_else_node",
+          "target": "llm_classification"
+        },
+        {
+          "source": "if_else_node",
+          "target": "llm_sentiment"
+        },
+        {
+          "source": "llm_classification",
+          "target": "template_response"
+        },
+        {
+          "source": "llm_sentiment",
+          "target": "quality_evaluation"
+        },
+        {
+          "source": "quality_evaluation",
+          "target": "end_node"
+        },
+        {
+          "source": "template_response",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "variables": {
+            "user_query": {
+              "type": "text",
+              "required": true
+            },
+            "customer_context": {
+              "type": "object",
+              "required": false
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "variables": {
+            "extracted_query": "{{#start_node.user_query#}}",
+            "extracted_context": "{{#start_node.customer_context#}}"
+          }
+        },
+        {
+          "id": "if_else_node",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "conditions": [
+            {
+              "condition": "{{#parameter_extractor.extracted_context#}} != null",
+              "true": "llm_sentiment",
+              "false": "llm_classification"
+            }
+          ]
+        },
+        {
+          "id": "llm_classification",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "parameters": {
+            "input": "{{#parameter_extractor.extracted_query#}}",
+            "model": "classification_model"
+          },
+          "output": {
+            "classification_result": "output"
+          }
+        },
+        {
+          "id": "llm_sentiment",
+          "type": "llm",
+          "position": {
+            "x": 850,
+            "y": 350
+          },
+          "parameters": {
+            "input": "{{#parameter_extractor.extracted_query#}}",
+            "model": "sentiment_model"
+          },
+          "output": {
+            "sentiment_score": "output"
+          }
+        },
+        {
+          "id": "quality_evaluation",
+          "type": "llm",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "parameters": {
+            "classification": "{{#llm_classification.classification_result#}}",
+            "sentiment": "{{#llm_sentiment.sentiment_score#}}"
+          },
+          "output": {
+            "quality_score": "output"
+          }
+        },
+        {
+          "id": "template_response",
+          "type": "template-transform",
+          "position": {
+            "x": 1100,
+            "y": 350
+          },
+          "template": "Response: {{#llm_classification.classification_result#}}, Sentiment: {{#llm_sentiment.sentiment_score#}}",
+          "output": {
+            "automated_response": "output"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "outputs": {
+            "classification_result": "{{#llm_classification.classification_result#}}",
+            "sentiment_score": "{{#llm_sentiment.sentiment_score#}}",
+            "automated_response": "{{#template_response.automated_response#}}",
+            "quality_score": "{{#quality_evaluation.quality_score#}}"
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,290 @@
+app:
+  description: 'Intelligent customer service automation with intent classification, knowledge retrieval, and escalation logic'
+  icon: 🎧
+  icon_background: '#10B981'
+  mode: workflow
+  name: 'Customer Service Automation'
+
+kind: app
+version: 0.1.5
+
+workflow:
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: true
+      number_limits: 3
+      max_size_mb: 10
+    retriever_resource:
+      enabled: true
+    opening_statement: 'Hello! I can help you with your questions and support requests. Please describe your issue.'
+    suggested_questions:
+      - 'I have a technical problem with the product'
+      - 'I need help with billing and payments'
+      - 'How do I use this feature?'
+      - 'I want to file a complaint'
+    text_to_speech:
+      enabled: false
+  graph:
+    edges:
+      - id: start-to-classifier
+        source: start-1
+        target: classifier-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: start
+          targetType: question_classifier
+      - id: classifier-to-condition
+        source: classifier-1
+        target: if-else-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: question_classifier
+          targetType: if_else
+      - id: condition-true-knowledge
+        source: if-else-1
+        target: knowledge-1
+        sourceHandle: 'true'
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: if_else
+          targetType: knowledge_retrieval
+      - id: condition-false-escalation
+        source: if-else-1
+        target: escalation-llm
+        sourceHandle: 'false'
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: if_else
+          targetType: llm
+      - id: knowledge-to-response
+        source: knowledge-1
+        target: response-llm
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: knowledge_retrieval
+          targetType: llm
+      - id: response-to-end
+        source: response-llm
+        target: end-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: llm
+          targetType: end
+      - id: escalation-to-end
+        source: escalation-llm
+        target: end-1
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        zIndex: 0
+        data:
+          sourceType: llm
+          targetType: end
+    nodes:
+      - id: start-1
+        type: start
+        position: { x: 100, y: 300 }
+        data:
+          title: '🚀 Customer Inquiry'
+          variables:
+            - variable: user_query
+              type: paragraph
+              label: 'Customer question or issue'
+              required: true
+              max_length: 2000
+            - variable: customer_tier
+              type: select
+              label: 'Customer tier'
+              required: false
+              options:
+                - Basic
+                - Premium
+                - Enterprise
+            - variable: previous_tickets
+              type: number
+              label: 'Previous tickets this month'
+              required: false
+      - id: classifier-1
+        type: question_classifier
+        position: { x: 400, y: 300 }
+        data:
+          title: '🎯 Intent Classification'
+          model:
+            provider: openai
+            name: gpt-4
+            completion_params:
+              temperature: 0.0
+          query_variable_selector:
+            - start-1
+            - user_query
+          classes:
+            - id: technical
+              name: Technical Support
+              description: Technical issues, bugs, feature problems
+            - id: billing
+              name: Billing & Payments
+              description: Payment issues, billing questions, subscription problems
+            - id: general
+              name: General Inquiry
+              description: General questions, how-to, feature usage
+            - id: complaint
+              name: Complaint
+              description: Complaints, negative feedback, escalation needed
+          instructions: |
+            Analyze the customer query and classify it into one of the predefined categories.
+            Consider the tone, keywords, and intent behind the message.
+            Focus on the primary issue even if multiple topics are mentioned.
+          variable: classified_intent
+      - id: if-else-1
+        type: if_else
+        position: { x: 700, y: 300 }
+        data:
+          title: '🔀 Routing Logic'
+          logical_operator: or
+          conditions:
+            - id: condition-1
+              variable_selector:
+                - classifier-1
+                - classified_intent
+              comparison_operator: contains
+              value: Technical Support
+            - id: condition-2
+              variable_selector:
+                - classifier-1
+                - classified_intent
+              comparison_operator: contains
+              value: General Inquiry
+            - id: condition-3
+              variable_selector:
+                - classifier-1
+                - classified_intent
+              comparison_operator: contains
+              value: Billing & Payments
+      - id: knowledge-1
+        type: knowledge_retrieval
+        position: { x: 900, y: 200 }
+        data:
+          title: '📚 Knowledge Search'
+          query_variable_selector:
+            - start-1
+            - user_query
+          dataset_ids:
+            - support-knowledge-base
+          retrieval_mode: multiple
+          multiple_retrieval_config:
+            top_k: 3
+            score_threshold_enabled: true
+            score_threshold: 0.6
+            reranking_enabled: true
+            reranking_model:
+              provider: cohere
+              model: rerank-multilingual-v2.0
+          variable: relevant_knowledge
+      - id: response-llm
+        type: llm
+        position: { x: 1200, y: 200 }
+        data:
+          title: '🤖 Response Generator'
+          model:
+            provider: openai
+            name: gpt-4
+            mode: chat
+            completion_params:
+              temperature: 0.3
+              max_tokens: 1000
+          prompt_template:
+            - role: system
+              text: |
+                You are a helpful customer service representative. Provide professional, empathetic, and accurate responses based on the knowledge retrieved from our support documentation.
+
+                Guidelines:
+                - Be friendly and professional
+                - Address the customer's specific question
+                - Use the retrieved knowledge to provide accurate information
+                - If information is incomplete, acknowledge limitations and suggest next steps
+                - For premium/enterprise customers, offer additional support options
+            - role: user
+              text: |
+                Customer Intent: {{#classifier-1.classified_intent#}}
+                Customer Tier: {{#start-1.customer_tier#}}
+
+                Original Question: {{#start-1.user_query#}}
+
+                Retrieved Knowledge:
+                {{#knowledge-1.relevant_knowledge#}}
+
+                Please provide a helpful response to address the customer's question.
+          memory:
+            enabled: false
+          variable: response_text
+      - id: escalation-llm
+        type: llm
+        position: { x: 900, y: 400 }
+        data:
+          title: '⚠️ Escalation Handler'
+          model:
+            provider: openai
+            name: gpt-4
+            mode: chat
+            completion_params:
+              temperature: 0.2
+              max_tokens: 800
+          prompt_template:
+            - role: system
+              text: |
+                You are handling a customer service escalation. The customer's issue requires human attention - either it's a complaint, a complex billing issue, or something that needs special handling.
+
+                Guidelines:
+                - Acknowledge the customer's concern with empathy
+                - Explain that you're connecting them with a specialist
+                - Provide a ticket reference number (format: CST-YYYY-NNNN)
+                - Set appropriate expectations for response time
+                - For premium/enterprise customers, offer priority handling
+            - role: user
+              text: |
+                Customer Intent: {{#classifier-1.classified_intent#}}
+                Customer Tier: {{#start-1.customer_tier#}}
+                Previous Tickets: {{#start-1.previous_tickets#}}
+
+                Original Issue: {{#start-1.user_query#}}
+
+                This case needs human escalation. Please provide an appropriate escalation response.
+          memory:
+            enabled: false
+          variable: escalation_response
+      - id: end-1
+        type: end
+        position: { x: 1500, y: 300 }
+        data:
+          title: '🏁 Service Complete'
+          outputs:
+            final_response:
+              type: string
+              children: null
+    viewport:
+      x: -50
+      y: 0
+      zoom: 0.8
+
+# Source: Created based on customer service automation best practices
+# Pattern: Conditional branching with knowledge retrieval and escalation logic
+# Complexity: Moderate to Complex
+# Node Count: 7 (Start, Classifier, IF/ELSE, Knowledge, 2x LLM, End)
+# Use Cases: Customer support automation, help desk routing, complaint handling

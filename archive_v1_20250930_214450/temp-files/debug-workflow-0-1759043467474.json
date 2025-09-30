@@ -1,0 +1,473 @@
+{
+  "app": {
+    "description": "Enterprise workflow",
+    "icon": "🏢",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Enterprise Solution"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "error_handler_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "ml_scoring"
+        },
+        {
+          "source": "param_extractor",
+          "target": "rule_check"
+        },
+        {
+          "source": "param_extractor",
+          "target": "credit_bureau_api"
+        },
+        {
+          "source": "param_extractor",
+          "target": "balance_validation"
+        },
+        {
+          "source": "param_extractor",
+          "target": "geo_assessment"
+        },
+        {
+          "source": "ml_scoring",
+          "target": "aggregator"
+        },
+        {
+          "source": "rule_check",
+          "target": "aggregator"
+        },
+        {
+          "source": "credit_bureau_api",
+          "target": "aggregator"
+        },
+        {
+          "source": "balance_validation",
+          "target": "aggregator"
+        },
+        {
+          "source": "geo_assessment",
+          "target": "aggregator"
+        },
+        {
+          "source": "error_handler_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "error_handler_2"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "escalation_review"
+        },
+        {
+          "source": "escalation_review",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "inputs": {
+              "transaction_payload": {
+                "type": "object",
+                "required": true
+              },
+              "context": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "parameters": [
+              {
+                "name": "transaction_data",
+                "type": "object",
+                "required": true
+              }
+            ],
+            "instruction": "Extract transaction fields from: {{#start_node.transaction_payload#}} with error handling and retry logic"
+          }
+        },
+        {
+          "id": "error_handler_1",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "param_extractor",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "ml_scoring",
+          "type": "ml-model",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "model_name": "fraud_risk_scorer_v2",
+            "provider": "aws-sagemaker",
+            "input": "{{#param_extractor.transaction_data#}}",
+            "timeout": 20,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "cache": true,
+            "pool": "ml_inference_pool",
+            "outputs": {
+              "risk_score": "number",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "rule_check",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 300
+          },
+          "data": {
+            "code": "def evaluate_rules(tx):\n    try:\n        # complex rule engine\n        result = run_rules(tx)\n        return {'status': 'success', 'result': result}\n    except Exception as e:\n        return {'status': 'error', 'fallback': 'allow', 'error': str(e)}",
+            "outputs": {
+              "status": "string",
+              "result": "object",
+              "error": "string",
+              "fallback": "string"
+            }
+          }
+        },
+        {
+          "id": "credit_bureau_api",
+          "type": "http-request",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://api.creditbureau.com/verify",
+            "headers": {
+              "Authorization": "Bearer {{#env.CREDIT_API_TOKEN#}}"
+            },
+            "body": {
+              "transaction": "{{#param_extractor.transaction_data#}}"
+            },
+            "timeout": 30,
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "linear"
+            },
+            "cache": true,
+            "outputs": {
+              "response": "object",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "balance_validation",
+          "type": "http-request",
+          "position": {
+            "x": 850,
+            "y": 300
+          },
+          "data": {
+            "method": "GET",
+            "url": "https://bank.internal/api/balance/{{#param_extractor.transaction_data.account_id#}}",
+            "headers": {
+              "Authorization": "Bearer {{#env.BANK_API_KEY#}}"
+            },
+            "timeout": 25,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "outputs": {
+              "balance": "number",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "geo_assessment",
+          "type": "code",
+          "position": {
+            "x": 850,
+            "y": 400
+          },
+          "data": {
+            "code": "async def geo_risk(tx):\n    # async batch processing of geo data\n    result = await async_geo_check(tx['ip_address'])\n    return {'status': 'success', 'geo_risk': result}\n\n# fallback on error\ntry:\n    out = await geo_risk({{#param_extractor.transaction_data#}})\nexcept Exception as e:\n    out = {'status': 'error', 'fallback': 'low', 'error': str(e)}\n\nout",
+            "outputs": {
+              "status": "string",
+              "geo_risk": "number",
+              "fallback": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "variables": [
+              {
+                "variable": "ml_score",
+                "value_selector": [
+                  "ml_scoring",
+                  "risk_score"
+                ]
+              },
+              {
+                "variable": "rule_result",
+                "value_selector": [
+                  "rule_check",
+                  "result"
+                ]
+              },
+              {
+                "variable": "credit_status",
+                "value_selector": [
+                  "credit_bureau_api",
+                  "status"
+                ]
+              },
+              {
+                "variable": "balance_info",
+                "value_selector": [
+                  "balance_validation",
+                  "balance"
+                ]
+              },
+              {
+                "variable": "geo_risk",
+                "value_selector": [
+                  "geo_assessment",
+                  "geo_risk"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "error_handler_2",
+          "type": "if-else",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "ml_scoring",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "rule_check",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "credit_bureau_api",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "balance_validation",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "geo_assessment",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "code": "def log_audit(event):\n    cache_key = generate_cache_key(event)\n    pool_conn = get_audit_pool()\n    # optimize by async batch write\n    asyncio.create_task(async_write_audit(pool_conn, cache_key, event))\n    return {'logged': True, 'cache_optimized': True, 'pool': pool_conn}\n\nlog_audit({\n    'transaction_id': {{#param_extractor.transaction_data.id#}},\n    'aggregated': {{#aggregator.output#}},\n    'timestamp': datetime.utcnow().isoformat()\n})",
+            "outputs": {
+              "logged": "boolean",
+              "cache_optimized": "boolean",
+              "pool": "object"
+            }
+          }
+        },
+        {
+          "id": "escalation_review",
+          "type": "human-review",
+          "position": {
+            "x": 1850,
+            "y": 200
+          },
+          "data": {
+            "review_type": "fraud_escalation",
+            "fallback": "auto_approve",
+            "inputs": {
+              "transaction": "{{#param_extractor.transaction_data#}}",
+              "aggregated": "{{#aggregator.output#}}",
+              "audit": "{{#audit_logger.logged#}}"
+            },
+            "outputs": {
+              "decision": "string",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 2100,
+            "y": 200
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "You are a compliance officer. Based on the aggregated risk data, produce a final decision."
+              },
+              {
+                "role": "user",
+                "text": "Aggregated data: {{#aggregator.output#}}\\nAudit logged: {{#audit_logger.logged#}}\\nEscalation decision: {{#escalation_review.decision#}}"
+              }
+            ],
+            "outputs": {
+              "text": "string",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 2350,
+            "y": 200
+          },
+          "data": {
+            "template": "Fraud Detection Result:\\nDecision: {{#final_processor.text#}}\\nOverall Status: {{#error_handler_2.result#}}\\nCache Optimized: {{#audit_logger.cache_optimized#}}\\nPool Used: {{#audit_logger.pool#}}"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2600,
+            "y": 200
+          },
+          "data": {
+            "outputs": {
+              "final_report": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

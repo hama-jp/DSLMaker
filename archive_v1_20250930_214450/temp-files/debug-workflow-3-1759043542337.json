@@ -1,0 +1,480 @@
+{
+  "app": {
+    "description": "Enterprise workflow",
+    "icon": "🏢",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Enterprise Solution"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "error_handler_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "parallel_2"
+        },
+        {
+          "source": "param_extractor",
+          "target": "threat_classifier"
+        },
+        {
+          "source": "param_extractor",
+          "target": "containment_action"
+        },
+        {
+          "source": "param_extractor",
+          "target": "evidence_collector"
+        },
+        {
+          "source": "error_handler_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "parallel_2",
+          "target": "aggregator"
+        },
+        {
+          "source": "threat_classifier",
+          "target": "aggregator"
+        },
+        {
+          "source": "containment_action",
+          "target": "aggregator"
+        },
+        {
+          "source": "evidence_collector",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "error_handler_2"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "cache_optimizer"
+        },
+        {
+          "source": "cache_optimizer",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "end_node"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "compliance_reporter"
+        },
+        {
+          "source": "compliance_reporter",
+          "target": "dashboard_updater"
+        },
+        {
+          "source": "dashboard_updater",
+          "target": "audit_logger"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "inputs": {
+              "user_input": {
+                "type": "string",
+                "required": true
+              },
+              "context": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "parameters": [
+              {
+                "name": "extracted_data",
+                "type": "object",
+                "required": true
+              }
+            ],
+            "instruction": "Extract SIEM event payload from: {{#start_node.user_input#}} with error handling and retry logic"
+          }
+        },
+        {
+          "id": "error_handler_1",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "param_extractor",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "parallel_1",
+          "type": "http-request",
+          "position": {
+            "x": 600,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://threatintel.example.com/api/v1/lookup",
+            "timeout": 30,
+            "retry": {
+              "max_attempts": 3,
+              "strategy": "exponential"
+            },
+            "body": {
+              "event": "{{#param_extractor.extracted_data#}}"
+            },
+            "cache": true,
+            "pool": "connection_pool_enabled"
+          }
+        },
+        {
+          "id": "parallel_2",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 300
+          },
+          "data": {
+            "code": "try:\n    result = process_async_batch(input_data)\n    return {'status': 'success', 'result': result}\nexcept Exception as e:\n    return {'status': 'error', 'fallback': 'default_value', 'error': str(e)}",
+            "outputs": {
+              "status": "string",
+              "result": "object",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "threat_classifier",
+          "type": "llm",
+          "position": {
+            "x": 1850,
+            "y": 100
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "system",
+                "text": "Classify the severity of the security incident based on the extracted SIEM data."
+              },
+              {
+                "role": "user",
+                "text": "{{#param_extractor.extracted_data#}}"
+              }
+            ],
+            "outputs": {
+              "classification": "string",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "containment_action",
+          "type": "http-request",
+          "position": {
+            "x": 1850,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://orchestrator.example.com/api/v1/contain",
+            "timeout": 20,
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "linear"
+            },
+            "body": {
+              "action": "isolate",
+              "details": "{{#param_extractor.extracted_data#}}"
+            },
+            "cache": false,
+            "pool": "containment_pool"
+          }
+        },
+        {
+          "id": "evidence_collector",
+          "type": "code",
+          "position": {
+            "x": 1850,
+            "y": 300
+          },
+          "data": {
+            "code": "def collect_evidence(event):\n    # Simulate forensic data collection\n    return {'evidence_id': 'EV-'+event['id'], 'status': 'collected'}\n\nresult = collect_evidence({{#param_extractor.extracted_data#}})\nreturn {'evidence_id': result['evidence_id'], 'status': result['status']}",
+            "outputs": {
+              "evidence_id": "string",
+              "status": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "variables": [
+              {
+                "variable": "api_result",
+                "value_selector": [
+                  "parallel_1",
+                  "response"
+                ]
+              },
+              {
+                "variable": "process_result",
+                "value_selector": [
+                  "parallel_2",
+                  "result"
+                ]
+              },
+              {
+                "variable": "classification",
+                "value_selector": [
+                  "threat_classifier",
+                  "classification"
+                ]
+              },
+              {
+                "variable": "containment_status",
+                "value_selector": [
+                  "containment_action",
+                  "response"
+                ]
+              },
+              {
+                "variable": "evidence_ref",
+                "value_selector": [
+                  "evidence_collector",
+                  "evidence_id"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "error_handler_2",
+          "type": "if-else",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "parallel_2",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "parallel_1",
+                  "status"
+                ],
+                "comparison_operator": "not equal",
+                "value": "error"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "cache_optimizer",
+          "type": "code",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "code": "import asyncio\n\ndef optimize_cache_performance(data):\n    cache_key = generate_cache_key(data)\n    pool_connection = get_connection_pool()\n    optimize_strategy = 'async_batch_processing'\n    return {'cached_result': data, 'cache_optimized': True, 'pool': pool_connection}",
+            "outputs": {
+              "cached_result": "object",
+              "cache_optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "compliance_reporter",
+          "type": "code",
+          "position": {
+            "x": 2100,
+            "y": 100
+          },
+          "data": {
+            "code": "def generate_report(agg):\n    try:\n        # Simulate regulatory report generation\n        return {'report_id': 'RPT-'+agg['evidence_ref'], 'status': 'generated'}\n    except Exception:\n        return {'report_id': None, 'status': 'fallback', 'error': 'report generation failed'}\n\nresult = generate_report({{#aggregator.output#}})\nreturn result",
+            "outputs": {
+              "report_id": "string",
+              "status": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "dashboard_updater",
+          "type": "http-request",
+          "position": {
+            "x": 2100,
+            "y": 200
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://dashboard.example.com/api/v1/update",
+            "timeout": 15,
+            "retry": {
+              "max_attempts": 2,
+              "strategy": "exponential"
+            },
+            "body": {
+              "payload": "{{#aggregator.output#}}",
+              "batch": true
+            },
+            "async": true,
+            "cache": false
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 2100,
+            "y": 300
+          },
+          "data": {
+            "code": "def log_audit(event):\n    # Write audit log with caching for performance\n    cache_write(event)\n    return {'logged': True}\n\nlog_audit({{#aggregator.output#}})\nreturn {'audit': 'completed'}",
+            "outputs": {
+              "audit": "string"
+            },
+            "cache": true,
+            "optimize": true
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Summarize the incident response actions and provide next‑step recommendations based on: {{#cache_optimizer.cached_result#}}"
+              }
+            ]
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1850,
+            "y": 200
+          },
+          "data": {
+            "template": "Incident Summary:\n{{#final_processor.text#}}\n\nStatus Check:\n{{#error_handler_2.result#}}\n\nOptimization Flag: {{#cache_optimizer.cache_optimized#}}\n\nCompliance Report ID: {{#compliance_reporter.report_id#}}"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2100,
+            "y": 200
+          },
+          "data": {
+            "outputs": {
+              "result": {
+                "type": "string",
+                "value": "{{#template_transform.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

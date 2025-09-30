@@ -1,0 +1,424 @@
+{
+  "app": {
+    "description": "Enterprise workflow",
+    "icon": "🏢",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Enterprise Solution"
+  },
+  "kind": "app",
+  "version": "0.1.0",
+  "workflow": {
+    "environment_variables": [],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 10,
+        "max_size_mb": 50
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "param_extractor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "error_handler_1"
+        },
+        {
+          "source": "param_extractor",
+          "target": "inventory_fetch"
+        },
+        {
+          "source": "param_extractor",
+          "target": "demand_predictor"
+        },
+        {
+          "source": "param_extractor",
+          "target": "routing_optimizer"
+        },
+        {
+          "source": "param_extractor",
+          "target": "supplier_manager"
+        },
+        {
+          "source": "error_handler_1",
+          "target": "aggregator"
+        },
+        {
+          "source": "inventory_fetch",
+          "target": "aggregator"
+        },
+        {
+          "source": "demand_predictor",
+          "target": "aggregator"
+        },
+        {
+          "source": "routing_optimizer",
+          "target": "aggregator"
+        },
+        {
+          "source": "supplier_manager",
+          "target": "aggregator"
+        },
+        {
+          "source": "aggregator",
+          "target": "error_handler_2"
+        },
+        {
+          "source": "error_handler_2",
+          "target": "security_validator"
+        },
+        {
+          "source": "security_validator",
+          "target": "cache_optimizer"
+        },
+        {
+          "source": "cache_optimizer",
+          "target": "audit_logger"
+        },
+        {
+          "source": "audit_logger",
+          "target": "final_processor"
+        },
+        {
+          "source": "final_processor",
+          "target": "template_transform"
+        },
+        {
+          "source": "template_transform",
+          "target": "visibility_dashboard"
+        },
+        {
+          "source": "visibility_dashboard",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 200
+          },
+          "data": {
+            "inputs": {
+              "user_input": {
+                "type": "string",
+                "required": true
+              },
+              "context": {
+                "type": "object",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "param_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 350,
+            "y": 200
+          },
+          "data": {
+            "parameters": [
+              {
+                "name": "extracted_data",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "warehouse_id",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Extract supply‑chain request details from: {{#start_node.user_input#}} with error handling and retry logic"
+          }
+        },
+        {
+          "id": "error_handler_1",
+          "type": "if-else",
+          "position": {
+            "x": 600,
+            "y": 100
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "param_extractor",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "inventory_fetch",
+          "type": "http-request",
+          "position": {
+            "x": 600,
+            "y": 150
+          },
+          "data": {
+            "method": "GET",
+            "url": "https://api.supplychain.com/warehouse/{{#param_extractor.warehouse_id#}}/inventory",
+            "timeout": 60,
+            "retry": {
+              "max_attempts": 5,
+              "strategy": "exponential"
+            },
+            "cache": true,
+            "outputs": {
+              "status": "string",
+              "inventory": "object"
+            }
+          }
+        },
+        {
+          "id": "demand_predictor",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 250
+          },
+          "data": {
+            "code": "async def predict_demand(data):\n    batch = await create_async_batch(data)\n    return {'status':'success','prediction':batch}\n\nresult = await predict_demand({{#param_extractor.extracted_data#}})\nreturn result",
+            "outputs": {
+              "status": "string",
+              "prediction": "object"
+            }
+          }
+        },
+        {
+          "id": "routing_optimizer",
+          "type": "code",
+          "position": {
+            "x": 600,
+            "y": 350
+          },
+          "data": {
+            "code": "def optimize_routes(inventory, demand):\n    pool = get_routing_pool()\n    optimized = pool.optimize(inventory, demand)\n    return {'status':'success','routes':optimized,'optimize':True}\n\nresult = optimize_routes({{#inventory_fetch.inventory#}}, {{#demand_predictor.prediction#}})\nreturn result",
+            "outputs": {
+              "status": "string",
+              "routes": "object",
+              "optimize": "boolean"
+            }
+          }
+        },
+        {
+          "id": "supplier_manager",
+          "type": "http-request",
+          "position": {
+            "x": 600,
+            "y": 450
+          },
+          "data": {
+            "method": "POST",
+            "url": "https://api.supplier.com/order",
+            "body": {
+              "items": "{{#routing_optimizer.routes#}}"
+            },
+            "fallback": "use_alternative_supplier",
+            "retry": {
+              "max_attempts": 2
+            },
+            "outputs": {
+              "status": "string",
+              "order_id": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 850,
+            "y": 200
+          },
+          "data": {
+            "variables": [
+              {
+                "variable": "inventory",
+                "value_selector": [
+                  "inventory_fetch",
+                  "inventory"
+                ]
+              },
+              {
+                "variable": "demand_prediction",
+                "value_selector": [
+                  "demand_predictor",
+                  "prediction"
+                ]
+              },
+              {
+                "variable": "routes",
+                "value_selector": [
+                  "routing_optimizer",
+                  "routes"
+                ]
+              },
+              {
+                "variable": "order_id",
+                "value_selector": [
+                  "supplier_manager",
+                  "order_id"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "error_handler_2",
+          "type": "if-else",
+          "position": {
+            "x": 1100,
+            "y": 200
+          },
+          "data": {
+            "conditions": [
+              {
+                "variable_selector": [
+                  "demand_predictor",
+                  "status"
+                ],
+                "comparison_operator": "is",
+                "value": "success"
+              },
+              {
+                "variable_selector": [
+                  "inventory_fetch",
+                  "status"
+                ],
+                "comparison_operator": "not equal",
+                "value": "error"
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "security_validator",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 350
+          },
+          "data": {
+            "code": "def validate_security(data):\n    if not is_authorized(data.get('user')):\n        return {'status':'error','error':'unauthorized'}\n    return {'status':'success'}\n\nvalidate_security({{#param_extractor.extracted_data#}})",
+            "outputs": {
+              "status": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "cache_optimizer",
+          "type": "code",
+          "position": {
+            "x": 1350,
+            "y": 200
+          },
+          "data": {
+            "code": "import asyncio\n\ndef optimize_cache_performance(data):\n    cache_key = generate_cache_key(data)\n    pool_connection = get_connection_pool()\n    optimize_strategy = 'async_batch_processing'\n    return {'cached_result': data, 'cache_optimized': True, 'pool': pool_connection}",
+            "outputs": {
+              "cached_result": "object",
+              "cache_optimized": "boolean"
+            }
+          }
+        },
+        {
+          "id": "audit_logger",
+          "type": "code",
+          "position": {
+            "x": 1350,
+            "y": 350
+          },
+          "data": {
+            "code": "def log_audit(event, data):\n    try:\n        send_to_audit_log(event, data)\n        return {'status':'logged'}\n    except Exception as e:\n        return {'status':'error','error':str(e)}\n\nlog_audit('final_processing', {{#final_processor.response#}})",
+            "outputs": {
+              "status": "string",
+              "error": "string"
+            }
+          }
+        },
+        {
+          "id": "final_processor",
+          "type": "llm",
+          "position": {
+            "x": 1600,
+            "y": 200
+          },
+          "data": {
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4"
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Generate a supply‑chain optimization summary using the aggregated data: {{#cache_optimizer.cached_result#}}. Include risk mitigation, cost savings, and environmental impact."
+              }
+            ]
+          }
+        },
+        {
+          "id": "template_transform",
+          "type": "template-transform",
+          "position": {
+            "x": 1850,
+            "y": 200
+          },
+          "data": {
+            "template": "Optimization Summary:\n{{#final_processor.text#}}\n\nStatus Check:\n{{#error_handler_2.result#}}\nCache Optimized: {{#cache_optimizer.cache_optimized#}}"
+          }
+        },
+        {
+          "id": "visibility_dashboard",
+          "type": "template-transform",
+          "position": {
+            "x": 1850,
+            "y": 350
+          },
+          "data": {
+            "template": "Dashboard Update:\nRoutes: {{#routing_optimizer.routes#}}\nInventory Levels: {{#inventory_fetch.inventory#}}\nDemand Forecast: {{#demand_predictor.prediction#}}\nOrder ID: {{#supplier_manager.order_id#}}\nOverall Status: {{#final_processor.text#}}"
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 2100,
+            "y": 200
+          },
+          "data": {
+            "outputs": {
+              "result": {
+                "type": "string",
+                "value": "{{#visibility_dashboard.output#}}"
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

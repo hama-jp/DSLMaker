@@ -1,0 +1,728 @@
+{
+  "app": {
+    "description": "Supply Chain Optimization Enterprise Workflow",
+    "icon": "🚚",
+    "icon_background": "#1f2937",
+    "mode": "workflow",
+    "name": "Supply Chain Optimizer"
+  },
+  "kind": "app",
+  "version": "2.0.0",
+  "workflow": {
+    "environment_variables": [
+      {
+        "key": "MAX_RETRIES",
+        "name": "Maximum retry attempts",
+        "type": "number",
+        "default": "3"
+      },
+      {
+        "key": "TIMEOUT_MS",
+        "name": "Request timeout milliseconds",
+        "type": "number",
+        "default": "30000"
+      },
+      {
+        "key": "CACHE_TTL",
+        "name": "Cache TTL seconds",
+        "type": "number",
+        "default": "300"
+      },
+      {
+        "key": "CIRCUIT_BREAKER_THRESHOLD",
+        "name": "Circuit breaker threshold",
+        "type": "number",
+        "default": "5"
+      },
+      {
+        "key": "SCALE_FACTOR",
+        "name": "Auto-scaling factor",
+        "type": "number",
+        "default": "2"
+      },
+      {
+        "key": "API_KEY",
+        "name": "External API authentication key",
+        "type": "string",
+        "default": ""
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": true,
+        "number_limits": 100,
+        "max_size_mb": 500
+      },
+      "retriever_resource": {
+        "enabled": true
+      }
+    },
+    "graph": {
+      "edges": [
+        {
+          "source": "start_node",
+          "target": "parameter_extractor"
+        },
+        {
+          "source": "parameter_extractor",
+          "target": "cache_manager"
+        },
+        {
+          "source": "cache_manager",
+          "target": "load_balancer"
+        },
+        {
+          "source": "load_balancer",
+          "target": "error_handler_layer_1"
+        },
+        {
+          "source": "load_balancer",
+          "target": "supplier_knowledge"
+        },
+        {
+          "source": "load_balancer",
+          "target": "inventory_fetch"
+        },
+        {
+          "source": "load_balancer",
+          "target": "demand_prediction"
+        },
+        {
+          "source": "load_balancer",
+          "target": "routing_optimizer"
+        },
+        {
+          "source": "error_handler_layer_1",
+          "target": "circuit_breaker"
+        },
+        {
+          "source": "supplier_knowledge",
+          "target": "compliance_check"
+        },
+        {
+          "source": "inventory_fetch",
+          "target": "performance_monitor_inventory"
+        },
+        {
+          "source": "demand_prediction",
+          "target": "performance_monitor_prediction"
+        },
+        {
+          "source": "routing_optimizer",
+          "target": "performance_monitor_routing"
+        },
+        {
+          "source": "performance_monitor_inventory",
+          "target": "aggregator_with_resilience"
+        },
+        {
+          "source": "performance_monitor_prediction",
+          "target": "aggregator_with_resilience"
+        },
+        {
+          "source": "performance_monitor_routing",
+          "target": "aggregator_with_resilience"
+        },
+        {
+          "source": "compliance_check",
+          "target": "dynamic_pricing"
+        },
+        {
+          "source": "dynamic_pricing",
+          "target": "customs_documentation"
+        },
+        {
+          "source": "customs_documentation",
+          "target": "aggregator_with_resilience"
+        },
+        {
+          "source": "circuit_breaker",
+          "target": "fallback_processor"
+        },
+        {
+          "source": "aggregator_with_resilience",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "fallback_processor",
+          "target": "scalability_optimizer"
+        },
+        {
+          "source": "scalability_optimizer",
+          "target": "security_validator_advanced"
+        },
+        {
+          "source": "security_validator_advanced",
+          "target": "error_handler_layer_2"
+        },
+        {
+          "source": "error_handler_layer_2",
+          "target": "final_processor_optimized"
+        },
+        {
+          "source": "final_processor_optimized",
+          "target": "cache_updater"
+        },
+        {
+          "source": "cache_updater",
+          "target": "template_transform_performance"
+        },
+        {
+          "source": "template_transform_performance",
+          "target": "end_node"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "start_node",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 300
+          },
+          "data": {
+            "title": "Supply Chain Start",
+            "inputs": {
+              "request_payload": {
+                "type": "object",
+                "required": true
+              },
+              "security_context": {
+                "type": "object",
+                "required": true
+              },
+              "priority_level": {
+                "type": "string",
+                "required": false
+              },
+              "stakeholder_ids": {
+                "type": "array",
+                "required": false
+              }
+            }
+          }
+        },
+        {
+          "id": "parameter_extractor",
+          "type": "parameter-extractor",
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "data": {
+            "title": "Parameter Extractor",
+            "parameters": [
+              {
+                "name": "order_data",
+                "type": "object",
+                "required": true
+              },
+              {
+                "name": "target_warehouses",
+                "type": "array",
+                "required": true
+              },
+              {
+                "name": "delivery_deadline",
+                "type": "string",
+                "required": true
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "instruction": "Extract order and logistics parameters from {{#start_node.request_payload#}}"
+          }
+        },
+        {
+          "id": "cache_manager",
+          "type": "code",
+          "position": {
+            "x": 500,
+            "y": 300
+          },
+          "data": {
+            "title": "Cache Manager",
+            "code": "import hashlib, json, time\n\ndef main(params):\n    key = hashlib.sha256(json.dumps(params, sort_keys=True).encode()).hexdigest()\n    ttl = int('{{#env.CACHE_TTL#}}')\n    hit = int(key[-1], 16) % 5 == 0\n    if hit:\n        return {'cache_status': 'HIT', 'cached_result': {'inventory_snapshot': 'cached_data'}, 'cache_key': key}\n    else:\n        return {'cache_status': 'MISS', 'cache_key': key, 'requires_processing': True, 'ttl_seconds': ttl}\n",
+            "outputs": {
+              "cache_status": "string",
+              "cache_key": "string",
+              "requires_processing": "boolean"
+            }
+          }
+        },
+        {
+          "id": "load_balancer",
+          "type": "code",
+          "position": {
+            "x": 700,
+            "y": 300
+          },
+          "data": {
+            "title": "Load Balancer",
+            "code": "import random\n\ndef main(cache_info, params):\n    instances = [f'instance_{i}' for i in range(1,5)]\n    selected = random.choice(instances)\n    return {'selected_instance': selected, 'routing_strategy': 'ROUND_ROBIN'}\n",
+            "outputs": {
+              "selected_instance": "string",
+              "routing_strategy": "string"
+            }
+          }
+        },
+        {
+          "id": "error_handler_layer_1",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 150
+          },
+          "data": {
+            "title": "Primary Error Handler",
+            "code": "import time, random\n\ndef main(load_balancer_result):\n    max_retries = int('{{#env.MAX_RETRIES#}}')\n    for attempt in range(max_retries):\n        if random.random() < 0.9:\n            return {'status': 'SUCCESS', 'attempt': attempt+1, 'error_handled': False}\n        time.sleep(0.1 * (2 ** attempt))\n    return {'status': 'FAILED', 'error_handled': True, 'circuit_breaker_triggered': True}\n",
+            "outputs": {
+              "status": "string",
+              "error_handled": "boolean",
+              "circuit_breaker_triggered": "boolean"
+            }
+          }
+        },
+        {
+          "id": "supplier_knowledge",
+          "type": "knowledge-retrieval",
+          "position": {
+            "x": 900,
+            "y": 250
+          },
+          "data": {
+            "title": "Supplier Knowledge Base",
+            "dataset_ids": [
+              "supplier_kb"
+            ],
+            "retrieval_mode": "hybrid",
+            "top_k": 5,
+            "score_threshold": 0.75,
+            "query": "{{#parameter_extractor.order_data#}}"
+          }
+        },
+        {
+          "id": "inventory_fetch",
+          "type": "http-request",
+          "position": {
+            "x": 900,
+            "y": 350
+          },
+          "data": {
+            "title": "Warehouse Inventory API",
+            "method": "POST",
+            "url": "https://api.enterprise.com/warehouse/inventory",
+            "headers": {
+              "Authorization": "Bearer {{#env.API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "warehouses": "{{#parameter_extractor.target_warehouses#}}",
+              "product_sku": "{{#parameter_extractor.order_data.sku#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": 2,
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "demand_prediction",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 450
+          },
+          "data": {
+            "title": "Demand Forecasting Model",
+            "code": "import random, json\n\ndef main(order_data):\n    forecast = random.uniform(0.8, 1.2) * order_data.get('quantity', 1)\n    return {'predicted_demand': int(forecast), 'confidence': round(random.uniform(0.7,0.95),2)}\n",
+            "outputs": {
+              "predicted_demand": "number",
+              "confidence": "number"
+            }
+          }
+        },
+        {
+          "id": "routing_optimizer",
+          "type": "code",
+          "position": {
+            "x": 900,
+            "y": 550
+          },
+          "data": {
+            "title": "Dynamic Routing Optimizer",
+            "code": "import random\n\ndef main(inventory, demand, params):\n    routes = []\n    for i in range(3):\n        routes.append({\n            'vehicle_id': f'VEH_{i+1}',\n            'path': ['WH_A','WH_B','DEST'],\n            'estimated_time_min': random.randint(120,240),\n            'cost_usd': random.uniform(200,500)\n        })\n    return {'routes': routes, 'optimization_score': random.randint(80,95)}\n",
+            "outputs": {
+              "routes": "array",
+              "optimization_score": "number"
+            }
+          }
+        },
+        {
+          "id": "compliance_check",
+          "type": "code",
+          "position": {
+            "x": 1100,
+            "y": 250
+          },
+          "data": {
+            "title": "Regulatory Compliance Validator",
+            "code": "def main(supplier_info, route_info):\n    compliant = True\n    issues = []\n    for r in route_info.get('routes', []):\n        if r['estimated_time_min'] > 300:\n            compliant = False\n            issues.append('Excessive transit time')\n    return {'compliant': compliant, 'issues': issues}\n",
+            "outputs": {
+              "compliant": "boolean",
+              "issues": "array"
+            }
+          }
+        },
+        {
+          "id": "dynamic_pricing",
+          "type": "llm",
+          "position": {
+            "x": 1100,
+            "y": 350
+          },
+          "data": {
+            "title": "Dynamic Pricing Engine",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.2,
+                "max_tokens": 300
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Given predicted demand {{#demand_prediction.predicted_demand#}} and route cost {{#routing_optimizer.routes[0].cost_usd#}} USD, propose optimal pricing in {{#parameter_extractor.currency#}} considering market volatility."
+              }
+            ]
+          }
+        },
+        {
+          "id": "customs_documentation",
+          "type": "http-request",
+          "position": {
+            "x": 1100,
+            "y": 450
+          },
+          "data": {
+            "title": "Customs Docs Generation",
+            "method": "POST",
+            "url": "https://api.enterprise.com/customs/generate",
+            "headers": {
+              "Authorization": "Bearer {{#env.API_KEY#}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "shipment_details": "{{#parameter_extractor.order_data#}}",
+              "routes": "{{#routing_optimizer.routes#}}",
+              "currency": "{{#parameter_extractor.currency#}}"
+            },
+            "timeout": "{{#env.TIMEOUT_MS#}}",
+            "retry": {
+              "max_attempts": 2,
+              "backoff_strategy": "exponential"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_inventory",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 350
+          },
+          "data": {
+            "title": "Inventory Performance Monitor",
+            "code": "def main(response):\n    latency = response.get('latency_ms', 0)\n    status = response.get('status', 200)\n    grade = 'A' if latency < 200 else 'B' if latency < 500 else 'C'\n    return {'inventory_latency': latency, 'inventory_status': status, 'inventory_grade': grade}\n",
+            "outputs": {
+              "inventory_latency": "number",
+              "inventory_status": "number",
+              "inventory_grade": "string"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_prediction",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 450
+          },
+          "data": {
+            "title": "Prediction Performance Monitor",
+            "code": "def main(prediction):\n    confidence = prediction.get('confidence', 0)\n    score = confidence * 100\n    grade = 'A' if score > 85 else 'B' if score > 70 else 'C'\n    return {'prediction_confidence': confidence, 'prediction_score': score, 'prediction_grade': grade}\n",
+            "outputs": {
+              "prediction_confidence": "number",
+              "prediction_score": "number",
+              "prediction_grade": "string"
+            }
+          }
+        },
+        {
+          "id": "performance_monitor_routing",
+          "type": "code",
+          "position": {
+            "x": 1300,
+            "y": 550
+          },
+          "data": {
+            "title": "Routing Performance Monitor",
+            "code": "def main(opt_result):\n    opt_score = opt_result.get('optimization_score', 0)\n    grade = 'A' if opt_score >= 90 else 'B' if opt_score >= 80 else 'C'\n    return {'routing_opt_score': opt_score, 'routing_grade': grade}\n",
+            "outputs": {
+              "routing_opt_score": "number",
+              "routing_grade": "string"
+            }
+          }
+        },
+        {
+          "id": "circuit_breaker",
+          "type": "code",
+          "position": {
+            "x": 1500,
+            "y": 150
+          },
+          "data": {
+            "title": "Circuit Breaker",
+            "code": "def main(error_info):\n    failures = 1 if error_info.get('error_handled') else 0\n    threshold = int('{{#env.CIRCUIT_BREAKER_THRESHOLD#}}')\n    if failures >= threshold:\n        return {'circuit_status': 'OPEN', 'fallback_triggered': True}\n    return {'circuit_status': 'CLOSED', 'fallback_triggered': False}\n",
+            "outputs": {
+              "circuit_status": "string",
+              "fallback_triggered": "boolean"
+            }
+          }
+        },
+        {
+          "id": "fallback_processor",
+          "type": "code",
+          "position": {
+            "x": 1700,
+            "y": 150
+          },
+          "data": {
+            "title": "Fallback Processor",
+            "code": "def main(cb_result):\n    if cb_result.get('fallback_triggered'):\n        return {'fallback_used': True, 'message': 'Default routing applied'}\n    return {'fallback_used': False, 'message': 'Normal flow'}\n",
+            "outputs": {
+              "fallback_used": "boolean",
+              "message": "string"
+            }
+          }
+        },
+        {
+          "id": "aggregator_with_resilience",
+          "type": "variable-aggregator",
+          "position": {
+            "x": 1900,
+            "y": 350
+          },
+          "data": {
+            "title": "Resilient Aggregator",
+            "variables": [
+              {
+                "variable": "inventory_perf",
+                "value_selector": [
+                  "performance_monitor_inventory",
+                  "inventory_grade"
+                ]
+              },
+              {
+                "variable": "prediction_perf",
+                "value_selector": [
+                  "performance_monitor_prediction",
+                  "prediction_grade"
+                ]
+              },
+              {
+                "variable": "routing_perf",
+                "value_selector": [
+                  "performance_monitor_routing",
+                  "routing_grade"
+                ]
+              },
+              {
+                "variable": "pricing_text",
+                "value_selector": [
+                  "dynamic_pricing",
+                  "text"
+                ]
+              },
+              {
+                "variable": "customs_doc_status",
+                "value_selector": [
+                  "customs_documentation",
+                  "status"
+                ]
+              }
+            ],
+            "output_type": "object"
+          }
+        },
+        {
+          "id": "scalability_optimizer",
+          "type": "code",
+          "position": {
+            "x": 2100,
+            "y": 250
+          },
+          "data": {
+            "title": "Scalability Optimizer",
+            "code": "def main(agg_data, fallback):\n    grades = [agg_data.get('inventory_perf'), agg_data.get('prediction_perf'), agg_data.get('routing_perf')]\n    score_map = {'A':3,'B':2,'C':1}\n    total = sum(score_map.get(g,0) for g in grades)\n    avg_score = total / len(grades)\n    scale = 'MAINTAIN'\n    if avg_score < 2:\n        scale = 'SCALE_UP'\n    elif avg_score > 2.5:\n        scale = 'SCALE_DOWN'\n    return {'overall_performance': avg_score, 'scale_decision': scale, 'auto_scaling_enabled': True}\n",
+            "outputs": {
+              "overall_performance": "number",
+              "scale_decision": "string",
+              "auto_scaling_enabled": "boolean"
+            }
+          }
+        },
+        {
+          "id": "security_validator_advanced",
+          "type": "code",
+          "position": {
+            "x": 2300,
+            "y": 250
+          },
+          "data": {
+            "title": "Advanced Security Validator",
+            "code": "import hashlib, time, json\n\ndef main(scalability, agg):\n    audit = {\n        'timestamp': time.time(),\n        'security_hash': hashlib.sha256(json.dumps(agg, sort_keys=True).encode()).hexdigest(),\n        'validation_passed': scalability.get('overall_performance') >= 2\n    }\n    return {'validated': audit['validation_passed'], 'audit': audit}\n",
+            "outputs": {
+              "validated": "boolean",
+              "audit": "object"
+            }
+          }
+        },
+        {
+          "id": "error_handler_layer_2",
+          "type": "if-else",
+          "position": {
+            "x": 2500,
+            "y": 250
+          },
+          "data": {
+            "title": "Secondary Error Handler",
+            "conditions": [
+              {
+                "variable_selector": [
+                  "security_validator_advanced",
+                  "validated"
+                ],
+                "comparison_operator": "is",
+                "value": true
+              },
+              {
+                "variable_selector": [
+                  "scalability_optimizer",
+                  "overall_performance"
+                ],
+                "comparison_operator": "greater than",
+                "value": 2
+              }
+            ],
+            "logical_operator": "and"
+          }
+        },
+        {
+          "id": "final_processor_optimized",
+          "type": "llm",
+          "position": {
+            "x": 2700,
+            "y": 250
+          },
+          "data": {
+            "title": "Final Response Generator",
+            "model": {
+              "provider": "openai",
+              "name": "gpt-4-turbo",
+              "mode": "chat",
+              "parameters": {
+                "temperature": 0.05,
+                "max_tokens": 800
+              }
+            },
+            "prompt_template": [
+              {
+                "role": "user",
+                "text": "Create a comprehensive supply chain execution plan using aggregated performance {{#aggregator_with_resilience.inventory_perf#}}, {{#aggregator_with_resilience.prediction_perf#}}, {{#aggregator_with_resilience.routing_perf#}}, pricing suggestion {{#aggregator_with_resilience.pricing_text#}}, and customs status {{#aggregator_with_resilience.customs_doc_status#}}. Include next steps and stakeholder notifications."
+              }
+            ]
+          }
+        },
+        {
+          "id": "cache_updater",
+          "type": "code",
+          "position": {
+            "x": 2900,
+            "y": 250
+          },
+          "data": {
+            "title": "Cache Updater",
+            "code": "def main(final_result, cache_info, scalability):\n    ttl = int('{{#env.CACHE_TTL#}}')\n    adjusted = ttl * 2 if scalability.get('overall_performance') > 2.5 else ttl\n    return {'cache_updated': True, 'cache_key': cache_info.get('cache_key'), 'ttl_seconds': adjusted}\n",
+            "outputs": {
+              "cache_updated": "boolean",
+              "cache_key": "string",
+              "ttl_seconds": "number"
+            }
+          }
+        },
+        {
+          "id": "template_transform_performance",
+          "type": "template-transform",
+          "position": {
+            "x": 3100,
+            "y": 250
+          },
+          "data": {
+            "title": "Output Formatter",
+            "template": "🚀 SUPPLY CHAIN EXECUTION RESULT\n\n{{#final_processor_optimized.text#}}\n\n---\nPerformance Summary:\n- Inventory Grade: {{#performance_monitor_inventory.inventory_grade#}}\n- Demand Prediction Grade: {{#performance_monitor_prediction.prediction_grade#}}\n- Routing Grade: {{#performance_monitor_routing.routing_grade#}}\n- Overall Performance Score: {{#scalability_optimizer.overall_performance#}}\n- Scaling Decision: {{#scalability_optimizer.scale_decision#}}\n- Security Validated: {{#security_validator_advanced.validated#}}\n- Cache Updated: {{#cache_updater.cache_updated#}}\n- Timestamp: {{#current_time#}}\n",
+            "variables": [
+              {
+                "value_selector": [
+                  "final_processor_optimized",
+                  "text"
+                ],
+                "variable": "final_text"
+              }
+            ]
+          }
+        },
+        {
+          "id": "end_node",
+          "type": "end",
+          "position": {
+            "x": 3300,
+            "y": 250
+          },
+          "data": {
+            "title": "Supply Chain End",
+            "outputs": {
+              "execution_report": {
+                "type": "string",
+                "value": "{{#template_transform_performance.output#}}"
+              },
+              "audit_log": {
+                "type": "object",
+                "value": "{{#security_validator_advanced.audit#}}"
+              },
+              "scaling_info": {
+                "type": "object",
+                "value": {
+                  "decision": "{{#scalability_optimizer.scale_decision#}}",
+                  "auto_scaling": "{{#scalability_optimizer.auto_scaling_enabled#}}"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+      }
+    }
+  }
+}
