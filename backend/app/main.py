@@ -10,6 +10,8 @@ import logging
 
 from app.config import settings
 from app.services.vector_store import vector_store
+from app.services.llm_service import llm_service
+from app.api.v1.router import api_router
 
 # Configure logging
 logging.basicConfig(
@@ -33,7 +35,13 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize ChromaDB: {e}")
         # Continue startup even if ChromaDB fails (for development)
 
-    # TODO: Initialize LLM clients
+    # Initialize LLM service
+    try:
+        await llm_service.initialize()
+    except Exception as e:
+        logger.error(f"Failed to initialize LLM service: {e}")
+        # Continue startup even if LLM fails (for development)
+
     # TODO: Initialize agents
 
     logger.info("✅ Backend started successfully")
@@ -63,6 +71,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include API router
+app.include_router(api_router)
+
 
 @app.get("/")
 async def root():
@@ -80,6 +91,8 @@ async def health_check():
     """Health check endpoint."""
     chromadb_status = "operational" if vector_store._initialized else "not_initialized"
     chromadb_stats = vector_store.get_collection_stats() if vector_store._initialized else {}
+    llm_status = "operational" if llm_service._initialized else "not_initialized"
+    llm_stats = llm_service.get_status()
 
     return {
         "status": "healthy",
@@ -87,7 +100,8 @@ async def health_check():
             "api": "operational",
             "chromadb": chromadb_status,
             "chromadb_stats": chromadb_stats,
-            "llm": "pending",  # TODO: Check LLM connection
+            "llm": llm_status,
+            "llm_stats": llm_stats,
             "agents": "pending",  # TODO: Check agent status
         }
     }

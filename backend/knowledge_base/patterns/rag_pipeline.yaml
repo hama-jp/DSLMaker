@@ -1,0 +1,104 @@
+# RAG Pipeline Pattern
+# Retrieval-Augmented Generation workflow
+
+metadata:
+  pattern_id: "pattern_rag_001"
+  name: "RAG Pipeline"
+  description: "Knowledge retrieval workflow: Start -> Knowledge Retrieval -> LLM -> End. Ideal for question answering with context from knowledge base."
+  complexity: "moderate"
+  node_count: 4
+  use_cases:
+    - "Q&A with knowledge base"
+    - "Documentation search"
+    - "Context-aware responses"
+    - "Customer support"
+  tags:
+    - "rag"
+    - "retrieval"
+    - "knowledge"
+    - "moderate"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Start"
+          variables:
+            - variable: "query"
+              type: "string"
+              label: "User Query"
+              required: true
+          desc: "Workflow entry point"
+        position:
+          x: 100
+          y: 100
+
+      - id: "knowledge_retrieval_1"
+        type: "knowledge-retrieval"
+        data:
+          title: "Retrieve Knowledge"
+          query_variable_selector:
+            - "start"
+            - "query"
+          dataset_ids: []
+          retrieval_mode: "multiple"
+          multiple_retrieval_config:
+            top_k: 3
+            score_threshold: 0.7
+        position:
+          x: 300
+          y: 100
+
+      - id: "llm_1"
+        type: "llm"
+        data:
+          title: "Generate Answer"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.7
+          prompt_template:
+            - role: "system"
+              text: "You are a helpful assistant. Answer based on the provided context."
+            - role: "user"
+              text: |
+                Context:
+                {{#knowledge_retrieval.result#}}
+
+                Question: {{#start.query#}}
+          context:
+            enabled: true
+            variable_selector:
+              - "knowledge_retrieval"
+              - "result"
+        position:
+          x: 500
+          y: 100
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "End"
+          outputs:
+            answer: "{{#llm.text#}}"
+            sources: "{{#knowledge_retrieval.result#}}"
+          desc: "Workflow completion"
+        position:
+          x: 700
+          y: 100
+
+    edges:
+      - id: "start_1-knowledge_retrieval_1"
+        source: "start_1"
+        target: "knowledge_retrieval_1"
+      - id: "knowledge_retrieval_1-llm_1"
+        source: "knowledge_retrieval_1"
+        target: "llm_1"
+      - id: "llm_1-end_1"
+        source: "llm_1"
+        target: "end_1"
