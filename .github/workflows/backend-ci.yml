@@ -1,0 +1,59 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, v2-reconstruction ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: |
+        uv sync --extra dev
+
+    - name: Run linting (ruff)
+      working-directory: ./backend
+      run: |
+        uv run ruff check app/
+
+    - name: Run type checking (mypy)
+      working-directory: ./backend
+      continue-on-error: true  # Allow failures during initial development
+      run: |
+        uv run mypy app/
+
+    - name: Run tests
+      working-directory: ./backend
+      run: |
+        uv run pytest tests/ -v --cov=app --cov-report=xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: matrix.python-version == '3.11'
+      with:
+        file: ./backend/coverage.xml
+        flags: backend
+        fail_ci_if_error: false
