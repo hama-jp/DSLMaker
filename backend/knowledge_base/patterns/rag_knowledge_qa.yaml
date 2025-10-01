@@ -1,0 +1,182 @@
+# RAG Knowledge Q&A Pattern
+# Complete RAG workflow with parameter extraction, knowledge retrieval, and conditional routing
+
+metadata:
+  pattern_id: "pattern_rag_qa_001"
+  name: "RAG Knowledge Q&A"
+  description: "Complete RAG workflow: Start -> Parameter Extraction -> Knowledge Retrieval -> Conditional Routing (Intent-based) -> LLM Processing -> Template Formatting -> End. Ideal for knowledge-grounded Q&A systems."
+  complexity: "complex"
+  node_count: 9
+  use_cases:
+    - "Question answering with knowledge base"
+    - "Intent-based response routing"
+    - "Knowledge-grounded generation"
+    - "Document Q&A systems"
+  tags:
+    - "rag"
+    - "knowledge-retrieval"
+    - "conditional-routing"
+    - "parameter-extraction"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "User Query Input"
+          variables:
+            - variable: "user_query"
+              type: "string"
+              label: "User Query"
+              required: true
+          desc: "Accepts user questions"
+        position:
+          x: 100
+          y: 200
+
+      - id: "parameter_extractor_1"
+        type: "parameter-extractor"
+        data:
+          title: "Extract Intent & Topic"
+          query: "{{#start.user_query#}}"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            completion_params:
+              temperature: 0.0
+          parameters:
+            - name: "intent"
+              type: "string"
+              required: true
+              description: "User's main intention"
+            - name: "topic"
+              type: "string"
+              required: true
+              description: "Main topic of query"
+        position:
+          x: 350
+          y: 200
+
+      - id: "knowledge_retrieval_1"
+        type: "knowledge-retrieval"
+        data:
+          title: "Knowledge Search"
+          query: "{{#parameter_extractor.topic#}}"
+          retrieval_mode: "multiple"
+          multiple_retrieval_config:
+            top_k: 3
+            score_threshold: 0.5
+            reranking_enable: true
+        position:
+          x: 600
+          y: 200
+
+      - id: "if_else_1"
+        type: "if-else"
+        data:
+          title: "Intent Router"
+          logical_operator: "and"
+          conditions:
+            - variable_selector: ["parameter_extractor", "intent"]
+              comparison_operator: "contains"
+              value: "detailed_analysis"
+        position:
+          x: 850
+          y: 200
+
+      - id: "llm_detailed"
+        type: "llm"
+        data:
+          title: "Detailed Analysis"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.7
+              max_tokens: 2000
+          prompt_template:
+            - role: "system"
+              text: "You are an expert analyst. Provide detailed analysis based on the retrieved knowledge."
+            - role: "user"
+              text: "Query: {{#start.user_query#}}\nKnowledge: {{#knowledge_retrieval.result#}}\nIntent: {{#parameter_extractor.intent#}}"
+        position:
+          x: 1100
+          y: 150
+
+      - id: "llm_quick"
+        type: "llm"
+        data:
+          title: "Quick Answer"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+              max_tokens: 500
+          prompt_template:
+            - role: "system"
+              text: "Provide concise, direct answers."
+            - role: "user"
+              text: "Query: {{#start.user_query#}}\nKnowledge: {{#knowledge_retrieval.result#}}"
+        position:
+          x: 1100
+          y: 250
+
+      - id: "template_transform_1"
+        type: "template-transform"
+        data:
+          title: "Format Response"
+          template: |
+            # Response to: {{#start.user_query#}}
+
+            ## Analysis
+            {{#llm_detailed.text#}}{{#llm_quick.text#}}
+
+            ## Context
+            **Intent**: {{#parameter_extractor.intent#}}
+            **Knowledge Sources**: {{#knowledge_retrieval.result#}}
+        position:
+          x: 1350
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Final Output"
+          outputs:
+            final_answer: "{{#template_transform.output#}}"
+        position:
+          x: 1600
+          y: 200
+
+    edges:
+      - id: "start_1-parameter_extractor_1"
+        source: "start_1"
+        target: "parameter_extractor_1"
+      - id: "parameter_extractor_1-knowledge_retrieval_1"
+        source: "parameter_extractor_1"
+        target: "knowledge_retrieval_1"
+      - id: "knowledge_retrieval_1-if_else_1"
+        source: "knowledge_retrieval_1"
+        target: "if_else_1"
+      - id: "if_else_1-llm_detailed"
+        source: "if_else_1"
+        target: "llm_detailed"
+        source_handle: "true"
+      - id: "if_else_1-llm_quick"
+        source: "if_else_1"
+        target: "llm_quick"
+        source_handle: "false"
+      - id: "llm_detailed-template_transform_1"
+        source: "llm_detailed"
+        target: "template_transform_1"
+      - id: "llm_quick-template_transform_1"
+        source: "llm_quick"
+        target: "template_transform_1"
+      - id: "template_transform_1-end_1"
+        source: "template_transform_1"
+        target: "end_1"

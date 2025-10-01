@@ -1,0 +1,258 @@
+# Content Generation Pipeline Pattern
+# Multi-stage content creation with quality enhancement
+
+metadata:
+  pattern_id: "pattern_content_gen_001"
+  name: "Content Generation Pipeline"
+  description: "Content creation workflow: Start -> Outline Generation -> Content Writing -> SEO Optimization -> Quality Review -> Refinement (Optional) -> End. Produces high-quality, optimized content."
+  complexity: "complex"
+  node_count: 8
+  use_cases:
+    - "Blog post generation"
+    - "Marketing content creation"
+    - "SEO-optimized articles"
+    - "Multi-stage content refinement"
+  tags:
+    - "content-generation"
+    - "seo"
+    - "writing"
+    - "multi-stage"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Content Requirements"
+          variables:
+            - variable: "topic"
+              type: "string"
+              label: "Content Topic"
+              required: true
+            - variable: "keywords"
+              type: "string"
+              label: "SEO Keywords"
+              required: false
+            - variable: "tone"
+              type: "string"
+              label: "Writing Tone"
+              required: false
+          desc: "Define content requirements"
+        position:
+          x: 100
+          y: 200
+
+      - id: "llm_outline"
+        type: "llm"
+        data:
+          title: "Generate Outline"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.7
+          prompt_template:
+            - role: "system"
+              text: "You are a content strategist. Create a detailed, logical outline for the given topic."
+            - role: "user"
+              text: |
+                Topic: {{#start.topic#}}
+                Keywords: {{#start.keywords#}}
+                Tone: {{#start.tone#}}
+
+                Create a comprehensive outline with:
+                1. Introduction hook
+                2. Main sections (3-5)
+                3. Key points per section
+                4. Conclusion
+        position:
+          x: 350
+          y: 200
+
+      - id: "llm_writer"
+        type: "llm"
+        data:
+          title: "Write Content"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.8
+              max_tokens: 2500
+          prompt_template:
+            - role: "system"
+              text: |
+                You are an expert content writer. Write engaging, well-structured content.
+                Use the tone: {{#start.tone#}}
+            - role: "user"
+              text: |
+                Topic: {{#start.topic#}}
+
+                Outline:
+                {{#llm_outline.text#}}
+
+                Write comprehensive content following this outline. Make it engaging and informative.
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_seo_optimizer"
+        type: "llm"
+        data:
+          title: "SEO Optimization"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.5
+          prompt_template:
+            - role: "system"
+              text: "You are an SEO specialist. Optimize content for search engines while maintaining quality."
+            - role: "user"
+              text: |
+                Target Keywords: {{#start.keywords#}}
+
+                Content:
+                {{#llm_writer.text#}}
+
+                Optimize this content by:
+                1. Naturally integrating keywords
+                2. Adding meta description
+                3. Suggesting title tags
+                4. Improving readability
+        position:
+          x: 850
+          y: 200
+
+      - id: "llm_quality_reviewer"
+        type: "llm"
+        data:
+          title: "Quality Review"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: |
+                You are a content quality reviewer. Evaluate:
+                1. Clarity and coherence
+                2. Grammar and style
+                3. Value proposition
+                4. Call-to-action effectiveness
+
+                Provide a score (0-100) and specific improvement suggestions.
+            - role: "user"
+              text: "Review this optimized content:\n{{#llm_seo_optimizer.text#}}"
+        position:
+          x: 1100
+          y: 200
+
+      - id: "parameter_extractor_1"
+        type: "parameter-extractor"
+        data:
+          title: "Extract Quality Score"
+          query: "{{#llm_quality_reviewer.text#}}"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            completion_params:
+              temperature: 0.0
+          parameters:
+            - name: "quality_score"
+              type: "number"
+              required: true
+              description: "Content quality score (0-100)"
+        position:
+          x: 1100
+          y: 100
+
+      - id: "if_else_refinement"
+        type: "if-else"
+        data:
+          title: "Need Refinement?"
+          logical_operator: "and"
+          conditions:
+            - variable_selector: ["parameter_extractor", "quality_score"]
+              comparison_operator: "<"
+              value: 80
+        position:
+          x: 1350
+          y: 200
+
+      - id: "llm_refiner"
+        type: "llm"
+        data:
+          title: "Refine Content"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.6
+          prompt_template:
+            - role: "system"
+              text: "You are a content editor. Refine content based on reviewer feedback."
+            - role: "user"
+              text: |
+                Original Content:
+                {{#llm_seo_optimizer.text#}}
+
+                Review Feedback:
+                {{#llm_quality_reviewer.text#}}
+
+                Please refine the content addressing all feedback.
+        position:
+          x: 1600
+          y: 250
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Final Content"
+          outputs:
+            final_content: "{{#llm_refiner.text#}}{{#llm_seo_optimizer.text#}}"
+            quality_score: "{{#parameter_extractor.quality_score#}}"
+            review_feedback: "{{#llm_quality_reviewer.text#}}"
+            outline: "{{#llm_outline.text#}}"
+        position:
+          x: 1850
+          y: 200
+
+    edges:
+      - id: "start_1-llm_outline"
+        source: "start_1"
+        target: "llm_outline"
+      - id: "llm_outline-llm_writer"
+        source: "llm_outline"
+        target: "llm_writer"
+      - id: "llm_writer-llm_seo_optimizer"
+        source: "llm_writer"
+        target: "llm_seo_optimizer"
+      - id: "llm_seo_optimizer-llm_quality_reviewer"
+        source: "llm_seo_optimizer"
+        target: "llm_quality_reviewer"
+      - id: "llm_quality_reviewer-parameter_extractor_1"
+        source: "llm_quality_reviewer"
+        target: "parameter_extractor_1"
+      - id: "parameter_extractor_1-if_else_refinement"
+        source: "parameter_extractor_1"
+        target: "if_else_refinement"
+      - id: "if_else_refinement-llm_refiner"
+        source: "if_else_refinement"
+        target: "llm_refiner"
+        source_handle: "true"
+      - id: "if_else_refinement-end_1"
+        source: "if_else_refinement"
+        target: "end_1"
+        source_handle: "false"
+      - id: "llm_refiner-end_1"
+        source: "llm_refiner"
+        target: "end_1"

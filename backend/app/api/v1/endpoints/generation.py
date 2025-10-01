@@ -16,6 +16,8 @@ from app.models.workflow import (
 from app.services.llm_service import llm_service
 from app.services.dsl_service import dsl_service
 from app.services.vector_store import vector_store
+from app.services.recommendation_service import recommendation_service
+from app.graph.workflow_graph import workflow_graph
 
 logger = logging.getLogger(__name__)
 
@@ -92,16 +94,20 @@ async def generate_full_workflow(request: WorkflowRequest) -> WorkflowResponse:
     try:
         logger.info(f"🚀 Starting full workflow generation: {request.description[:50]}...")
 
-        # Retrieve similar patterns if RAG is enabled
+        # Use intelligent pattern recommendation if RAG is enabled
         retrieved_patterns = []
+        recommended_pattern_names = []
         if request.use_rag and vector_store._initialized:
-            logger.info("🔍 Retrieving similar patterns from knowledge base...")
-            patterns = await vector_store.search_patterns(
-                query=request.description,
-                n_results=3
+            logger.info("🔍 Getting pattern recommendations...")
+            recommendations = await recommendation_service.recommend_patterns(
+                description=request.description,
+                n_results=3,
+                complexity=request.preferences.get("complexity"),
+                use_llm_analysis=True
             )
-            retrieved_patterns = [p['content'] for p in patterns]
-            logger.info(f"📚 Retrieved {len(retrieved_patterns)} patterns")
+            retrieved_patterns = [p['content'] for p in recommendations]
+            recommended_pattern_names = [p['metadata']['name'] for p in recommendations]
+            logger.info(f"📚 Recommended patterns: {', '.join(recommended_pattern_names)}")
 
         # Generate workflow description using LLM with RAG context
         if not llm_service._initialized:
@@ -158,15 +164,21 @@ Focus on practical, production-ready workflows."""
 
         logger.info(f"✅ Full workflow generated successfully in {generation_time:.2f}s")
 
+        # Build suggestions
+        suggestions = [
+            "Review variable connections",
+            "Add comprehensive error handling"
+        ]
+        if retrieved_patterns:
+            suggestions.insert(0, f"Based on patterns: {', '.join(recommended_pattern_names)}")
+        else:
+            suggestions.insert(0, "Consider adding reference patterns")
+
         return WorkflowResponse(
             workflow=workflow,
             metadata=metadata,
             quality_score=quality_score,
-            suggestions=[
-                "Workflow enhanced with knowledge base patterns" if retrieved_patterns else "Consider adding reference patterns",
-                "Review variable connections",
-                "Add comprehensive error handling"
-            ],
+            suggestions=suggestions,
             generation_time=generation_time
         )
 
@@ -175,11 +187,131 @@ Focus on practical, production-ready workflows."""
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/multi-agent", response_model=WorkflowResponse)
+async def generate_multi_agent_workflow(request: WorkflowRequest) -> WorkflowResponse:
+    """
+    Generate workflow using multi-agent LangGraph system.
+
+    This endpoint uses a sophisticated multi-agent system:
+    1. Requirements Agent - Analyzes and structures requirements
+    2. Architecture Agent - Designs optimal workflow architecture
+    3. Configuration Agent - Configures all nodes with proper settings
+    4. Quality Agent - Validates and scores workflow quality
+    5. Iterative refinement if quality is insufficient
+
+    This is the recommended endpoint for production use.
+    """
+    start_time = time.time()
+
+    try:
+        logger.info(f"🤖 Starting multi-agent workflow generation: {request.description[:50]}...")
+
+        # Initialize state
+        initial_state = {
+            "user_request": request.description,
+            "preferences": request.preferences,
+            "requirements": None,
+            "architecture": None,
+            "configured_nodes": [],
+            "configured_edges": [],
+            "quality_report": None,
+            "final_dsl": None,
+            "iterations": 0,
+            "max_iterations": request.preferences.get("max_iterations", 3) if request.preferences else 3,
+            "current_agent": None,
+            "retrieved_patterns": [],
+            "error_history": []
+        }
+
+        # Execute LangGraph multi-agent workflow
+        logger.info("🚀 Executing LangGraph workflow...")
+        result = await workflow_graph.ainvoke(initial_state)
+
+        generation_time = time.time() - start_time
+
+        # Extract results
+        final_dsl = result.get("final_dsl")
+        quality_report = result.get("quality_report")
+        requirements = result.get("requirements")
+        architecture = result.get("architecture")
+
+        if not final_dsl:
+            raise ValueError("Multi-agent workflow failed to generate DSL")
+
+        # Create metadata
+        metadata = WorkflowMetadata(
+            name=final_dsl["app"]["name"],
+            description=final_dsl["app"]["description"],
+            created_at=datetime.now(),
+            complexity=architecture.complexity if architecture else "moderate",
+            tags=["generated", "multi-agent", "ai-enhanced"]
+        )
+
+        # Build suggestions from quality report
+        suggestions = []
+        if quality_report:
+            suggestions = quality_report.recommendations
+            if quality_report.issues:
+                suggestions.insert(0, f"⚠️ {len(quality_report.issues)} quality issues detected - review recommended")
+
+        # Add pattern information
+        if architecture:
+            suggestions.insert(0, f"Based on pattern: {architecture.pattern_name}")
+
+        logger.info(
+            f"✅ Multi-agent workflow generated successfully\n"
+            f"   Generation Time: {generation_time:.2f}s\n"
+            f"   Iterations: {result.get('iterations', 0)}\n"
+            f"   Nodes: {len(result.get('configured_nodes', []))}\n"
+            f"   Quality Score: {quality_report.overall_score if quality_report else 'N/A'}\n"
+            f"   Pattern: {architecture.pattern_name if architecture else 'N/A'}"
+        )
+
+        return WorkflowResponse(
+            workflow=final_dsl,
+            metadata=metadata,
+            quality_score=quality_report.overall_score if quality_report else 75.0,
+            suggestions=suggestions,
+            generation_time=generation_time
+        )
+
+    except Exception as e:
+        logger.error(f"❌ Multi-agent workflow generation failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Multi-agent generation failed: {str(e)}"
+        )
+
+
 @router.get("/status")
 async def get_generation_status() -> Dict[str, Any]:
     """Get the status of generation services."""
     return {
         "llm_service": llm_service.get_status(),
         "vector_store": vector_store.get_collection_stats(),
-        "dsl_service": {"available": True}
+        "dsl_service": {"available": True},
+        "multi_agent": {
+            "available": True,
+            "agents": ["requirements", "architecture", "configuration", "quality"],
+            "pattern_library_size": vector_store.get_collection_stats().get("total_patterns", 0)
+        }
+    }
+
+
+@router.get("/usage")
+async def get_token_usage() -> Dict[str, Any]:
+    """Get detailed token usage statistics."""
+    return {
+        "usage_stats": llm_service.get_usage_stats(),
+        "service": "DSLMaker v2 Backend"
+    }
+
+
+@router.post("/usage/reset")
+async def reset_token_usage() -> Dict[str, str]:
+    """Reset token usage statistics."""
+    llm_service.reset_usage_stats()
+    return {
+        "status": "success",
+        "message": "Token usage statistics have been reset"
     }

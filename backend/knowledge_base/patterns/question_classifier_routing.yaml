@@ -1,0 +1,169 @@
+# Question Classifier Routing Pattern
+# Intent-based routing using question classification
+
+metadata:
+  pattern_id: "pattern_classifier_001"
+  name: "Question Classifier Routing"
+  description: "Classification-based workflow: Start -> Question Classifier -> Multi-branch Processing -> Variable Aggregator -> End. Routes queries to specialized handlers based on classification."
+  complexity: "moderate"
+  node_count: 7
+  use_cases:
+    - "Customer support ticket routing"
+    - "Multi-intent chatbot"
+    - "Document type classification"
+    - "Query categorization and routing"
+  tags:
+    - "classification"
+    - "routing"
+    - "multi-branch"
+    - "intent-detection"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "User Query Input"
+          variables:
+            - variable: "user_query"
+              type: "string"
+              label: "User Query"
+              required: true
+          desc: "Accepts user queries for classification"
+        position:
+          x: 100
+          y: 200
+
+      - id: "question_classifier_1"
+        type: "question-classifier"
+        data:
+          title: "Query Classifier"
+          query: "{{#start.user_query#}}"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+          classes:
+            - class_name: "technical_support"
+              description: "Technical issues, bugs, troubleshooting"
+            - class_name: "billing_inquiry"
+              description: "Billing, payments, pricing questions"
+            - class_name: "product_information"
+              description: "Product features, specifications, availability"
+            - class_name: "general_inquiry"
+              description: "General questions, other topics"
+        position:
+          x: 350
+          y: 200
+
+      - id: "llm_technical"
+        type: "llm"
+        data:
+          title: "Technical Support Handler"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: "You are a technical support specialist. Provide detailed technical assistance."
+            - role: "user"
+              text: "{{#start.user_query#}}"
+        position:
+          x: 600
+          y: 100
+
+      - id: "llm_billing"
+        type: "llm"
+        data:
+          title: "Billing Handler"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: "You are a billing specialist. Help with billing and payment inquiries."
+            - role: "user"
+              text: "{{#start.user_query#}}"
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_product"
+        type: "llm"
+        data:
+          title: "Product Info Handler"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.5
+          prompt_template:
+            - role: "system"
+              text: "You are a product specialist. Provide comprehensive product information."
+            - role: "user"
+              text: "{{#start.user_query#}}"
+        position:
+          x: 600
+          y: 300
+
+      - id: "variable_aggregator_1"
+        type: "variable-aggregator"
+        data:
+          title: "Merge Responses"
+          aggregation_mode: "merge"
+          output_variables:
+            - name: "response"
+              type: "string"
+            - name: "category"
+              type: "string"
+        position:
+          x: 850
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Classified Response"
+          outputs:
+            final_response: "{{#variable_aggregator.response#}}"
+            query_category: "{{#question_classifier.class_name#}}"
+        position:
+          x: 1100
+          y: 200
+
+    edges:
+      - id: "start_1-question_classifier_1"
+        source: "start_1"
+        target: "question_classifier_1"
+      - id: "question_classifier_1-llm_technical"
+        source: "question_classifier_1"
+        target: "llm_technical"
+        source_handle: "technical_support"
+      - id: "question_classifier_1-llm_billing"
+        source: "question_classifier_1"
+        target: "llm_billing"
+        source_handle: "billing_inquiry"
+      - id: "question_classifier_1-llm_product"
+        source: "question_classifier_1"
+        target: "llm_product"
+        source_handle: "product_information"
+      - id: "llm_technical-variable_aggregator_1"
+        source: "llm_technical"
+        target: "variable_aggregator_1"
+      - id: "llm_billing-variable_aggregator_1"
+        source: "llm_billing"
+        target: "variable_aggregator_1"
+      - id: "llm_product-variable_aggregator_1"
+        source: "llm_product"
+        target: "variable_aggregator_1"
+      - id: "variable_aggregator_1-end_1"
+        source: "variable_aggregator_1"
+        target: "end_1"

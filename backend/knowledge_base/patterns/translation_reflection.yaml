@@ -1,0 +1,172 @@
+# Translation with Reflection Pattern
+# Multi-stage translation workflow inspired by Andrew Ng's Agentic Workflow
+
+metadata:
+  pattern_id: "pattern_translation_001"
+  name: "Translation with Reflection"
+  description: "Multi-stage translation workflow: Start -> Direct Translation -> Reflection Analysis -> Refined Translation -> End. Uses reflection to improve translation quality iteratively."
+  complexity: "moderate"
+  node_count: 6
+  use_cases:
+    - "High-quality document translation"
+    - "Localization with cultural adaptation"
+    - "Technical content translation"
+    - "Iterative translation refinement"
+  tags:
+    - "translation"
+    - "reflection"
+    - "multi-stage"
+    - "quality-improvement"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Translation Input"
+          variables:
+            - variable: "source_text"
+              type: "string"
+              label: "Source Text"
+              required: true
+            - variable: "source_language"
+              type: "string"
+              label: "Source Language"
+              required: true
+            - variable: "target_language"
+              type: "string"
+              label: "Target Language"
+              required: true
+            - variable: "target_country"
+              type: "string"
+              label: "Target Country/Region"
+              required: false
+          desc: "Input text and language parameters"
+        position:
+          x: 100
+          y: 200
+
+      - id: "llm_direct_translation"
+        type: "llm"
+        data:
+          title: "Direct Translation"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: "You are an expert translator. Translate the following text from {{#start.source_language#}} to {{#start.target_language#}}."
+            - role: "user"
+              text: "{{#start.source_text#}}"
+        position:
+          x: 350
+          y: 200
+
+      - id: "llm_reflection"
+        type: "llm"
+        data:
+          title: "Translation Reflection"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.5
+          prompt_template:
+            - role: "system"
+              text: "You are a translation quality expert. Review the translation and suggest improvements."
+            - role: "user"
+              text: |
+                Source ({{#start.source_language#}}): {{#start.source_text#}}
+
+                Current Translation ({{#start.target_language#}}): {{#llm_direct_translation.text#}}
+
+                Target Country/Region: {{#start.target_country#}}
+
+                Please analyze this translation and provide:
+                1. Accuracy issues
+                2. Cultural appropriateness
+                3. Fluency improvements
+                4. Specific suggestions for refinement
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_refined_translation"
+        type: "llm"
+        data:
+          title: "Refined Translation"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: "You are an expert translator. Improve the translation based on the reflection feedback."
+            - role: "user"
+              text: |
+                Source Text: {{#start.source_text#}}
+
+                Initial Translation: {{#llm_direct_translation.text#}}
+
+                Reflection & Suggestions: {{#llm_reflection.text#}}
+
+                Please provide an improved translation from {{#start.source_language#}} to {{#start.target_language#}}, incorporating the reflection feedback.
+        position:
+          x: 850
+          y: 200
+
+      - id: "template_transform_1"
+        type: "template-transform"
+        data:
+          title: "Format Output"
+          template: |
+            # Translation Result
+
+            ## Source ({{#start.source_language#}})
+            {{#start.source_text#}}
+
+            ## Target ({{#start.target_language#}})
+            {{#llm_refined_translation.text#}}
+
+            ## Translation Process
+            - Direct Translation: ✓
+            - Reflection Analysis: ✓
+            - Refinement: ✓
+        position:
+          x: 1100
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Translation Complete"
+          outputs:
+            final_translation: "{{#template_transform.output#}}"
+        position:
+          x: 1350
+          y: 200
+
+    edges:
+      - id: "start_1-llm_direct_translation"
+        source: "start_1"
+        target: "llm_direct_translation"
+      - id: "llm_direct_translation-llm_reflection"
+        source: "llm_direct_translation"
+        target: "llm_reflection"
+      - id: "llm_reflection-llm_refined_translation"
+        source: "llm_reflection"
+        target: "llm_refined_translation"
+      - id: "llm_refined_translation-template_transform_1"
+        source: "llm_refined_translation"
+        target: "template_transform_1"
+      - id: "template_transform_1-end_1"
+        source: "template_transform_1"
+        target: "end_1"

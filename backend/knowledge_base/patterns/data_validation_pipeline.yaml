@@ -1,0 +1,212 @@
+# Data Validation Pipeline Pattern
+# Multi-stage data validation and quality assurance
+
+metadata:
+  pattern_id: "pattern_validation_001"
+  name: "Data Validation Pipeline"
+  description: "Data quality workflow: Start -> Schema Validation (Code) -> Content Validation (LLM) -> Quality Check -> Conditional Fix -> End. Ensures data quality through multiple validation stages."
+  complexity: "moderate"
+  node_count: 7
+  use_cases:
+    - "Data quality assurance"
+    - "Input sanitization"
+    - "Content moderation"
+    - "Automated data cleaning"
+  tags:
+    - "validation"
+    - "quality-assurance"
+    - "data-processing"
+    - "error-handling"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Data Input"
+          variables:
+            - variable: "input_data"
+              type: "string"
+              label: "Input Data (JSON)"
+              required: true
+          desc: "Data to be validated"
+        position:
+          x: 100
+          y: 200
+
+      - id: "code_schema_validation"
+        type: "code"
+        data:
+          title: "Schema Validation"
+          code_language: "python"
+          code: |
+            import json
+            from jsonschema import validate, ValidationError
+
+            def main(input_data: str) -> dict:
+                try:
+                    # Parse JSON
+                    data = json.loads(input_data)
+
+                    # Define expected schema
+                    schema = {
+                        "type": "object",
+                        "required": ["name", "email", "content"],
+                        "properties": {
+                            "name": {"type": "string", "minLength": 1},
+                            "email": {"type": "string", "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"},
+                            "content": {"type": "string", "minLength": 10}
+                        }
+                    }
+
+                    # Validate
+                    validate(instance=data, schema=schema)
+
+                    return {
+                        'is_valid': True,
+                        'data': json.dumps(data),
+                        'error': None
+                    }
+
+                except (json.JSONDecodeError, ValidationError) as e:
+                    return {
+                        'is_valid': False,
+                        'data': input_data,
+                        'error': str(e)
+                    }
+          variables:
+            - variable: "input_data"
+              value_selector: ["start", "input_data"]
+        position:
+          x: 350
+          y: 200
+
+      - id: "if_else_1"
+        type: "if-else"
+        data:
+          title: "Check Schema Valid"
+          logical_operator: "and"
+          conditions:
+            - variable_selector: ["code_schema_validation", "is_valid"]
+              comparison_operator: "="
+              value: true
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_content_validation"
+        type: "llm"
+        data:
+          title: "Content Quality Check"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: |
+                You are a content validator. Check for:
+                1. Offensive or inappropriate language
+                2. Spam or promotional content
+                3. Coherence and relevance
+                4. Potential security issues
+
+                Return JSON: {"is_safe": true/false, "issues": [], "confidence": 0-1}
+            - role: "user"
+              text: "Validate this content:\n{{#code_schema_validation.data#}}"
+        position:
+          x: 850
+          y: 150
+
+      - id: "template_error_message"
+        type: "template-transform"
+        data:
+          title: "Format Error"
+          template: |
+            ❌ Validation Failed
+
+            Error: {{#code_schema_validation.error#}}
+
+            Please correct the input data and try again.
+        position:
+          x: 850
+          y: 250
+
+      - id: "code_final_check"
+        type: "code"
+        data:
+          title: "Final Quality Score"
+          code_language: "python"
+          code: |
+            import json
+
+            def main(schema_valid: bool, content_validation: str) -> dict:
+                try:
+                    content_check = json.loads(content_validation)
+                    is_safe = content_check.get('is_safe', False)
+                    confidence = content_check.get('confidence', 0)
+
+                    # Calculate overall quality score
+                    quality_score = confidence if (schema_valid and is_safe) else 0
+
+                    return {
+                        'passed': schema_valid and is_safe,
+                        'quality_score': quality_score,
+                        'issues': content_check.get('issues', [])
+                    }
+                except:
+                    return {
+                        'passed': False,
+                        'quality_score': 0,
+                        'issues': ['Failed to parse validation results']
+                    }
+          variables:
+            - variable: "schema_valid"
+              value_selector: ["code_schema_validation", "is_valid"]
+            - variable: "content_validation"
+              value_selector: ["llm_content_validation", "text"]
+        position:
+          x: 1100
+          y: 150
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Validation Result"
+          outputs:
+            validation_passed: "{{#code_final_check.passed#}}"
+            quality_score: "{{#code_final_check.quality_score#}}"
+            validated_data: "{{#code_schema_validation.data#}}"
+            issues: "{{#code_final_check.issues#}}"
+        position:
+          x: 1350
+          y: 200
+
+    edges:
+      - id: "start_1-code_schema_validation"
+        source: "start_1"
+        target: "code_schema_validation"
+      - id: "code_schema_validation-if_else_1"
+        source: "code_schema_validation"
+        target: "if_else_1"
+      - id: "if_else_1-llm_content_validation"
+        source: "if_else_1"
+        target: "llm_content_validation"
+        source_handle: "true"
+      - id: "if_else_1-template_error_message"
+        source: "if_else_1"
+        target: "template_error_message"
+        source_handle: "false"
+      - id: "llm_content_validation-code_final_check"
+        source: "llm_content_validation"
+        target: "code_final_check"
+      - id: "code_final_check-end_1"
+        source: "code_final_check"
+        target: "end_1"
+      - id: "template_error_message-end_1"
+        source: "template_error_message"
+        target: "end_1"

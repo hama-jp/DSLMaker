@@ -1,0 +1,103 @@
+# Template Transform Pattern
+# Data transformation using templates
+
+metadata:
+  pattern_id: "pattern_template_001"
+  name: "Template Transform"
+  description: "Workflow with template-based transformation: Start -> LLM -> Template Transform -> End. Ideal for structured output formatting, report generation, data reshaping."
+  complexity: "simple"
+  node_count: 4
+  use_cases:
+    - "Report generation"
+    - "Structured output formatting"
+    - "Data transformation"
+    - "Custom response formatting"
+  tags:
+    - "template"
+    - "transform"
+    - "formatting"
+    - "simple"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Start"
+          variables:
+            - variable: "data"
+              type: "string"
+              label: "Input Data"
+              required: true
+          desc: "Workflow entry point"
+        position:
+          x: 100
+          y: 100
+
+      - id: "llm_1"
+        type: "llm"
+        data:
+          title: "Extract Information"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: "Extract key information from the input."
+            - role: "user"
+              text: "{{#start.data#}}"
+        position:
+          x: 300
+          y: 100
+
+      - id: "template_1"
+        type: "template-transform"
+        data:
+          title: "Format Output"
+          template: |
+            # Analysis Report
+
+            ## Input
+            {{#start.data#}}
+
+            ## Extracted Information
+            {{#llm_1.text#}}
+
+            ## Timestamp
+            {{sys.time}}
+          variables:
+            - variable_selector:
+                - "start"
+                - "data"
+            - variable_selector:
+                - "llm_1"
+                - "text"
+        position:
+          x: 500
+          y: 100
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "End"
+          outputs:
+            formatted_report: "{{#template_1.output#}}"
+        position:
+          x: 700
+          y: 100
+
+    edges:
+      - id: "start_1-llm_1"
+        source: "start_1"
+        target: "llm_1"
+      - id: "llm_1-template_1"
+        source: "llm_1"
+        target: "template_1"
+      - id: "template_1-end_1"
+        source: "template_1"
+        target: "end_1"

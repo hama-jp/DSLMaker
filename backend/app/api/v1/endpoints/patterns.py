@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional
 import logging
 
 from app.services.vector_store import vector_store
+from app.services.recommendation_service import recommendation_service
 from app.models.workflow import PatternMetadata, WorkflowPattern
 
 logger = logging.getLogger(__name__)
@@ -162,4 +163,64 @@ async def delete_pattern(pattern_id: str) -> Dict[str, str]:
         raise
     except Exception as e:
         logger.error(f"❌ Failed to delete pattern: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/recommend")
+async def recommend_patterns(
+    description: str,
+    n_results: int = 3,
+    complexity: Optional[str] = None,
+    use_llm_analysis: bool = True
+) -> Dict[str, Any]:
+    """
+    Get pattern recommendations based on workflow description.
+
+    Uses intelligent scoring combining:
+    - Semantic similarity from vector search
+    - Complexity matching
+    - Use case relevance
+
+    Args:
+        description: Workflow description
+        n_results: Number of recommendations (default: 3)
+        complexity: Optional complexity filter (simple, moderate, complex)
+        use_llm_analysis: Whether to use LLM for requirement analysis (default: True)
+    """
+    try:
+        if not vector_store._initialized:
+            raise HTTPException(
+                status_code=503,
+                detail="Vector store not initialized"
+            )
+
+        recommendations = await recommendation_service.recommend_patterns(
+            description=description,
+            n_results=n_results,
+            complexity=complexity,
+            use_llm_analysis=use_llm_analysis
+        )
+
+        return {
+            "description": description,
+            "n_results": len(recommendations),
+            "recommendations": recommendations
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to get recommendations: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/statistics")
+async def get_pattern_statistics() -> Dict[str, Any]:
+    """Get statistics about the pattern library."""
+    try:
+        stats = await recommendation_service.get_pattern_statistics()
+        return stats
+
+    except Exception as e:
+        logger.error(f"❌ Failed to get statistics: {e}")
         raise HTTPException(status_code=500, detail=str(e))

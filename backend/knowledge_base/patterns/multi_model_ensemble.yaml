@@ -1,0 +1,175 @@
+# Multi-Model Ensemble Pattern
+# Multiple LLMs working in parallel with consensus mechanism
+
+metadata:
+  pattern_id: "pattern_ensemble_001"
+  name: "Multi-Model Ensemble"
+  description: "Ensemble workflow: Start -> Parallel LLM Processing (3 models) -> Variable Aggregator -> Consensus Analysis -> End. Uses multiple models for improved accuracy and reliability."
+  complexity: "moderate"
+  node_count: 6
+  use_cases:
+    - "High-stakes decision making"
+    - "Quality assurance for AI outputs"
+    - "Cross-validation of results"
+    - "Reducing model bias"
+  tags:
+    - "ensemble"
+    - "parallel"
+    - "multi-model"
+    - "consensus"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Task Input"
+          variables:
+            - variable: "task_prompt"
+              type: "string"
+              label: "Task Prompt"
+              required: true
+          desc: "Task to be processed by multiple models"
+        position:
+          x: 100
+          y: 200
+
+      - id: "llm_model_a"
+        type: "llm"
+        data:
+          title: "Model A (GPT-4)"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.7
+          prompt_template:
+            - role: "user"
+              text: "{{#start.task_prompt#}}"
+        position:
+          x: 350
+          y: 100
+
+      - id: "llm_model_b"
+        type: "llm"
+        data:
+          title: "Model B (Claude)"
+          model:
+            provider: "anthropic"
+            name: "claude-3-opus"
+            mode: "chat"
+            completion_params:
+              temperature: 0.7
+          prompt_template:
+            - role: "user"
+              text: "{{#start.task_prompt#}}"
+        position:
+          x: 350
+          y: 200
+
+      - id: "llm_model_c"
+        type: "llm"
+        data:
+          title: "Model C (Gemini)"
+          model:
+            provider: "google"
+            name: "gemini-pro"
+            mode: "chat"
+            completion_params:
+              temperature: 0.7
+          prompt_template:
+            - role: "user"
+              text: "{{#start.task_prompt#}}"
+        position:
+          x: 350
+          y: 300
+
+      - id: "variable_aggregator_1"
+        type: "variable-aggregator"
+        data:
+          title: "Collect All Responses"
+          aggregation_mode: "concatenate"
+          output_variables:
+            - name: "all_responses"
+              type: "array"
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_consensus"
+        type: "llm"
+        data:
+          title: "Consensus Analysis"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: |
+                You are a consensus analyzer. Compare multiple model outputs and:
+                1. Identify common themes and agreements
+                2. Note significant differences
+                3. Synthesize the best elements from each
+                4. Provide a final consensus answer
+            - role: "user"
+              text: |
+                Original Task: {{#start.task_prompt#}}
+
+                Model A Response:
+                {{#llm_model_a.text#}}
+
+                Model B Response:
+                {{#llm_model_b.text#}}
+
+                Model C Response:
+                {{#llm_model_c.text#}}
+
+                Provide a consensus analysis and final answer.
+        position:
+          x: 850
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Ensemble Result"
+          outputs:
+            consensus_answer: "{{#llm_consensus.text#}}"
+            model_a_response: "{{#llm_model_a.text#}}"
+            model_b_response: "{{#llm_model_b.text#}}"
+            model_c_response: "{{#llm_model_c.text#}}"
+        position:
+          x: 1100
+          y: 200
+
+    edges:
+      - id: "start_1-llm_model_a"
+        source: "start_1"
+        target: "llm_model_a"
+      - id: "start_1-llm_model_b"
+        source: "start_1"
+        target: "llm_model_b"
+      - id: "start_1-llm_model_c"
+        source: "start_1"
+        target: "llm_model_c"
+      - id: "llm_model_a-variable_aggregator_1"
+        source: "llm_model_a"
+        target: "variable_aggregator_1"
+      - id: "llm_model_b-variable_aggregator_1"
+        source: "llm_model_b"
+        target: "variable_aggregator_1"
+      - id: "llm_model_c-variable_aggregator_1"
+        source: "llm_model_c"
+        target: "variable_aggregator_1"
+      - id: "variable_aggregator_1-llm_consensus"
+        source: "variable_aggregator_1"
+        target: "llm_consensus"
+      - id: "llm_consensus-end_1"
+        source: "llm_consensus"
+        target: "end_1"

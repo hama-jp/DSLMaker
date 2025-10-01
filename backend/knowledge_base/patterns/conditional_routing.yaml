@@ -1,0 +1,109 @@
+# Conditional Routing Pattern
+# Decision-based workflow with branching logic
+
+metadata:
+  pattern_id: "pattern_conditional_001"
+  name: "Conditional Routing"
+  description: "Workflow with conditional branching: Start -> LLM -> IF/ELSE -> End. Ideal for classification, routing, and decision-making tasks."
+  complexity: "moderate"
+  node_count: 5
+  use_cases:
+    - "Content classification"
+    - "Request routing"
+    - "Sentiment analysis routing"
+    - "Priority-based handling"
+  tags:
+    - "conditional"
+    - "branching"
+    - "decision"
+    - "moderate"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Start"
+          variables:
+            - variable: "input_text"
+              type: "string"
+              label: "Input Text"
+              required: true
+          desc: "Workflow entry point"
+        position:
+          x: 100
+          y: 100
+
+      - id: "llm_1"
+        type: "llm"
+        data:
+          title: "Classify Input"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: "You are a classifier. Respond with only 'positive' or 'negative'."
+            - role: "user"
+              text: "Classify the sentiment: {{#start.input_text#}}"
+        position:
+          x: 300
+          y: 100
+
+      - id: "ifelse_1"
+        type: "if-else"
+        data:
+          title: "Route by Sentiment"
+          conditions:
+            - id: "condition_1"
+              variable_selector:
+                - "llm_1"
+                - "text"
+              comparison_operator: "contains"
+              value: "positive"
+        position:
+          x: 500
+          y: 100
+
+      - id: "end_positive"
+        type: "end"
+        data:
+          title: "Positive Route"
+          outputs:
+            result: "Positive sentiment detected"
+            original: "{{#start.input_text#}}"
+        position:
+          x: 700
+          y: 50
+
+      - id: "end_negative"
+        type: "end"
+        data:
+          title: "Negative Route"
+          outputs:
+            result: "Negative sentiment detected"
+            original: "{{#start.input_text#}}"
+        position:
+          x: 700
+          y: 150
+
+    edges:
+      - id: "start_1-llm_1"
+        source: "start_1"
+        target: "llm_1"
+      - id: "llm_1-ifelse_1"
+        source: "llm_1"
+        target: "ifelse_1"
+      - id: "ifelse_1-end_positive"
+        source: "ifelse_1"
+        target: "end_positive"
+        sourceHandle: "true"
+      - id: "ifelse_1-end_negative"
+        source: "ifelse_1"
+        target: "end_negative"
+        sourceHandle: "false"

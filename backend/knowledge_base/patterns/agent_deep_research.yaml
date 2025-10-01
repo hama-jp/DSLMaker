@@ -1,0 +1,171 @@
+# Agent Deep Research Pattern
+# Autonomous research workflow with iterative refinement
+
+metadata:
+  pattern_id: "pattern_agent_research_001"
+  name: "Agent Deep Research"
+  description: "Autonomous research workflow: Start -> Agent (Research Planning) -> Iteration (Research Loop) -> Knowledge Synthesis -> End. Agent autonomously identifies knowledge gaps and conducts systematic research."
+  complexity: "complex"
+  node_count: 6
+  use_cases:
+    - "Deep research tasks"
+    - "Comprehensive report generation"
+    - "Multi-source information gathering"
+    - "Systematic investigation"
+  tags:
+    - "agent"
+    - "research"
+    - "autonomous"
+    - "iteration"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Research Topic"
+          variables:
+            - variable: "research_topic"
+              type: "string"
+              label: "Research Topic"
+              required: true
+            - variable: "depth_level"
+              type: "number"
+              label: "Research Depth (1-5)"
+              required: false
+          desc: "Define research topic and depth"
+        position:
+          x: 100
+          y: 200
+
+      - id: "agent_planner"
+        type: "agent"
+        data:
+          title: "Research Planning Agent"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            completion_params:
+              temperature: 0.7
+          prompt: |
+            You are a research planning agent. Analyze the research topic and:
+            1. Break down into key research questions
+            2. Identify knowledge gaps
+            3. Plan research strategy
+            4. Prioritize areas to investigate
+
+            Topic: {{#start.research_topic#}}
+            Depth: {{#start.depth_level#}}
+          tools:
+            - type: "web_search"
+            - type: "knowledge_retrieval"
+          max_iterations: 3
+        position:
+          x: 350
+          y: 200
+
+      - id: "iteration_1"
+        type: "iteration"
+        data:
+          title: "Research Iteration Loop"
+          iteration_mode: "sequential"
+          input_array: "{{#agent_planner.research_questions#}}"
+          item_variable: "current_question"
+          output_collection: "research_findings"
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_researcher"
+        type: "llm"
+        data:
+          title: "Investigate Question"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.5
+              max_tokens: 1500
+          prompt_template:
+            - role: "system"
+              text: "You are a thorough researcher. Investigate the given question deeply and provide well-reasoned findings."
+            - role: "user"
+              text: |
+                Research Topic: {{#start.research_topic#}}
+
+                Current Question: {{#iteration.current_question#}}
+
+                Previous Findings: {{#iteration.research_findings#}}
+
+                Provide comprehensive findings for this specific question.
+          in_iteration: true
+        position:
+          x: 850
+          y: 300
+
+      - id: "llm_synthesizer"
+        type: "llm"
+        data:
+          title: "Synthesize Research"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.6
+              max_tokens: 3000
+          prompt_template:
+            - role: "system"
+              text: |
+                You are a research analyst. Synthesize all research findings into a comprehensive report.
+                Structure: Executive Summary, Key Findings, Detailed Analysis, Conclusions
+            - role: "user"
+              text: |
+                Research Topic: {{#start.research_topic#}}
+
+                Research Plan: {{#agent_planner.output#}}
+
+                All Findings: {{#iteration.research_findings#}}
+
+                Create a comprehensive research report.
+        position:
+          x: 1100
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Research Report"
+          outputs:
+            final_report: "{{#llm_synthesizer.text#}}"
+            research_plan: "{{#agent_planner.output#}}"
+            num_findings: "{{#iteration.processed_count#}}"
+        position:
+          x: 1350
+          y: 200
+
+    edges:
+      - id: "start_1-agent_planner"
+        source: "start_1"
+        target: "agent_planner"
+      - id: "agent_planner-iteration_1"
+        source: "agent_planner"
+        target: "iteration_1"
+      - id: "iteration_1-llm_researcher"
+        source: "iteration_1"
+        target: "llm_researcher"
+        source_handle: "item_output"
+      - id: "llm_researcher-iteration_1"
+        source: "llm_researcher"
+        target: "iteration_1"
+        target_handle: "result_input"
+      - id: "iteration_1-llm_synthesizer"
+        source: "iteration_1"
+        target: "llm_synthesizer"
+        source_handle: "final_output"
+      - id: "llm_synthesizer-end_1"
+        source: "llm_synthesizer"
+        target: "end_1"

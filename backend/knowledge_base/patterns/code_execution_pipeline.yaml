@@ -1,0 +1,135 @@
+# Code Execution Pipeline Pattern
+# Dynamic code generation and execution workflow
+
+metadata:
+  pattern_id: "pattern_code_exec_001"
+  name: "Code Execution Pipeline"
+  description: "Code generation and execution workflow: Start -> LLM Code Generation -> Code Execution -> Result Validation -> End. Generates and executes code dynamically based on requirements."
+  complexity: "moderate"
+  node_count: 5
+  use_cases:
+    - "Data transformation tasks"
+    - "Dynamic calculation workflows"
+    - "Code generation and testing"
+    - "Automated data processing"
+  tags:
+    - "code-execution"
+    - "dynamic-generation"
+    - "data-processing"
+    - "automation"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Task Description Input"
+          variables:
+            - variable: "task_description"
+              type: "string"
+              label: "Task Description"
+              required: true
+            - variable: "input_data"
+              type: "string"
+              label: "Input Data"
+              required: false
+          desc: "Describe the task and provide input data"
+        position:
+          x: 100
+          y: 200
+
+      - id: "llm_code_generator"
+        type: "llm"
+        data:
+          title: "Generate Python Code"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "system"
+              text: |
+                You are an expert Python programmer. Generate clean, efficient Python code.
+                The code must include a main() function that returns a dictionary with the results.
+            - role: "user"
+              text: |
+                Task: {{#start.task_description#}}
+
+                Input Data: {{#start.input_data#}}
+
+                Please generate Python code to accomplish this task. The code should:
+                1. Be production-ready and error-handled
+                2. Include a main() function
+                3. Return results as a dictionary
+
+                Provide ONLY the Python code, no explanations.
+        position:
+          x: 350
+          y: 200
+
+      - id: "code_1"
+        type: "code"
+        data:
+          title: "Execute Generated Code"
+          code_language: "python"
+          code: "{{#llm_code_generator.text#}}"
+          variables:
+            - variable: "input_data"
+              value_selector: ["start", "input_data"]
+        position:
+          x: 600
+          y: 200
+
+      - id: "llm_result_formatter"
+        type: "llm"
+        data:
+          title: "Format Results"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.5
+          prompt_template:
+            - role: "system"
+              text: "You are a helpful assistant that explains code execution results clearly."
+            - role: "user"
+              text: |
+                Original Task: {{#start.task_description#}}
+
+                Execution Results: {{#code.result#}}
+
+                Please provide a clear, user-friendly explanation of the results.
+        position:
+          x: 850
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Execution Complete"
+          outputs:
+            formatted_results: "{{#llm_result_formatter.text#}}"
+            raw_results: "{{#code.result#}}"
+            generated_code: "{{#llm_code_generator.text#}}"
+        position:
+          x: 1100
+          y: 200
+
+    edges:
+      - id: "start_1-llm_code_generator"
+        source: "start_1"
+        target: "llm_code_generator"
+      - id: "llm_code_generator-code_1"
+        source: "llm_code_generator"
+        target: "code_1"
+      - id: "code_1-llm_result_formatter"
+        source: "code_1"
+        target: "llm_result_formatter"
+      - id: "llm_result_formatter-end_1"
+        source: "llm_result_formatter"
+        target: "end_1"

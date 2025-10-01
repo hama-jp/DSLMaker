@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     openai_api_key: str
     openai_model: str = "gpt-4"
     openai_embedding_model: str = "text-embedding-3-small"
+    openai_base_url: str = "https://api.openai.com/v1"
 
     # ChromaDB Configuration
     chromadb_host: str = "localhost"
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
     chromadb_collection: str = "dslmaker_patterns"
 
     # CORS Configuration
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://localhost:3005"
 
     @property
     def cors_origins_list(self) -> List[str]:
@@ -41,6 +42,11 @@ class Settings(BaseSettings):
     secret_key: str = "dev-secret-key-change-in-production"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+
+    # Rate Limiting Configuration
+    rate_limit_enabled: bool = True
+    rate_limit_requests: int = 100
+    rate_limit_period: int = 60  # seconds
 
     model_config = SettingsConfigDict(
         env_file=".env",

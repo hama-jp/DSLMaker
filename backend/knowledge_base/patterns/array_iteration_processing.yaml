@@ -1,0 +1,113 @@
+# Array Iteration Processing Pattern
+# Sequential iteration over array items with LLM processing
+
+metadata:
+  pattern_id: "pattern_iteration_002"
+  name: "Array Iteration Processing"
+  description: "Iteration workflow: Start (Array Input) -> Iteration Loop -> LLM Processing (per item) -> Template Aggregation -> End. Perfect for batch processing of multiple items."
+  complexity: "moderate"
+  node_count: 5
+  use_cases:
+    - "Batch document processing"
+    - "Product review analysis"
+    - "Multi-item classification"
+    - "Sequential data transformation"
+  tags:
+    - "iteration"
+    - "batch-processing"
+    - "array-operations"
+    - "sequential"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "Array Input"
+          variables:
+            - variable: "items_array"
+              type: "array"
+              label: "Items Array"
+              required: true
+              description: "Array of items to process"
+          desc: "Accepts array for batch processing"
+        position:
+          x: 100
+          y: 200
+
+      - id: "iteration_1"
+        type: "iteration"
+        data:
+          title: "Process Each Item"
+          iteration_mode: "sequential"
+          input_array: "{{#start.items_array#}}"
+          item_variable: "current_item"
+          output_collection: "processed_items"
+        position:
+          x: 350
+          y: 200
+
+      - id: "llm_process"
+        type: "llm"
+        data:
+          title: "Analyze Item"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.3
+          prompt_template:
+            - role: "user"
+              text: "Analyze this item and extract key information: {{#iteration.current_item#}}"
+          in_iteration: true
+        position:
+          x: 600
+          y: 300
+
+      - id: "template_transform_1"
+        type: "template-transform"
+        data:
+          title: "Format Results"
+          template: |
+            Processing Complete
+
+            Total Items Processed: {{#iteration.processed_count#}}
+
+            Results:
+            {{#iteration.processed_items#}}
+        position:
+          x: 850
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "Results Output"
+          outputs:
+            batch_results: "{{#template_transform.output#}}"
+        position:
+          x: 1100
+          y: 200
+
+    edges:
+      - id: "start_1-iteration_1"
+        source: "start_1"
+        target: "iteration_1"
+      - id: "iteration_1-llm_process"
+        source: "iteration_1"
+        target: "llm_process"
+        source_handle: "item_output"
+      - id: "llm_process-iteration_1"
+        source: "llm_process"
+        target: "iteration_1"
+        target_handle: "result_input"
+      - id: "iteration_1-template_transform_1"
+        source: "iteration_1"
+        target: "template_transform_1"
+        source_handle: "final_output"
+      - id: "template_transform_1-end_1"
+        source: "template_transform_1"
+        target: "end_1"

@@ -1,0 +1,157 @@
+# HTTP API Integration Pattern
+# External API integration with data transformation
+
+metadata:
+  pattern_id: "pattern_http_001"
+  name: "HTTP API Integration"
+  description: "API integration workflow: Start -> Parameter Extraction -> HTTP Request -> Code Processing -> LLM Enhancement -> End. Integrates external APIs with AI processing."
+  complexity: "moderate"
+  node_count: 6
+  use_cases:
+    - "Weather data integration"
+    - "External API enrichment"
+    - "Third-party service integration"
+    - "Data fetching and processing"
+  tags:
+    - "http"
+    - "api-integration"
+    - "external-data"
+    - "data-processing"
+
+workflow:
+  version: "0.1"
+  graph:
+    nodes:
+      - id: "start_1"
+        type: "start"
+        data:
+          title: "API Request Input"
+          variables:
+            - variable: "user_request"
+              type: "string"
+              label: "User Request"
+              required: true
+          desc: "User request requiring external API data"
+        position:
+          x: 100
+          y: 200
+
+      - id: "parameter_extractor_1"
+        type: "parameter-extractor"
+        data:
+          title: "Extract API Parameters"
+          query: "{{#start.user_request#}}"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            completion_params:
+              temperature: 0.0
+          parameters:
+            - name: "location"
+              type: "string"
+              required: true
+              description: "Location for API query"
+            - name: "query_type"
+              type: "string"
+              required: true
+              description: "Type of information requested"
+        position:
+          x: 350
+          y: 200
+
+      - id: "http_request_1"
+        type: "http-request"
+        data:
+          title: "Fetch External Data"
+          method: "GET"
+          url: "https://api.example.com/data"
+          params:
+            location: "{{#parameter_extractor.location#}}"
+            type: "{{#parameter_extractor.query_type#}}"
+          headers:
+            Content-Type: "application/json"
+          timeout: 30
+        position:
+          x: 600
+          y: 200
+
+      - id: "code_1"
+        type: "code"
+        data:
+          title: "Process API Response"
+          code_language: "python"
+          code: |
+            import json
+
+            def main(api_response: str) -> dict:
+                # Parse API response
+                data = json.loads(api_response)
+
+                # Extract relevant fields
+                processed = {
+                    'summary': data.get('main', {}).get('description', 'N/A'),
+                    'value': data.get('value', 'N/A'),
+                    'timestamp': data.get('timestamp', 'N/A')
+                }
+
+                return {
+                    'result': json.dumps(processed, indent=2)
+                }
+          variables:
+            - variable: "api_response"
+              value_selector: ["http_request", "body"]
+        position:
+          x: 850
+          y: 200
+
+      - id: "llm_1"
+        type: "llm"
+        data:
+          title: "AI Enhancement"
+          model:
+            provider: "openai"
+            name: "gpt-4"
+            mode: "chat"
+            completion_params:
+              temperature: 0.5
+          prompt_template:
+            - role: "system"
+              text: "You are a helpful assistant that interprets API data for users."
+            - role: "user"
+              text: |
+                User Request: {{#start.user_request#}}
+
+                API Data: {{#code.result#}}
+
+                Please provide a clear, user-friendly response that answers the user's request using the API data.
+        position:
+          x: 1100
+          y: 200
+
+      - id: "end_1"
+        type: "end"
+        data:
+          title: "API Response"
+          outputs:
+            user_response: "{{#llm.text#}}"
+            raw_data: "{{#code.result#}}"
+        position:
+          x: 1350
+          y: 200
+
+    edges:
+      - id: "start_1-parameter_extractor_1"
+        source: "start_1"
+        target: "parameter_extractor_1"
+      - id: "parameter_extractor_1-http_request_1"
+        source: "parameter_extractor_1"
+        target: "http_request_1"
+      - id: "http_request_1-code_1"
+        source: "http_request_1"
+        target: "code_1"
+      - id: "code_1-llm_1"
+        source: "code_1"
+        target: "llm_1"
+      - id: "llm_1-end_1"
+        source: "llm_1"
+        target: "end_1"

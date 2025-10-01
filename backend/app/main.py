@@ -12,6 +12,8 @@ from app.config import settings
 from app.services.vector_store import vector_store
 from app.services.llm_service import llm_service
 from app.api.v1.router import api_router
+from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.logging import RequestLoggingMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -31,6 +33,26 @@ async def lifespan(app: FastAPI):
     # Initialize ChromaDB
     try:
         await vector_store.initialize()
+
+        # Check if patterns need to be loaded
+        stats = vector_store.get_collection_stats()
+        pattern_count = stats.get("total_patterns", 0)
+
+        if pattern_count == 0:
+            logger.info("📚 No patterns found in vector store. Loading patterns...")
+            try:
+                from scripts.initialize_patterns import initialize_patterns
+                result = await initialize_patterns(force_reload=False)
+                if result["status"] == "success":
+                    logger.info(f"✅ Loaded {result['loaded']} patterns successfully")
+                else:
+                    logger.warning(f"⚠️ Pattern loading completed with warnings")
+            except Exception as pattern_error:
+                logger.error(f"Failed to load patterns: {pattern_error}")
+                logger.warning("⚠️ Continuing without patterns - manual initialization may be required")
+        else:
+            logger.info(f"✅ Vector store contains {pattern_count} patterns")
+
     except Exception as e:
         logger.error(f"Failed to initialize ChromaDB: {e}")
         # Continue startup even if ChromaDB fails (for development)
@@ -62,6 +84,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Configure Request Logging (first, so it logs everything)
+app.add_middleware(RequestLoggingMiddleware)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
@@ -69,6 +94,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# Configure Rate Limiting
+app.add_middleware(
+    RateLimitMiddleware,
+    requests=settings.rate_limit_requests,
+    period=settings.rate_limit_period,
+    enabled=settings.rate_limit_enabled
 )
 
 # Include API router

@@ -12,6 +12,9 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Import llm_service for embeddings (avoid circular import by importing at module level)
+# We'll import it lazily in the method to avoid circular dependency
+
 
 class VectorStoreService:
     """ChromaDB-based vector store for workflow patterns."""
@@ -29,11 +32,8 @@ class VectorStoreService:
 
             # Initialize ChromaDB client
             # For development: use persistent client with local storage
-            self.client = chromadb.Client(
-                Settings(
-                    persist_directory="./chroma_db",
-                    anonymized_telemetry=False
-                )
+            self.client = chromadb.PersistentClient(
+                path="./chroma_db"
             )
 
             # Get or create collection
@@ -103,8 +103,15 @@ class VectorStoreService:
             await self.initialize()
 
         try:
+            # Generate embedding for query using OpenAI (same as pattern embeddings)
+            from app.services.llm_service import llm_service
+            if not llm_service._initialized:
+                await llm_service.initialize()
+
+            query_embedding = await llm_service.get_embedding(query)
+
             results = self.collection.query(
-                query_texts=[query],
+                query_embeddings=[query_embedding],
                 n_results=n_results,
                 where=filter_metadata
             )
