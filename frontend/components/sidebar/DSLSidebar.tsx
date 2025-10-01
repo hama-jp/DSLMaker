@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Copy, Download, FileCode, Check, FileJson, Upload } from 'lucide-react'
+import { Copy, Download, FileCode, Check, FileJson, Upload, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Node } from '@xyflow/react'
 import NodePropertiesPanel from '@/components/properties/NodePropertiesPanel'
 import { ResizableHandle } from '@/components/ui/ResizableHandle'
+import DependenciesPanel from '@/components/workflow/DependenciesPanel'
+import ConversationVariablesPanel from '@/components/workflow/ConversationVariablesPanel'
 
 export interface DSLSidebarProps {
   workflow: any | null
@@ -158,6 +160,10 @@ export default function DSLSidebar({
               <FileJson className="w-3 h-3 mr-1" />
               JSON
             </TabsTrigger>
+            <TabsTrigger value="info" className="flex-1">
+              <Info className="w-3 h-3 mr-1" />
+              Info
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="yaml" className="flex-1 overflow-auto p-3 bg-muted/30 m-0 data-[state=active]:flex">
@@ -170,6 +176,18 @@ export default function DSLSidebar({
             <pre className="text-xs font-mono leading-relaxed">
               <code>{JSON.stringify(workflow, null, 2)}</code>
             </pre>
+          </TabsContent>
+
+          <TabsContent value="info" className="flex-1 overflow-auto p-3 bg-muted/30 m-0 space-y-3 data-[state=active]:block">
+            {/* Dependencies */}
+            <DependenciesPanel
+              dependencies={workflow?.dependencies || []}
+            />
+
+            {/* Conversation Variables */}
+            <ConversationVariablesPanel
+              variables={workflow?.workflow?.conversation_variables || []}
+            />
           </TabsContent>
         </Tabs>
 
