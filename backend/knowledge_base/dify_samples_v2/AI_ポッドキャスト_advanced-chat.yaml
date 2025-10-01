@@ -1,0 +1,607 @@
+app:
+  description: 参考サイトからポッドキャストを作ります。
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: AI ポッドキャスト
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.19@219552f62b54919d6fd317c737956d3b2cc97719b85f0179bb995e5a512b7ebb
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.6@e2665624a156f52160927bceac9e169bd7e5ae6b936ae82575e14c90af390e6e
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: document-extractor
+      id: 1754916346450-source-1754916862628-target
+      source: '1754916346450'
+      sourceHandle: source
+      target: '1754916862628'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: document-extractor
+        targetType: llm
+      id: 1754916862628-source-1754916902865-target
+      source: '1754916862628'
+      sourceHandle: source
+      target: '1754916902865'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 1754916902865-source-1754917555372-target
+      source: '1754916902865'
+      sourceHandle: source
+      target: '1754917555372'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1754917555372-source-1754919624547-target
+      source: '1754917555372'
+      sourceHandle: source
+      target: '1754919624547'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: answer
+        targetType: llm
+      id: 1754919624547-source-llm-target
+      source: '1754919624547'
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: llm-source-1754920303622-target
+      source: llm
+      sourceHandle: source
+      target: '1754920303622'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: answer
+        targetType: template-transform
+      id: 1754920303622-source-1754920435754-target
+      source: '1754920303622'
+      sourceHandle: source
+      target: '1754920435754'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: template-transform
+        targetType: answer
+      id: 1754920435754-source-answer-target
+      source: '1754920435754'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 開始
+        type: start
+        variables:
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - document
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: file
+          max_length: 48
+          options: []
+          required: true
+          type: file
+          variable: file
+        - default: CASUAL="ポッドキャストのトーンは、カジュアルな話口調にしてください。"
+          label: tone
+          max_length: 48
+          options:
+          - CASUAL="ポッドキャストのトーンは、カジュアルな話口調にしてください。"
+          - FOMAL="ポッドキャストのトーンは、フォーマルでプロフェッショナルな口調にしてください。"
+          - HUMOROUS="ポッドキャストのトーンは、ユーモアがあり軽快な雰囲気にしてください。"
+          required: true
+          type: select
+          variable: tone
+        - label: host_name
+          max_length: 48
+          options: []
+          required: true
+          type: text-input
+          variable: host_name
+        - label: guest_name
+          max_length: 48
+          options: []
+          required: true
+          type: text-input
+          variable: guest_name
+        - default: 日本語
+          label: language
+          max_length: 48
+          options:
+          - 日本語
+          - 英語
+          required: true
+          type: select
+          variable: language
+      height: 193
+      id: '1754916346450'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1754917555372'
+          - text
+        desc: ''
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: unsloth/gpt-oss-20b
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 9e48546d-3538-4933-bd26-bd4ed0386705
+          role: system
+          text: '対談の最後に、ホストとゲストが自然に主なポイントをまとめる流れを作ります。
+
+
+            形式的な要約ではなく、会話を振り返ることで重要な内容をもうもう一度リスナーに印象づけます。スムーズな締めくくりを目指します。リスナーに考えさせる質問、行動喚起などで締めくくる。
+
+
+            例：
+
+            　「今日はたくさん興味深いお話が出来て、〇〇の重要性を感じましたね。」
+
+            　「リスナーの皆さんも、ぜひ〇〇について考えてみてください！」　など'
+        - id: cc635a91-af62-41ae-82db-0d50da350229
+          role: user
+          text: "コンテキスト: {{#1754917555372.text#}}\nホスト名: {{#1754916346450.host_name#}}\n\
+            ゲスト名: {{#1754916346450.guest_name#}}\n\n- コンテキストに基づいて結論を引き出し、コンテキストと同じ形式を維持します。\n\
+            - コンテキストと一致する内容の繰り返しや導入文は避けてください。\n\n- スクリプト形式: \n- スクリプトはホストの発言から始め、ホストとゲストが１行づつ交互に話します。\n\
+            - 最終スクリプトには会話内容のみを含めてください。XMLダグや話者名、その他フォーマットは含めないこと。\n- 最後の対話以外のまとめ文は不要です。"
+        selected: false
+        title: まとめ作成
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 89
+      id: llm
+      position:
+        x: 965
+        y: 282
+      positionAbsolute:
+        x: 965
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '-----------------
+
+          ポッドキャストを作成中。しばらくおまちください。'
+        desc: ''
+        selected: false
+        title: 音声作成中
+        type: answer
+        variables: []
+      height: 117
+      id: answer
+      position:
+        x: 1284.7406572305918
+        y: 400
+      positionAbsolute:
+        x: 1284.7406572305918
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        is_array_file: false
+        selected: false
+        title: テキスト抽出
+        type: document-extractor
+        variable_selector:
+        - '1754916346450'
+        - file
+      height: 94
+      id: '1754916862628'
+      position:
+        x: 380
+        y: 282
+      positionAbsolute:
+        x: 380
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1754916862628'
+          - text
+        desc: ''
+        model:
+          completion_params: {}
+          mode: chat
+          name: o4-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 7bf1af64-669c-4ad1-87f7-1ec1c7cf80f4
+          role: system
+          text: 'あなたのタスクは、提供された入力テキストを魅力的で有益なポッドキャストの題材を分析してアイデア出しをすることです。
+
+            入力テキストはPDFやウェブページなどから取得された、構造が不明瞭な乱雑なものが含まれています。無関係な情報やフォーマットの問題は無視してください。最も興味深く、洞察に富んだ内容を抽出し、ポッドキャストでの議論に適したものに焦点を当ててください。'
+        - id: 9e413d50-74f6-461b-b52d-21cd420f7bf5
+          role: user
+          text: '# 手順
+
+            1.入力内容の分析
+
+            提供されたテキストを注意深く読み、重要なトピック、ポイント、または興味深い事実や話題を特定します。無関係な情報やフォーマットの問題は無視します。
+
+            2.アイデアのブレーンストーミング
+
+            次の点に考慮しながら、ポッドキャストとして魅力的に提示する方法をブレーンストーミングします。
+
+            - 一般のリスナーにもわかりやすく、親しみやすい表現
+
+            - 情報に不足がある場合、創造的に補うアプローチ（ただし事実に反さないこと）
+
+
+            # 元情報
+
+            {{#1754916862628.text#}}'
+        selected: false
+        title: 入力内容を分析する
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 89
+      id: '1754916902865'
+      position:
+        x: 380
+        y: 410
+      positionAbsolute:
+        x: 380
+        y: 410
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1754916862628'
+          - text
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: unsloth/gpt-oss-20b
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 8c6fcc00-bcb4-4824-bd0b-0d7755db1ba1
+          role: system
+          text: 'あなたはポッドキャストのプロの脚本家です。
+
+
+            あなたの役割は、提供された入力テキストを魅力的で有益なポッドキャストの台本に変換することです。
+
+            入力テキストはPDFやウェブページから取得されたものです。変換時に乱雑なノイズが含まれる可能性があります。不要な情報やフォーマットの問題は無視してください。
+
+
+            最も興味深く洞察に富んだ内容を抽出し、ポッドキャストのディスカッションとして展開してください。
+
+
+            # 目指すべきポイント
+
+            - 自然な会話の流れを作ること。
+
+            - *{{#1754916346450.host_name#}}* と *{{#1754916346450.guest_name#}}} *
+            の間の対話に重点を置いてください。
+
+
+            ## ホストとゲストの役割
+
+            - ホストとゲストの役割はお互いが補完し合う構造にします。
+
+            - ホストは興味深いポイントを熱意をもって聞き出し、専門家は分析や背景説明、広い視野からの解説を提供します。
+
+
+            ## 深堀り
+
+            - 表面的な一般的な情報にとどまらず、提供された情報からリスナーに新たな発見を提供する視点や話題を掘り下げてください。
+
+
+            ## ターゲットリスナー
+
+            - 効率を重視し、記憶に残る詳細を楽しみ、学びたいリスナーを対象とします。
+
+
+            ## 構造と進行
+
+            - 明快な構造と魅力的な進行を維持。
+
+            - 単調なトーンを避け、生き生きとした語り口で進行してください。
+
+
+            ## 具体例
+
+            - 提供された情報に実際の例や共感できるエピソードがあれば活用し、情報に命を吹き込み、リスナーの関与を促進します。
+
+
+            ## 難しいトピックの簡潔な解説
+
+            - 正確なゲストの説明を、ホストがかみ砕いて言い直し、その内容についてゲストが補足することでリスナーの理解を促進してください。
+
+
+            ## リスナーを引き付けるトーン
+
+            - 魅力的かつリスナーを引き付ける{{#1754916346450.tone#}}を維持します。
+
+
+            # ルール
+
+            - ホストが常に話を切り出し、ゲストにインタビューする形式です。ゲストがトピックを説明します。
+
+            - ホストはゲストに質問を投げかけ、最後に主要な洞察をまとめます。
+
+            - 必要に応じて、「えっと」や「なるほど」など口癖も含め、リアルな会話台本にします。
+
+            - ホストとゲストが話の流れに応じて、お互いの話を遮る場面も許容します。
+
+            - ゲストはマーケティングや自己宣伝を含めてはなりません。
+
+            - スクリプトが結論に近づく際、終了部分は別のスクリプトで作成するため、ここでは提供しなくて構いません。'
+        - id: 75c6ffd8-1aeb-41a3-be47-2a9b58db2305
+          role: user
+          text: '以下の要件に基づき、高品質で魅力的なポッドスクリプトのスクリプトを作成してください。
+
+
+            コンテキスト: {{#1754916862628.text#}}
+
+            ホスト名: {{#1754916346450.host_name#}}
+
+            ゲスト名: {{#1754916346450.guest_name#}}
+
+            トーン: {{#1754916346450.tone#}}
+
+
+            スクリプトの作成アイデア: {{#1754916902865.text#}}
+
+
+            # スクリプト形式と内容
+
+            - スクリプトはホストの発言から始めてください。
+
+            - ホストとゲストの対話は１行づつ交互に進めてください。
+
+            - 各行の冒頭に話者名は ** 記載しない **  でください。
+
+            - 魅力的な会話を作ることに重点をおき、軽快なやりとりを展開してください。
+
+
+            # 出力条件
+
+            - スクリプト形式: スクリプトはホストの発言から始め、ホストとゲストが１行づつ交互に話します。
+
+            - 最終スクリプトには会話内容のみを含めてください。XMLダグや話者名、その他フォーマットは含めないこと。
+
+
+            これら指示に従って、ポッドキャストの対話スクリプトを作成してください。'
+        selected: false
+        title: 会話の下書き作成
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 89
+      id: '1754917555372'
+      position:
+        x: 666
+        y: 282
+      positionAbsolute:
+        x: 666
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1754917555372.text#}}'
+        desc: ''
+        selected: false
+        title: 下書き内容の表示
+        type: answer
+        variables: []
+      height: 103
+      id: '1754919624547'
+      position:
+        x: 653
+        y: 410
+      positionAbsolute:
+        x: 653
+        y: 410
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#llm.text#}}'
+        desc: ''
+        selected: false
+        title: まとめ表示
+        type: answer
+        variables: []
+      height: 103
+      id: '1754920303622'
+      position:
+        x: 965
+        y: 405
+      positionAbsolute:
+        x: 965
+        y: 405
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        selected: false
+        template: "{{ arg1 }}\r\n{{ arg2 }}"
+        title: テンプレート
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1754917555372'
+          - text
+          value_type: string
+          variable: arg1
+        - value_selector:
+          - llm
+          - text
+          value_type: string
+          variable: arg2
+      height: 53
+      id: '1754920435754'
+      position:
+        x: 1284.7406572305918
+        y: 282
+      positionAbsolute:
+        x: 1284.7406572305918
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 97.75934276940848
+      y: 84.50000000000011
+      zoom: 0.9999999999999998
+  rag_pipeline_variables: []
+

@@ -1,0 +1,445 @@
+app:
+  name: Web Research Assistant
+  description: Search the web, extract content, and summarize results
+  icon: 🔍
+  icon_background: '#FFEAD5'
+  mode: workflow
+  use_icon_as_answer_icon: false
+kind: app
+version: 0.4.0
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tavily:0.1.2@aa7a8744b2ccf3a7aec818da6c504997a6319b29040e541bfc73b4fbaa9e98d9
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.6@e2665624a156f52160927bceac9e169bd7e5ae6b936ae82575e14c90af390e6e
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/jina_tool:0.0.7@08d5935b56b9ddaa633204874c0fd796c14971489b6379fad1a430b5ec99b569
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    nodes:
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 30
+        y: 100
+      positionAbsolute:
+        x: 30
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 89
+      width: 244
+      data:
+        type: start
+        title: Start
+        desc: ''
+        selected: false
+        variables:
+        - variable: query
+          label: Search Query
+          type: text-input
+          required: true
+          max_length: 48
+          options: []
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 300
+        y: 100
+      positionAbsolute:
+        x: 300
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 245
+      width: 244
+      data:
+        type: tool
+        title: Web Search
+        desc: ''
+        selected: false
+        provider_id: tavily
+        provider_name: tavily
+        provider_type: builtin
+        tool_name: tavily_search
+        tool_label: Web Search
+        tool_parameters:
+          query:
+            type: mixed
+            value: '{{#1759323258234.query#}}'
+        tool_configurations:
+          search_depth: basic
+          max_results: 5
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 600
+        y: 100
+      positionAbsolute:
+        x: 600
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 53
+      width: 244
+      data:
+        type: code
+        title: Extract URLs
+        desc: ''
+        selected: false
+        code: "import re\ndef main(search_results):\n    urls = re.findall(r'http[s]?://[^\\\
+          s)]+', str(search_results))\n    return {\"result\": urls[:3]}  # Top 3\
+          \ URLs\n"
+        code_language: python3
+        variables:
+        - variable: search_results
+          value_selector:
+          - '1759323258234'
+          - text
+        outputs:
+          result:
+            type: array[string]
+            children: null
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 900
+        y: 100
+      positionAbsolute:
+        x: 900
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 250
+      width: 800
+      zIndex: 1
+      data:
+        type: iteration
+        title: Process Each URL
+        desc: ''
+        selected: false
+        iterator_selector:
+        - '1759323258234'
+        - result
+        output_selector:
+        - '1759323258234'
+        - output
+        output_type: array[string]
+        startNodeType: tool
+        start_node_id: 1759323258234start0
+        width: 800
+        height: 250
+    - id: 1759323258234start0
+      type: custom-iteration-start
+      position:
+        x: 24
+        y: 60
+      positionAbsolute:
+        x: 24
+        y: 60
+      parentId: '1759323258234'
+      selected: false
+      draggable: false
+      selectable: false
+      sourcePosition: right
+      targetPosition: left
+      height: 44
+      width: 44
+      zIndex: 1002
+      data:
+        type: iteration-start
+        title: ''
+        desc: ''
+        isInIteration: true
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 100
+        y: 60
+      positionAbsolute:
+        x: 100
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 245
+      width: 244
+      data:
+        type: tool
+        title: Read Content
+        desc: ''
+        selected: false
+        provider_id: jina
+        provider_name: jina
+        provider_type: builtin
+        tool_name: jina_reader
+        tool_label: Read Content
+        tool_parameters:
+          url:
+            type: mixed
+            value: '{{#1759323258234.item#}}'
+        tool_configurations: {}
+        isInIteration: true
+        iteration_id: '1759323258234'
+      parentId: '1759323258234'
+      extent: parent
+      zIndex: 1001
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 400
+        y: 60
+      positionAbsolute:
+        x: 400
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 97
+      width: 244
+      data:
+        type: llm
+        title: Summarize
+        desc: ''
+        selected: false
+        model:
+          provider: openai
+          name: gpt-4
+          mode: chat
+          completion_params:
+            temperature: 0.7
+        prompt_template:
+        - id: c8790270-521e-499f-bd96-f827fc42dc07
+          role: system
+          text: Summarize this content in 2-3 sentences:\n{{#1759323258234.text#}}
+        variables: []
+        context:
+          enabled: false
+          variable_selector: []
+        vision:
+          enabled: false
+          configs: null
+        isInIteration: true
+        iteration_id: '1759323258234'
+      parentId: '1759323258234'
+      extent: parent
+      zIndex: 1002
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 650
+        y: 60
+      positionAbsolute:
+        x: 650
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 53
+      width: 244
+      data:
+        type: template-transform
+        title: Format Result
+        desc: ''
+        selected: false
+        template: 'URL: {{ url }}\nSummary: {{ summary }}'
+        variables:
+        - variable: url
+          value_selector:
+          - '1759323258234'
+          - item
+        - variable: summary
+          value_selector:
+          - '1759323258234'
+          - text
+        isInIteration: true
+        iteration_id: '1759323258234'
+      parentId: '1759323258234'
+      extent: parent
+      zIndex: 1002
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 1750
+        y: 100
+      positionAbsolute:
+        x: 1750
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 53
+      width: 244
+      data:
+        type: code
+        title: Combine Results
+        desc: ''
+        selected: false
+        code: "def main(summaries):\n    return {\"result\": \"\\n\\n\".join(summaries)}\n"
+        code_language: python3
+        variables:
+        - variable: summaries
+          value_selector:
+          - '1759323258234'
+          - output
+        outputs:
+          result:
+            type: string
+            children: null
+    - id: '1759323258234'
+      type: custom
+      position:
+        x: 2050
+        y: 100
+      positionAbsolute:
+        x: 2050
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      height: 89
+      width: 244
+      data:
+        type: end
+        title: End
+        desc: ''
+        selected: false
+        outputs:
+        - variable: final_result
+          value_selector:
+          - '1759323258234'
+          - result
+    edges:
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: start
+        targetType: tool
+        isInIteration: false
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: tool
+        targetType: code
+        isInIteration: false
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: code
+        targetType: iteration
+        isInIteration: false
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: iteration
+        targetType: code
+        isInIteration: false
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: code
+        targetType: end
+        isInIteration: false
+    - id: 1759323258234start0-1759323258234
+      source: 1759323258234start0
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: iteration-start
+        targetType: tool
+        isInIteration: true
+        iteration_id: '1759323258234'
+      zIndex: 1002
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: tool
+        targetType: llm
+        isInIteration: true
+        iteration_id: '1759323258234'
+      zIndex: 1002
+    - id: 1759323258234-1759323258234
+      source: '1759323258234'
+      target: '1759323258234'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      selected: false
+      data:
+        sourceType: llm
+        targetType: template-transform
+        isInIteration: true
+        iteration_id: '1759323258234'
+      zIndex: 1002
+    viewport:
+      x: 100
+      y: 100
+      zoom: 1.0
+  rag_pipeline_variables: []
