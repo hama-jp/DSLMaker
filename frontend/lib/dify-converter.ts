@@ -26,6 +26,27 @@ export function difyNodeToReactFlow(difyNode: DifyNodeBase): Node {
   const nodeData = difyNode.data as DifyNodeData
   const nodeType = nodeData.type || 'generic'
 
+  // Special handling for ITERATION container nodes - use original dimensions
+  const isIteration = nodeType === 'iteration'
+  const hasParent = !!difyNode.parentId
+
+  const style = isIteration
+    ? {
+        width: difyNode.width || 800,
+        height: difyNode.height || 400,
+      }
+    : {
+        width: 280,
+        height: 'auto',
+      }
+
+  // Set z-index based on node hierarchy
+  // Parent nodes (iteration) should be at lower z-index (rendered first/below)
+  // Child nodes should be at higher z-index (rendered last/above)
+  const zIndex = difyNode.zIndex !== undefined
+    ? difyNode.zIndex
+    : (hasParent ? 1002 : isIteration ? 1 : undefined)
+
   return {
     id: difyNode.id,
     type: nodeType || 'generic', // Use generic as fallback
@@ -37,11 +58,9 @@ export function difyNodeToReactFlow(difyNode: DifyNodeBase): Node {
     },
     ...(difyNode.parentId && { parentId: difyNode.parentId }),
     ...(difyNode.extent && { extent: difyNode.extent as any }),
-    // Set consistent dimensions for Dify-style nodes
-    style: {
-      width: 280,
-      height: 'auto',
-    },
+    ...(zIndex !== undefined && { zIndex }),
+    // Set dimensions based on node type
+    style,
     draggable: difyNode.draggable ?? true,
     selectable: difyNode.selectable ?? true,
   }
@@ -90,11 +109,24 @@ export function difyDSLToReactFlow(dsl: DifyDSL): {
   const difyNodes = getDifyNodes(dsl)
   const difyEdges = getDifyEdges(dsl)
 
+  // Convert nodes to React Flow format
   const nodes = difyNodes.map(difyNodeToReactFlow)
+
+  // Sort nodes: parent nodes must come before their children
+  // This ensures proper rendering order in React Flow
+  const sortedNodes = nodes.sort((a, b) => {
+    // Nodes without parent come first
+    if (!a.parentId && b.parentId) return -1
+    if (a.parentId && !b.parentId) return 1
+
+    // If both have parents or both don't have parents, maintain original order
+    return 0
+  })
+
   const edges = difyEdges.map(difyEdgeToReactFlow)
 
   return {
-    nodes,
+    nodes: sortedNodes,
     edges,
     metadata: {
       name: dsl.app.name,

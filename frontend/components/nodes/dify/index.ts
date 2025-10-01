@@ -19,6 +19,9 @@ export { DifyVariableAssignerNode } from './DifyVariableAssignerNode'
 export { DifyVariableAggregatorNode } from './DifyVariableAggregatorNode'
 export { DifyDocumentExtractorNode } from './DifyDocumentExtractorNode'
 
+// Import iteration-specific components
+import IterationStartNode from './IterationStartNode'
+
 // Node type mapping for React Flow
 import { DifyStartNode } from './DifyStartNode'
 import { DifyEndNode } from './DifyEndNode'
@@ -42,6 +45,8 @@ export const DIFY_NODE_COMPONENTS = {
   'if-else': DifyIfElseNode,
   code: DifyCodeNode,
   iteration: DifyIterationNode,
+  'custom-iteration-start': IterationStartNode, // Special iteration start marker
+  'iteration-start': IterationStartNode, // Alias
   tool: DifyToolNode,
   answer: DifyAnswerNode,
   'template-transform': DifyTemplateTransformNode,
