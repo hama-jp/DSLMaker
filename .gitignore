@@ -62,3 +62,30 @@ backend/chroma_db/
 
 # Backend env (already covered by .env* above)
 backend/app/utils/dify_converter.py
+
+# Test files (manual tests)
+backend/test_*_manual.py
+backend/test_qa_simple.py
+backend/test_agents_integrated.py
+backend/test_complete_pipeline.py
+backend/test_multi_agent.py
+backend/test_quick_agent.py
+test-*.js
+test-*.json
+test-*.yml
+test-*.yaml
+
+# Screenshots and images
+*.png
+*.jpg
+*.jpeg
+
+# Node modules in frontend
+frontend/node_modules/
+frontend/.next/
+
+# Backup files
+*.backup
+
+# Scripts
+scripts/

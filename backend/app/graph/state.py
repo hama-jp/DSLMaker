@@ -37,13 +37,21 @@ class ConfiguredNode(BaseModel):
     position: Dict[str, int]
 
 
+class QualityIssue(BaseModel):
+    """Individual quality issue."""
+    severity: str  # high, medium, low
+    node_id: Optional[str] = None  # None for general issues
+    issue: str
+    recommendation: str
+
+
 class QualityAssessment(BaseModel):
     """Quality report from QA Agent."""
     overall_score: float  # 0-100
     completeness_score: float
     correctness_score: float
     best_practices_score: float
-    issues: List[Dict[str, str]]
+    issues: List[QualityIssue]
     recommendations: List[str]
     should_retry: bool
 

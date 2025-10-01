@@ -104,10 +104,51 @@ function WorkflowVisualizerInner({ workflow, metadata, onNodeSelect, onImport }:
       return
     }
 
+    // First pass: Identify iteration nodes and their children
+    const iterationNodes = new Map<string, any[]>() // iteration_id -> child nodes
+    const nodeIterationMap = new Map<string, string>() // node_id -> parent iteration_id
+
+    workflowNodes.forEach((node) => {
+      const iterationId = node.data?.iteration_id
+      if (iterationId) {
+        // This node belongs to an iteration
+        nodeIterationMap.set(node.id, iterationId)
+        if (!iterationNodes.has(iterationId)) {
+          iterationNodes.set(iterationId, [])
+        }
+        iterationNodes.get(iterationId)!.push(node)
+      }
+    })
+
+    // Calculate bounding boxes for iteration nodes
+    const iterationBounds = new Map<string, { width: number; height: number }>()
+    iterationNodes.forEach((childNodes, iterationId) => {
+      if (childNodes.length === 0) {
+        iterationBounds.set(iterationId, { width: 600, height: 400 })
+        return
+      }
+
+      // Calculate bounds based on child positions
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+      childNodes.forEach((child) => {
+        const pos = child.position || { x: 0, y: 0 }
+        minX = Math.min(minX, pos.x)
+        minY = Math.min(minY, pos.y)
+        maxX = Math.max(maxX, pos.x + 200) // node width
+        maxY = Math.max(maxY, pos.y + 110) // node height
+      })
+
+      const width = Math.max(600, maxX - minX + 100) // padding
+      const height = Math.max(400, maxY - minY + 150) // padding + header
+      iterationBounds.set(iterationId, { width, height })
+    })
+
     // Create React Flow nodes with custom types
     const flowNodes: Node[] = workflowNodes.map((node) => {
-      const nodeType = node.data?.type || 'default'
+      const nodeType = node.data?.type || node.type || 'default'
       const reactFlowType = getNodeType(nodeType)
+      const iterationId = node.data?.iteration_id
+      const isIterationNode = nodeType === 'iteration'
 
       const nodeData: BaseNodeData = {
         title: node.data?.title || node.id,
@@ -116,16 +157,42 @@ function WorkflowVisualizerInner({ workflow, metadata, onNodeSelect, onImport }:
         config: node.data,
       }
 
-      return {
+      // Base node configuration
+      const flowNode: Node = {
         id: node.id,
         type: reactFlowType,
         position: { x: 0, y: 0 }, // Will be set by layout algorithm
         data: nodeData,
         style: {
-          width: 200, // Match Dagre nodeWidth
-          height: 110, // Match Dagre nodeHeight
+          width: 200,
+          height: 110,
         },
       }
+
+      // Configure iteration parent nodes
+      if (isIterationNode) {
+        const bounds = iterationBounds.get(node.id) || { width: 600, height: 400 }
+        flowNode.style = {
+          width: bounds.width,
+          height: bounds.height,
+        }
+      }
+
+      // Configure child nodes (nodes inside iteration)
+      if (iterationId && iterationId !== node.id) {
+        flowNode.parentId = iterationId
+        flowNode.extent = 'parent' as const
+        // Adjust position to be relative to parent
+        // Add top padding for iteration header (40px)
+        if (node.position) {
+          flowNode.position = {
+            x: node.position.x + 20, // left padding
+            y: node.position.y + 60, // top padding (header + spacing)
+          }
+        }
+      }
+
+      return flowNode
     })
 
     // Create React Flow edges

@@ -29,69 +29,27 @@ class ConfigurationAgent(BaseAgent):
     6. Ensure data compatibility between connected nodes
     """
 
-    SYSTEM_PROMPT = """You are a Dify workflow configuration expert.
+    SYSTEM_PROMPT = """You are a Dify DSL workflow configuration expert.
 
-Your task is to configure each node in the workflow with proper settings and parameters.
+Configure nodes using EXACT Dify DSL structure with these templates:
 
-Node Configuration Guidelines:
+**Start Node**: id=start, data must have title/type/desc/selected/variables, position={{x:80,y:282}}
+**LLM Node**: id=llm_xxx, data has model(provider/name/mode/completion_params), prompt_template array, memory/context/vision objects
+**Answer Node**: id=answer, data has answer field with variable reference like {{{{#llm.text#}}}}
+**Knowledge Node**: query_variable_selector, dataset_ids, retrieval_mode, multiple_retrieval_config
+**Code Node**: code_language=python3, code string, variables array, outputs object
+**Tool Node**: provider_id/name, tool_name, tool_parameters with query
 
-**Start Node**:
-- Define input variables (name, type, label, required, description)
-- Types: string, number, boolean, array, object
+**CRITICAL Rules**:
+1. ALL nodes MUST have: id (string), type (string), data (object), position ({{x,y}})
+2. data object MUST include: title, type, desc, selected (always false)
+3. Variable references use format: {{{{#node_id.field#}}}}
+4. Position strategy: start at x=80 y=282, space 300px horizontally
+5. LLM nodes need complete model config: provider, name, mode, completion_params
+6. LLM prompt_template is array of {{role, text}} objects
+7. Answer nodes reference LLM output as: {{{{#llm_id.text#}}}}
 
-**LLM Node**:
-- Provider: openai, anthropic, etc.
-- Model: gpt-4, gpt-3.5-turbo, claude-3-opus, etc.
-- Prompt template with role (system/user) and text
-- Variable references: {{#node_id.variable_name#}}
-- Temperature: 0.0-1.0 (lower for factual, higher for creative)
-- Max tokens: reasonable limit
-
-**Knowledge Retrieval Node**:
-- Query: what to search (can reference variables)
-- Dataset IDs: which knowledge bases
-- Retrieval mode: single or multiple
-- Top K: number of results
-- Reranking: true/false
-
-**If-Else Node**:
-- Logical operator: and/or
-- Conditions: variable_selector, comparison_operator, value
-- Operators: =, !=, >, <, contains, is_empty, etc.
-
-**Iteration Node**:
-- Input array: source array variable
-- Item variable: name for current item
-- Output collection: where to store results
-- Iteration mode: sequential/parallel
-
-**Code Node**:
-- Language: python or nodejs
-- Code: executable code with main() function
-- Variables: input variable mappings
-
-**HTTP Request Node**:
-- Method: GET, POST, PUT, DELETE
-- URL: endpoint URL
-- Params/Body: request data
-- Headers: required headers
-- Timeout: in seconds
-
-**Parameter Extractor Node**:
-- Query: input text to extract from
-- Parameters: list with name, type, description
-- Model: LLM for extraction
-
-**Template Transform Node**:
-- Template: Jinja2 template with variable references
-- Output format: text, json, html
-
-**End Node**:
-- Outputs: final output variables with references
-
-Variable Reference Format: {{{{#source_node_id.output_variable#}}}}
-
-IMPORTANT: Return ONLY valid JSON without markdown code blocks or explanations.
+Return JSON with nodes and edges arrays. NO markdown blocks.
 
 Return configuration as valid JSON with 'nodes' and 'edges' keys:
 {{

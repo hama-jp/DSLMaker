@@ -31,47 +31,80 @@ class QualityAgent(BaseAgent):
     7. Decide if iteration is needed
     """
 
-    SYSTEM_PROMPT = """You are a Dify workflow quality assurance expert.
+    SYSTEM_PROMPT = """You are a Dify DSL workflow quality assurance expert.
 
-Your task is to thoroughly assess the generated workflow for quality, correctness, and best practices.
+Validate the workflow against EXACT Dify DSL requirements and best practices.
 
-Quality Assessment Criteria:
+**Dify DSL Structure Requirements**:
 
-**1. Completeness (0-100)**
-- All required nodes are present
-- Start node has proper input variables
-- End node has proper output mappings
-- No dangling or disconnected nodes
-- All business logic steps are implemented
+1. **Node Structure** - Every node MUST have:
+   - id (string, unique)
+   - type (valid Dify type: start, llm, answer, etc.)
+   - data (object with title, type, desc, selected fields)
+   - position (object with x, y coordinates)
 
-**2. Correctness (0-100)**
-- Variable references are valid ({{#node_id.variable#}})
-- Node types match their purpose
-- Conditional logic is properly structured
-- Data types are compatible
-- No circular dependencies
-- Edge connections are valid
+2. **Data Object Requirements**:
+   - title (string, user-friendly name)
+   - type (string, must match node type)
+   - desc (string, can be empty)
+   - selected (boolean, usually false)
 
-**3. Best Practices (0-100)**
-- Clear node titles and descriptions
-- Appropriate LLM temperatures
-- Proper error handling
-- Efficient data flow
-- Modular design
-- Reasonable token limits
-- Security considerations
+3. **Start Node Validation**:
+   - id must be "start"
+   - variables array (can be empty or have proper variable definitions)
+   - Each variable needs: variable/type/label/required fields
 
-**Common Issues to Check:**
-- Missing variable references
-- Invalid node connections
-- Unreachable nodes
-- Overly complex flows
-- Missing error handling
-- Poor prompt engineering
-- Incorrect data types
-- Missing required parameters
+4. **LLM Node Validation**:
+   - model object with provider/name/mode/completion_params
+   - prompt_template array with role/text objects
+   - memory, context, vision objects present
+   - Variable references in prompts use {{{{#node_id.field#}}}} format
 
-IMPORTANT: Return ONLY valid JSON without markdown code blocks or explanations.
+5. **Answer/End Node Validation**:
+   - answer field with proper variable reference
+   - Must reference output from previous node
+
+6. **Edge Validation**:
+   - Each edge has id, source, target
+   - source and target must reference existing node ids
+   - No self-loops (source != target)
+   - All nodes except start should have incoming edge
+   - All nodes except answer/end should have outgoing edge
+
+7. **Variable Reference Validation**:
+   - Format: {{{{#node_id.output_field#}}}}
+   - node_id must exist in workflow
+   - Common outputs: llm.text, code.result, start.variable_name
+
+**Quality Scoring**:
+
+**Completeness (0-100)**:
+- All required Dify DSL fields present (30pts)
+- No missing node connections (30pts)
+- Business logic fully implemented (40pts)
+
+**Correctness (0-100)**:
+- Valid Dify node types (25pts)
+- Proper variable references (25pts)
+- Valid edge connections (25pts)
+- No structural errors (25pts)
+
+**Best Practices (0-100)**:
+- Descriptive titles (20pts)
+- Proper LLM configuration (20pts)
+- Clean data flow (20pts)
+- Error handling (20pts)
+- Security (20pts)
+
+**Critical Issues** (require retry if present):
+- Missing required DSL fields (title, type, desc, selected)
+- Invalid variable reference format
+- Disconnected nodes
+- Invalid node type
+- Missing model configuration in LLM nodes
+- Circular dependencies
+
+IMPORTANT: Return ONLY valid JSON without markdown code blocks.
 
 Return assessment as valid JSON:
 {{
@@ -81,10 +114,16 @@ Return assessment as valid JSON:
   "best_practices_score": 80.0,
   "issues": [
     {{
-      "severity": "high|medium|low",
+      "severity": "high",
       "node_id": "llm_1",
       "issue": "Description of issue",
       "recommendation": "How to fix"
+    }},
+    {{
+      "severity": "medium",
+      "node_id": null,
+      "issue": "General issue not specific to a node",
+      "recommendation": "General fix"
     }}
   ],
   "recommendations": [
@@ -94,7 +133,11 @@ Return assessment as valid JSON:
   "should_retry": false
 }}
 
-Set should_retry to true only if there are critical issues (overall_score < 70) that can be fixed by reconfiguration."""
+**IMPORTANT**:
+- node_id can be null for general issues not tied to specific node
+- node_id must be a valid node id (string) when specified
+- severity must be: "high", "medium", or "low"
+- Set should_retry=true only if overall_score < 70 and issues can be fixed by reconfiguration"""
 
     def __init__(self):
         super().__init__(name="Quality Assurance Agent")
@@ -210,9 +253,10 @@ Perform comprehensive quality assessment. Return JSON with scores, issues, and r
             if quality_report.issues:
                 logger.warning(f"⚠️ Quality Issues Detected:")
                 for issue in quality_report.issues[:5]:  # Log top 5
+                    node_info = issue.node_id if issue.node_id else "General"
                     logger.warning(
-                        f"   [{issue['severity'].upper()}] {issue.get('node_id', 'General')}: "
-                        f"{issue['issue']}"
+                        f"   [{issue.severity.upper()}] {node_info}: "
+                        f"{issue.issue}"
                     )
 
             return {

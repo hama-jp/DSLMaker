@@ -1,0 +1,2270 @@
+{
+  "start": [
+    {
+      "id": "1758934875881",
+      "type": "start",
+      "data": {
+        "title": "開始",
+        "type": "start",
+        "variables": []
+      },
+      "position": {
+        "x": 80,
+        "y": 282
+      },
+      "source_file": "test_workflow.yaml"
+    },
+    {
+      "id": "1754915045081",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "開始",
+        "type": "start",
+        "variables": []
+      },
+      "position": {
+        "x": 80,
+        "y": 282
+      },
+      "source_file": "テスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1711708591503",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "Start",
+        "type": "start",
+        "variables": [
+          {
+            "label": "input_text",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "input_text"
+          },
+          {
+            "label": "Multisentiment",
+            "max_length": 48,
+            "options": [
+              "True",
+              "False"
+            ],
+            "required": true,
+            "type": "select",
+            "variable": "Multisentiment"
+          },
+          {
+            "label": "Categories",
+            "max_length": 48,
+            "options": [],
+            "required": false,
+            "type": "text-input",
+            "variable": "Categories"
+          }
+        ]
+      },
+      "position": {
+        "x": 79.5,
+        "y": 3033.5
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1754916346450",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "開始",
+        "type": "start",
+        "variables": [
+          {
+            "allowed_file_extensions": [],
+            "allowed_file_types": [
+              "document"
+            ],
+            "allowed_file_upload_methods": [
+              "local_file",
+              "remote_url"
+            ],
+            "label": "file",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "file",
+            "variable": "file"
+          },
+          {
+            "default": "CASUAL=\"ポッドキャストのトーンは、カジュアルな話口調にしてください。\"",
+            "label": "tone",
+            "max_length": 48,
+            "options": [
+              "CASUAL=\"ポッドキャストのトーンは、カジュアルな話口調にしてください。\"",
+              "FOMAL=\"ポッドキャストのトーンは、フォーマルでプロフェッショナルな口調にしてください。\"",
+              "HUMOROUS=\"ポッドキャストのトーンは、ユーモアがあり軽快な雰囲気にしてください。\""
+            ],
+            "required": true,
+            "type": "select",
+            "variable": "tone"
+          },
+          {
+            "label": "host_name",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "host_name"
+          },
+          {
+            "label": "guest_name",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "guest_name"
+          },
+          {
+            "default": "日本語",
+            "label": "language",
+            "max_length": 48,
+            "options": [
+              "日本語",
+              "英語"
+            ],
+            "required": true,
+            "type": "select",
+            "variable": "language"
+          }
+        ]
+      },
+      "position": {
+        "x": 80,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1713261835258",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "Start",
+        "type": "start",
+        "variables": [
+          {
+            "label": "質問",
+            "max_length": 148,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "Question"
+          }
+        ]
+      },
+      "position": {
+        "x": 30,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1758934875881",
+      "type": "start",
+      "data": {
+        "title": "開始",
+        "type": "start",
+        "variables": []
+      },
+      "position": {
+        "x": 80,
+        "y": 282
+      },
+      "source_file": "test_workflow.yaml"
+    },
+    {
+      "id": "1754915045081",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "開始",
+        "type": "start",
+        "variables": []
+      },
+      "position": {
+        "x": 80,
+        "y": 282
+      },
+      "source_file": "テスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1711708591503",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "Start",
+        "type": "start",
+        "variables": [
+          {
+            "label": "input_text",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "input_text"
+          },
+          {
+            "label": "Multisentiment",
+            "max_length": 48,
+            "options": [
+              "True",
+              "False"
+            ],
+            "required": true,
+            "type": "select",
+            "variable": "Multisentiment"
+          },
+          {
+            "label": "Categories",
+            "max_length": 48,
+            "options": [],
+            "required": false,
+            "type": "text-input",
+            "variable": "Categories"
+          }
+        ]
+      },
+      "position": {
+        "x": 79.5,
+        "y": 3033.5
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1754916346450",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "開始",
+        "type": "start",
+        "variables": [
+          {
+            "allowed_file_extensions": [],
+            "allowed_file_types": [
+              "document"
+            ],
+            "allowed_file_upload_methods": [
+              "local_file",
+              "remote_url"
+            ],
+            "label": "file",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "file",
+            "variable": "file"
+          },
+          {
+            "default": "CASUAL=\"ポッドキャストのトーンは、カジュアルな話口調にしてください。\"",
+            "label": "tone",
+            "max_length": 48,
+            "options": [
+              "CASUAL=\"ポッドキャストのトーンは、カジュアルな話口調にしてください。\"",
+              "FOMAL=\"ポッドキャストのトーンは、フォーマルでプロフェッショナルな口調にしてください。\"",
+              "HUMOROUS=\"ポッドキャストのトーンは、ユーモアがあり軽快な雰囲気にしてください。\""
+            ],
+            "required": true,
+            "type": "select",
+            "variable": "tone"
+          },
+          {
+            "label": "host_name",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "host_name"
+          },
+          {
+            "label": "guest_name",
+            "max_length": 48,
+            "options": [],
+            "required": true,
+            "type": "text-input",
+            "variable": "guest_name"
+          },
+          {
+            "default": "日本語",
+            "label": "language",
+            "max_length": 48,
+            "options": [
+              "日本語",
+              "英語"
+            ],
+            "required": true,
+            "type": "select",
+            "variable": "language"
+          }
+        ]
+      },
+      "position": {
+        "x": 80,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1739229221219",
+      "type": "start",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "title": "開始",
+        "type": "start",
+        "variables": [
+          {
+            "label": "depth",
+            "max_length": 48,
+            "options": [],
+            "required": false,
+            "type": "number",
+            "variable": "depth"
+          }
+        ]
+      },
+      "position": {
+        "x": 366.31402428155843,
+        "y": 451.3953252394805
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "llm": [
+    {
+      "id": "llm",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "memory": {
+          "query_prompt_template": "{{#sys.query#}}\n\n{{#sys.files#}}",
+          "role_prefix": {
+            "assistant": "",
+            "user": ""
+          },
+          "window": {
+            "enabled": false,
+            "size": 10
+          }
+        },
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "unsloth/gpt-oss-20b",
+          "provider": "langgenius/openai_api_compatible/openai_api_compatible"
+        },
+        "prompt_template": [
+          {
+            "role": "system",
+            "text": ""
+          }
+        ],
+        "selected": false,
+        "title": "LLM",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 380,
+        "y": 282
+      },
+      "source_file": "テスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1711708651402",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {
+            "frequency_penalty": 0,
+            "max_tokens": 512,
+            "presence_penalty": 0,
+            "temperature": 0.7,
+            "top_p": 1
+          },
+          "mode": "chat",
+          "name": "gpt-3.5-turbo",
+          "provider": "openai"
+        },
+        "prompt_template": [
+          {
+            "id": "d4fc418e-504e-42e6-b262-c1179c961e1c",
+            "role": "system",
+            "text": "You are a text sentiment analysis model. Analyze text sentiment, categorize, and extract positive and negative keywords. If no categories are provided, categories should be automatically determined. Assign a sentiment score (-1.0 to 1.0, in 0.1 increments). Return a JSON response only.\nAlways attempt to return a sentiment score without exceptions.\nDefine a sentiment score for each category that applies to the input text. Do not include categories that do not apply to the text. It is okay to skip categories. \nIMPORTANT: Format the output as a JSON. Only return a JSON response with no other comment or text. If you return any other text than JSON, you will have failed."
+          },
+          {
+            "id": "cf3d4bd5-61d5-435e-b0f8-e262e7980934",
+            "role": "user",
+            "text": "input_text: The Pizza was delicious and staff was friendly , long wait.\ncategories: quality, service, price"
+          },
+          {
+            "id": "760174bb-2bbe-44ab-b34c-b289f5b950b9",
+            "role": "assistant",
+            "text": "[\n\t\t\"category\": \"quality\",\n\t\t\"positive_keywords\": [\n\t\t\t\"delicious pizza\"\n\t\t],\n\t\t\"negative_keywords\": [],\n\t\t\"score\": 0.7,\n\t\t\"sentiment\": \"Positive\"\n\t},\n\t{\n\t\t\"category\": \"service\",\n\t\t\"positive_keywords\": [\n\t\t\t\"friendly staff\"\n\t\t],\n\t\t\"negative_keywords\": [],\n\t\t\"score\": 0.6,\n\t\t\"sentiment\": \"Positive\"\n\t}\n]"
+          },
+          {
+            "id": "4b3d6b57-5e8b-48ef-af9d-766c6502bc00",
+            "role": "user",
+            "text": "input_text: {{#1711708591503.input_text#}}\n\ncategories: {{#1711708591503.Categories#}}"
+          }
+        ],
+        "selected": false,
+        "title": "Multisentiment is False",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 636.40862709903,
+        "y": 3143.606627356191
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1711708925268",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {
+            "frequency_penalty": 0,
+            "max_tokens": 512,
+            "presence_penalty": 0,
+            "temperature": 0.7,
+            "top_p": 1
+          },
+          "mode": "chat",
+          "name": "gpt-3.5-turbo",
+          "provider": "openai"
+        },
+        "prompt_template": [
+          {
+            "id": "1e4e0b38-4056-4b6a-b5c7-4b99e47cd66b",
+            "role": "system",
+            "text": "You are a text sentiment analysis model. Analyze text sentiment, categorize, and extract positive and negative keywords. If no categories are provided, categories should be automatically determined. Assign a sentiment score (-1.0 to 1.0, in 0.1 increments). Return a JSON response only.\nAlways attempt to return a sentiment score without exceptions.\nDefine a single score for the entire text and identify categories that are relevant to that text\nIMPORTANT: Format the output as a JSON. Only return a JSON response with no other comment or text. If you return any other text than JSON, you will have failed.\n"
+          },
+          {
+            "id": "333f6f58-ca2d-459f-9455-8eeec485bee9",
+            "role": "user",
+            "text": "input_text: The Pizza was delicious and staff was friendly , long wait.\ncategories: quality, service, price"
+          },
+          {
+            "id": "85f3e061-7cc0-485b-b66d-c3f7a3cb12b5",
+            "role": "assistant",
+            "text": "{\n    \"positive_keywords\": [\"delicious\", \"friendly staff\"],\n    \"negative_keywords\": [\"long wait\"],\n    \"score\": 0.3,\n    \"sentiment\": \"Slightly Positive\",\n    \"categories\": [\"quality\", \"service\"]\n}\n"
+          },
+          {
+            "id": "7d40b4ed-1480-43bf-b56d-3ca2bd4c36af",
+            "role": "user",
+            "text": "Input Text: {{#1711708591503.input_text#}}\ncategories: {{#1711708591503.Categories#}}"
+          }
+        ],
+        "selected": false,
+        "title": "Multisentiment is True",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 636.40862709903,
+        "y": 3019.7436097924674
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "llm",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": true,
+          "variable_selector": [
+            "1754917555372",
+            "text"
+          ]
+        },
+        "desc": "",
+        "memory": {
+          "query_prompt_template": "{{#sys.query#}}\n\n{{#sys.files#}}",
+          "role_prefix": {
+            "assistant": "",
+            "user": ""
+          },
+          "window": {
+            "enabled": false,
+            "size": 10
+          }
+        },
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "unsloth/gpt-oss-20b",
+          "provider": "langgenius/openai_api_compatible/openai_api_compatible"
+        },
+        "prompt_template": [
+          {
+            "id": "9e48546d-3538-4933-bd26-bd4ed0386705",
+            "role": "system",
+            "text": "対談の最後に、ホストとゲストが自然に主なポイントをまとめる流れを作ります。\n\n形式的な要約ではなく、会話を振り返ることで重要な内容をもうもう一度リスナーに印象づけます。スムーズな締めくくりを目指します。リスナーに考えさせる質問、行動喚起などで締めくくる。\n\n例：\n　「今日はたくさん興味深いお話が出来て、〇〇の重要性を感じましたね。」\n　「リスナーの皆さんも、ぜひ〇〇について考えてみてください！」　など"
+          },
+          {
+            "id": "cc635a91-af62-41ae-82db-0d50da350229",
+            "role": "user",
+            "text": "コンテキスト: {{#1754917555372.text#}}\nホスト名: {{#1754916346450.host_name#}}\nゲスト名: {{#1754916346450.guest_name#}}\n\n- コンテキストに基づいて結論を引き出し、コンテキストと同じ形式を維持します。\n- コンテキストと一致する内容の繰り返しや導入文は避けてください。\n\n- スクリプト形式: \n- スクリプトはホストの発言から始め、ホストとゲストが１行づつ交互に話します。\n- 最終スクリプトには会話内容のみを含めてください。XMLダグや話者名、その他フォーマットは含めないこと。\n- 最後の対話以外のまとめ文は不要です。"
+          }
+        ],
+        "selected": false,
+        "title": "まとめ作成",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 965,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754916902865",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": true,
+          "variable_selector": [
+            "1754916862628",
+            "text"
+          ]
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {},
+          "mode": "chat",
+          "name": "o4-mini",
+          "provider": "langgenius/openai/openai"
+        },
+        "prompt_template": [
+          {
+            "id": "7bf1af64-669c-4ad1-87f7-1ec1c7cf80f4",
+            "role": "system",
+            "text": "あなたのタスクは、提供された入力テキストを魅力的で有益なポッドキャストの題材を分析してアイデア出しをすることです。\n入力テキストはPDFやウェブページなどから取得された、構造が不明瞭な乱雑なものが含まれています。無関係な情報やフォーマットの問題は無視してください。最も興味深く、洞察に富んだ内容を抽出し、ポッドキャストでの議論に適したものに焦点を当ててください。"
+          },
+          {
+            "id": "9e413d50-74f6-461b-b52d-21cd420f7bf5",
+            "role": "user",
+            "text": "# 手順\n1.入力内容の分析\n提供されたテキストを注意深く読み、重要なトピック、ポイント、または興味深い事実や話題を特定します。無関係な情報やフォーマットの問題は無視します。\n2.アイデアのブレーンストーミング\n次の点に考慮しながら、ポッドキャストとして魅力的に提示する方法をブレーンストーミングします。\n- 一般のリスナーにもわかりやすく、親しみやすい表現\n- 情報に不足がある場合、創造的に補うアプローチ（ただし事実に反さないこと）\n\n# 元情報\n{{#1754916862628.text#}}"
+          }
+        ],
+        "selected": false,
+        "title": "入力内容を分析する",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 380,
+        "y": 410
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754917555372",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": true,
+          "variable_selector": [
+            "1754916862628",
+            "text"
+          ]
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "unsloth/gpt-oss-20b",
+          "provider": "langgenius/openai_api_compatible/openai_api_compatible"
+        },
+        "prompt_template": [
+          {
+            "id": "8c6fcc00-bcb4-4824-bd0b-0d7755db1ba1",
+            "role": "system",
+            "text": "あなたはポッドキャストのプロの脚本家です。\n\nあなたの役割は、提供された入力テキストを魅力的で有益なポッドキャストの台本に変換することです。\n入力テキストはPDFやウェブページから取得されたものです。変換時に乱雑なノイズが含まれる可能性があります。不要な情報やフォーマットの問題は無視してください。\n\n最も興味深く洞察に富んだ内容を抽出し、ポッドキャストのディスカッションとして展開してください。\n\n# 目指すべきポイント\n- 自然な会話の流れを作ること。\n- *{{#1754916346450.host_name#}}* と *{{#1754916346450.guest_name#}}} * の間の対話に重点を置いてください。\n\n## ホストとゲストの役割\n- ホストとゲストの役割はお互いが補完し合う構造にします。\n- ホストは興味深いポイントを熱意をもって聞き出し、専門家は分析や背景説明、広い視野からの解説を提供します。\n\n## 深堀り\n- 表面的な一般的な情報にとどまらず、提供された情報からリスナーに新たな発見を提供する視点や話題を掘り下げてください。\n\n## ターゲットリスナー\n- 効率を重視し、記憶に残る詳細を楽しみ、学びたいリスナーを対象とします。\n\n## 構造と進行\n- 明快な構造と魅力的な進行を維持。\n- 単調なトーンを避け、生き生きとした語り口で進行してください。\n\n## 具体例\n- 提供された情報に実際の例や共感できるエピソードがあれば活用し、情報に命を吹き込み、リスナーの関与を促進します。\n\n## 難しいトピックの簡潔な解説\n- 正確なゲストの説明を、ホストがかみ砕いて言い直し、その内容についてゲストが補足することでリスナーの理解を促進してください。\n\n## リスナーを引き付けるトーン\n- 魅力的かつリスナーを引き付ける{{#1754916346450.tone#}}を維持します。\n\n# ルール\n- ホストが常に話を切り出し、ゲストにインタビューする形式です。ゲストがトピックを説明します。\n- ホストはゲストに質問を投げかけ、最後に主要な洞察をまとめます。\n- 必要に応じて、「えっと」や「なるほど」など口癖も含め、リアルな会話台本にします。\n- ホストとゲストが話の流れに応じて、お互いの話を遮る場面も許容します。\n- ゲストはマーケティングや自己宣伝を含めてはなりません。\n- スクリプトが結論に近づく際、終了部分は別のスクリプトで作成するため、ここでは提供しなくて構いません。"
+          },
+          {
+            "id": "75c6ffd8-1aeb-41a3-be47-2a9b58db2305",
+            "role": "user",
+            "text": "以下の要件に基づき、高品質で魅力的なポッドスクリプトのスクリプトを作成してください。\n\nコンテキスト: {{#1754916862628.text#}}\nホスト名: {{#1754916346450.host_name#}}\nゲスト名: {{#1754916346450.guest_name#}}\nトーン: {{#1754916346450.tone#}}\n\nスクリプトの作成アイデア: {{#1754916902865.text#}}\n\n# スクリプト形式と内容\n- スクリプトはホストの発言から始めてください。\n- ホストとゲストの対話は１行づつ交互に進めてください。\n- 各行の冒頭に話者名は ** 記載しない **  でください。\n- 魅力的な会話を作ることに重点をおき、軽快なやりとりを展開してください。\n\n# 出力条件\n- スクリプト形式: スクリプトはホストの発言から始め、ホストとゲストが１行づつ交互に話します。\n- 最終スクリプトには会話内容のみを含めてください。XMLダグや話者名、その他フォーマットは含めないこと。\n\nこれら指示に従って、ポッドキャストの対話スクリプトを作成してください。"
+          }
+        ],
+        "selected": false,
+        "title": "会話の下書き作成",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 666,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1716959261724",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1716911333343",
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "gpt-4o",
+          "provider": "openai"
+        },
+        "prompt_template": [
+          {
+            "id": "1c7eeb97-1ebc-4579-b1ec-d0d649d57d2d",
+            "role": "system",
+            "text": "Summarize the following text.\n{{#1720758285748.text#}}"
+          }
+        ],
+        "selected": false,
+        "title": "LLM 2",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "configs": {
+            "detail": "high"
+          },
+          "enabled": true
+        }
+      },
+      "position": {
+        "x": 421,
+        "y": 85
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "llm",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "memory": {
+          "query_prompt_template": "{{#sys.query#}}\n\n{{#sys.files#}}",
+          "role_prefix": {
+            "assistant": "",
+            "user": ""
+          },
+          "window": {
+            "enabled": false,
+            "size": 10
+          }
+        },
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "unsloth/gpt-oss-20b",
+          "provider": "langgenius/openai_api_compatible/openai_api_compatible"
+        },
+        "prompt_template": [
+          {
+            "role": "system",
+            "text": ""
+          }
+        ],
+        "selected": false,
+        "title": "LLM",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 380,
+        "y": 282
+      },
+      "source_file": "テスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1711708651402",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {
+            "frequency_penalty": 0,
+            "max_tokens": 512,
+            "presence_penalty": 0,
+            "temperature": 0.7,
+            "top_p": 1
+          },
+          "mode": "chat",
+          "name": "gpt-3.5-turbo",
+          "provider": "openai"
+        },
+        "prompt_template": [
+          {
+            "id": "d4fc418e-504e-42e6-b262-c1179c961e1c",
+            "role": "system",
+            "text": "You are a text sentiment analysis model. Analyze text sentiment, categorize, and extract positive and negative keywords. If no categories are provided, categories should be automatically determined. Assign a sentiment score (-1.0 to 1.0, in 0.1 increments). Return a JSON response only.\nAlways attempt to return a sentiment score without exceptions.\nDefine a sentiment score for each category that applies to the input text. Do not include categories that do not apply to the text. It is okay to skip categories. \nIMPORTANT: Format the output as a JSON. Only return a JSON response with no other comment or text. If you return any other text than JSON, you will have failed."
+          },
+          {
+            "id": "cf3d4bd5-61d5-435e-b0f8-e262e7980934",
+            "role": "user",
+            "text": "input_text: The Pizza was delicious and staff was friendly , long wait.\ncategories: quality, service, price"
+          },
+          {
+            "id": "760174bb-2bbe-44ab-b34c-b289f5b950b9",
+            "role": "assistant",
+            "text": "[\n\t\t\"category\": \"quality\",\n\t\t\"positive_keywords\": [\n\t\t\t\"delicious pizza\"\n\t\t],\n\t\t\"negative_keywords\": [],\n\t\t\"score\": 0.7,\n\t\t\"sentiment\": \"Positive\"\n\t},\n\t{\n\t\t\"category\": \"service\",\n\t\t\"positive_keywords\": [\n\t\t\t\"friendly staff\"\n\t\t],\n\t\t\"negative_keywords\": [],\n\t\t\"score\": 0.6,\n\t\t\"sentiment\": \"Positive\"\n\t}\n]"
+          },
+          {
+            "id": "4b3d6b57-5e8b-48ef-af9d-766c6502bc00",
+            "role": "user",
+            "text": "input_text: {{#1711708591503.input_text#}}\n\ncategories: {{#1711708591503.Categories#}}"
+          }
+        ],
+        "selected": false,
+        "title": "Multisentiment is False",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 636.40862709903,
+        "y": 3143.606627356191
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1711708925268",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {
+            "frequency_penalty": 0,
+            "max_tokens": 512,
+            "presence_penalty": 0,
+            "temperature": 0.7,
+            "top_p": 1
+          },
+          "mode": "chat",
+          "name": "gpt-3.5-turbo",
+          "provider": "openai"
+        },
+        "prompt_template": [
+          {
+            "id": "1e4e0b38-4056-4b6a-b5c7-4b99e47cd66b",
+            "role": "system",
+            "text": "You are a text sentiment analysis model. Analyze text sentiment, categorize, and extract positive and negative keywords. If no categories are provided, categories should be automatically determined. Assign a sentiment score (-1.0 to 1.0, in 0.1 increments). Return a JSON response only.\nAlways attempt to return a sentiment score without exceptions.\nDefine a single score for the entire text and identify categories that are relevant to that text\nIMPORTANT: Format the output as a JSON. Only return a JSON response with no other comment or text. If you return any other text than JSON, you will have failed.\n"
+          },
+          {
+            "id": "333f6f58-ca2d-459f-9455-8eeec485bee9",
+            "role": "user",
+            "text": "input_text: The Pizza was delicious and staff was friendly , long wait.\ncategories: quality, service, price"
+          },
+          {
+            "id": "85f3e061-7cc0-485b-b66d-c3f7a3cb12b5",
+            "role": "assistant",
+            "text": "{\n    \"positive_keywords\": [\"delicious\", \"friendly staff\"],\n    \"negative_keywords\": [\"long wait\"],\n    \"score\": 0.3,\n    \"sentiment\": \"Slightly Positive\",\n    \"categories\": [\"quality\", \"service\"]\n}\n"
+          },
+          {
+            "id": "7d40b4ed-1480-43bf-b56d-3ca2bd4c36af",
+            "role": "user",
+            "text": "Input Text: {{#1711708591503.input_text#}}\ncategories: {{#1711708591503.Categories#}}"
+          }
+        ],
+        "selected": false,
+        "title": "Multisentiment is True",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 636.40862709903,
+        "y": 3019.7436097924674
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "llm",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": true,
+          "variable_selector": [
+            "1754917555372",
+            "text"
+          ]
+        },
+        "desc": "",
+        "memory": {
+          "query_prompt_template": "{{#sys.query#}}\n\n{{#sys.files#}}",
+          "role_prefix": {
+            "assistant": "",
+            "user": ""
+          },
+          "window": {
+            "enabled": false,
+            "size": 10
+          }
+        },
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "unsloth/gpt-oss-20b",
+          "provider": "langgenius/openai_api_compatible/openai_api_compatible"
+        },
+        "prompt_template": [
+          {
+            "id": "9e48546d-3538-4933-bd26-bd4ed0386705",
+            "role": "system",
+            "text": "対談の最後に、ホストとゲストが自然に主なポイントをまとめる流れを作ります。\n\n形式的な要約ではなく、会話を振り返ることで重要な内容をもうもう一度リスナーに印象づけます。スムーズな締めくくりを目指します。リスナーに考えさせる質問、行動喚起などで締めくくる。\n\n例：\n　「今日はたくさん興味深いお話が出来て、〇〇の重要性を感じましたね。」\n　「リスナーの皆さんも、ぜひ〇〇について考えてみてください！」　など"
+          },
+          {
+            "id": "cc635a91-af62-41ae-82db-0d50da350229",
+            "role": "user",
+            "text": "コンテキスト: {{#1754917555372.text#}}\nホスト名: {{#1754916346450.host_name#}}\nゲスト名: {{#1754916346450.guest_name#}}\n\n- コンテキストに基づいて結論を引き出し、コンテキストと同じ形式を維持します。\n- コンテキストと一致する内容の繰り返しや導入文は避けてください。\n\n- スクリプト形式: \n- スクリプトはホストの発言から始め、ホストとゲストが１行づつ交互に話します。\n- 最終スクリプトには会話内容のみを含めてください。XMLダグや話者名、その他フォーマットは含めないこと。\n- 最後の対話以外のまとめ文は不要です。"
+          }
+        ],
+        "selected": false,
+        "title": "まとめ作成",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 965,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754916902865",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": true,
+          "variable_selector": [
+            "1754916862628",
+            "text"
+          ]
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {},
+          "mode": "chat",
+          "name": "o4-mini",
+          "provider": "langgenius/openai/openai"
+        },
+        "prompt_template": [
+          {
+            "id": "7bf1af64-669c-4ad1-87f7-1ec1c7cf80f4",
+            "role": "system",
+            "text": "あなたのタスクは、提供された入力テキストを魅力的で有益なポッドキャストの題材を分析してアイデア出しをすることです。\n入力テキストはPDFやウェブページなどから取得された、構造が不明瞭な乱雑なものが含まれています。無関係な情報やフォーマットの問題は無視してください。最も興味深く、洞察に富んだ内容を抽出し、ポッドキャストでの議論に適したものに焦点を当ててください。"
+          },
+          {
+            "id": "9e413d50-74f6-461b-b52d-21cd420f7bf5",
+            "role": "user",
+            "text": "# 手順\n1.入力内容の分析\n提供されたテキストを注意深く読み、重要なトピック、ポイント、または興味深い事実や話題を特定します。無関係な情報やフォーマットの問題は無視します。\n2.アイデアのブレーンストーミング\n次の点に考慮しながら、ポッドキャストとして魅力的に提示する方法をブレーンストーミングします。\n- 一般のリスナーにもわかりやすく、親しみやすい表現\n- 情報に不足がある場合、創造的に補うアプローチ（ただし事実に反さないこと）\n\n# 元情報\n{{#1754916862628.text#}}"
+          }
+        ],
+        "selected": false,
+        "title": "入力内容を分析する",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 380,
+        "y": 410
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754917555372",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": true,
+          "variable_selector": [
+            "1754916862628",
+            "text"
+          ]
+        },
+        "desc": "",
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "unsloth/gpt-oss-20b",
+          "provider": "langgenius/openai_api_compatible/openai_api_compatible"
+        },
+        "prompt_template": [
+          {
+            "id": "8c6fcc00-bcb4-4824-bd0b-0d7755db1ba1",
+            "role": "system",
+            "text": "あなたはポッドキャストのプロの脚本家です。\n\nあなたの役割は、提供された入力テキストを魅力的で有益なポッドキャストの台本に変換することです。\n入力テキストはPDFやウェブページから取得されたものです。変換時に乱雑なノイズが含まれる可能性があります。不要な情報やフォーマットの問題は無視してください。\n\n最も興味深く洞察に富んだ内容を抽出し、ポッドキャストのディスカッションとして展開してください。\n\n# 目指すべきポイント\n- 自然な会話の流れを作ること。\n- *{{#1754916346450.host_name#}}* と *{{#1754916346450.guest_name#}}} * の間の対話に重点を置いてください。\n\n## ホストとゲストの役割\n- ホストとゲストの役割はお互いが補完し合う構造にします。\n- ホストは興味深いポイントを熱意をもって聞き出し、専門家は分析や背景説明、広い視野からの解説を提供します。\n\n## 深堀り\n- 表面的な一般的な情報にとどまらず、提供された情報からリスナーに新たな発見を提供する視点や話題を掘り下げてください。\n\n## ターゲットリスナー\n- 効率を重視し、記憶に残る詳細を楽しみ、学びたいリスナーを対象とします。\n\n## 構造と進行\n- 明快な構造と魅力的な進行を維持。\n- 単調なトーンを避け、生き生きとした語り口で進行してください。\n\n## 具体例\n- 提供された情報に実際の例や共感できるエピソードがあれば活用し、情報に命を吹き込み、リスナーの関与を促進します。\n\n## 難しいトピックの簡潔な解説\n- 正確なゲストの説明を、ホストがかみ砕いて言い直し、その内容についてゲストが補足することでリスナーの理解を促進してください。\n\n## リスナーを引き付けるトーン\n- 魅力的かつリスナーを引き付ける{{#1754916346450.tone#}}を維持します。\n\n# ルール\n- ホストが常に話を切り出し、ゲストにインタビューする形式です。ゲストがトピックを説明します。\n- ホストはゲストに質問を投げかけ、最後に主要な洞察をまとめます。\n- 必要に応じて、「えっと」や「なるほど」など口癖も含め、リアルな会話台本にします。\n- ホストとゲストが話の流れに応じて、お互いの話を遮る場面も許容します。\n- ゲストはマーケティングや自己宣伝を含めてはなりません。\n- スクリプトが結論に近づく際、終了部分は別のスクリプトで作成するため、ここでは提供しなくて構いません。"
+          },
+          {
+            "id": "75c6ffd8-1aeb-41a3-be47-2a9b58db2305",
+            "role": "user",
+            "text": "以下の要件に基づき、高品質で魅力的なポッドスクリプトのスクリプトを作成してください。\n\nコンテキスト: {{#1754916862628.text#}}\nホスト名: {{#1754916346450.host_name#}}\nゲスト名: {{#1754916346450.guest_name#}}\nトーン: {{#1754916346450.tone#}}\n\nスクリプトの作成アイデア: {{#1754916902865.text#}}\n\n# スクリプト形式と内容\n- スクリプトはホストの発言から始めてください。\n- ホストとゲストの対話は１行づつ交互に進めてください。\n- 各行の冒頭に話者名は ** 記載しない **  でください。\n- 魅力的な会話を作ることに重点をおき、軽快なやりとりを展開してください。\n\n# 出力条件\n- スクリプト形式: スクリプトはホストの発言から始め、ホストとゲストが１行づつ交互に話します。\n- 最終スクリプトには会話内容のみを含めてください。XMLダグや話者名、その他フォーマットは含めないこと。\n\nこれら指示に従って、ポッドキャストの対話スクリプトを作成してください。"
+          }
+        ],
+        "selected": false,
+        "title": "会話の下書き作成",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 666,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1739245286499",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "memory": {
+          "query_prompt_template": "## トピック\n{{#sys.query#}}\n\n## 現在の発見事項\n{{#conversation.findings#}}\n\n## 検索済のtopics\n{{#conversation.topics#}}",
+          "role_prefix": {
+            "assistant": "",
+            "user": ""
+          },
+          "window": {
+            "enabled": false,
+            "size": 50
+          }
+        },
+        "model": {
+          "completion_params": {
+            "response_format": "json_object",
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "gpt-4o",
+          "provider": "langgenius/openai/openai"
+        },
+        "prompt_template": [
+          {
+            "id": "2acdb5a9-823a-4ce3-8dbe-401540a61bc5",
+            "role": "system",
+            "text": "あなたは以下のトピックについて調査を行う研究エージェントです\n何が分かりましたか？どのような不明点が残っていますか？次に調査すべき具体的な側面はありますか？\n\n## 出力\n- 検索済みのtopicsと完全に同じtopicは出力しないでください。\n- さらに情報を検索する必要がある場合は、nextSearchTopicを設定してください。\n- 十分な情報が得られた場合は、shouldContinueをfalseに設定してください。`,\n- jsonで出力してください\n\n```json\nnextSearchTopic: str | None\nshouldContinue: bool \n```\n\n\n"
+          }
+        ],
+        "selected": false,
+        "title": "LLM",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 128,
+        "y": 67.17608171067138
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    },
+    {
+      "id": "1739246156652",
+      "type": "llm",
+      "data": {
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "desc": "",
+        "memory": {
+          "query_prompt_template": "## topic\n{{#sys.query#}}\n\n# findings \n{{#conversation.findings#}}\n",
+          "role_prefix": {
+            "assistant": "",
+            "user": ""
+          },
+          "window": {
+            "enabled": false,
+            "size": 50
+          }
+        },
+        "model": {
+          "completion_params": {
+            "temperature": 0.7
+          },
+          "mode": "chat",
+          "name": "deepseek-reasoner",
+          "provider": "langgenius/deepseek/deepseek"
+        },
+        "prompt_template": [
+          {
+            "id": "89c17d58-6a63-4f4f-98fe-f6534ec1ecb0",
+            "role": "system",
+            "text": " 以下の調査結果に基づいて、topicに関する包括的な分析を作成してください\n重要な洞察、結論、および残された不確実性を提供してください。適切な箇所で出典を引用してください。この分析は非常に包括的で詳細な内容である必要があります。長文になることを想定しています。\nマークダウンで出力してください。"
+          }
+        ],
+        "selected": false,
+        "title": "Reasoning Model",
+        "type": "llm",
+        "variables": [],
+        "vision": {
+          "enabled": false
+        }
+      },
+      "position": {
+        "x": 1858.4472130110016,
+        "y": 563.5
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "answer": [
+    {
+      "id": "answer",
+      "type": "answer",
+      "data": {
+        "answer": "{{#llm.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "回答",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 680,
+        "y": 282
+      },
+      "source_file": "テスト_advanced-chat.yaml"
+    },
+    {
+      "id": "answer",
+      "type": "answer",
+      "data": {
+        "answer": "-----------------\nポッドキャストを作成中。しばらくおまちください。",
+        "desc": "",
+        "selected": false,
+        "title": "音声作成中",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 1284.7406572305918,
+        "y": 400
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754919624547",
+      "type": "answer",
+      "data": {
+        "answer": "{{#1754917555372.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "下書き内容の表示",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 653,
+        "y": 410
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754920303622",
+      "type": "answer",
+      "data": {
+        "answer": "{{#llm.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "まとめ表示",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 965,
+        "y": 405
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "answer",
+      "type": "answer",
+      "data": {
+        "answer": "{{#llm.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "回答",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 680,
+        "y": 282
+      },
+      "source_file": "テスト_advanced-chat.yaml"
+    },
+    {
+      "id": "answer",
+      "type": "answer",
+      "data": {
+        "answer": "-----------------\nポッドキャストを作成中。しばらくおまちください。",
+        "desc": "",
+        "selected": false,
+        "title": "音声作成中",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 1284.7406572305918,
+        "y": 400
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754919624547",
+      "type": "answer",
+      "data": {
+        "answer": "{{#1754917555372.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "下書き内容の表示",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 653,
+        "y": 410
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754920303622",
+      "type": "answer",
+      "data": {
+        "answer": "{{#llm.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "まとめ表示",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 965,
+        "y": 405
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "answer",
+      "type": "answer",
+      "data": {
+        "answer": "\n{{#1739246156652.text#}}",
+        "desc": "",
+        "selected": false,
+        "title": "回答",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 1858.4472130110016,
+        "y": 676.2043901579685
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    },
+    {
+      "id": "1739253994297",
+      "type": "answer",
+      "data": {
+        "answer": "{{#1739254296073.output#}}",
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "selected": false,
+        "title": "回答",
+        "type": "answer",
+        "variables": []
+      },
+      "position": {
+        "x": 906.5415537904462,
+        "y": 878.1347002855746
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "end": [
+    {
+      "id": "1711708653229",
+      "type": "end",
+      "data": {
+        "desc": "",
+        "outputs": [
+          {
+            "value_selector": [
+              "1711708651402",
+              "text"
+            ],
+            "variable": "text"
+          }
+        ],
+        "selected": false,
+        "title": "End",
+        "type": "end"
+      },
+      "position": {
+        "x": 943.6522881682833,
+        "y": 3143.606627356191
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1712457684421",
+      "type": "end",
+      "data": {
+        "desc": "",
+        "outputs": [
+          {
+            "value_selector": [
+              "1711708925268",
+              "text"
+            ],
+            "variable": "text"
+          }
+        ],
+        "selected": false,
+        "title": "End 2",
+        "type": "end"
+      },
+      "position": {
+        "x": 943.6522881682833,
+        "y": 3019.7436097924674
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1713262577750",
+      "type": "end",
+      "data": {
+        "desc": "",
+        "outputs": [
+          {
+            "value_selector": [
+              "1720761482451",
+              "output"
+            ],
+            "variable": "text"
+          }
+        ],
+        "selected": false,
+        "title": "End",
+        "type": "end"
+      },
+      "position": {
+        "x": 2595,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1711708653229",
+      "type": "end",
+      "data": {
+        "desc": "",
+        "outputs": [
+          {
+            "value_selector": [
+              "1711708651402",
+              "text"
+            ],
+            "variable": "text"
+          }
+        ],
+        "selected": false,
+        "title": "End",
+        "type": "end"
+      },
+      "position": {
+        "x": 943.6522881682833,
+        "y": 3143.606627356191
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1712457684421",
+      "type": "end",
+      "data": {
+        "desc": "",
+        "outputs": [
+          {
+            "value_selector": [
+              "1711708925268",
+              "text"
+            ],
+            "variable": "text"
+          }
+        ],
+        "selected": false,
+        "title": "End 2",
+        "type": "end"
+      },
+      "position": {
+        "x": 943.6522881682833,
+        "y": 3019.7436097924674
+      },
+      "source_file": "感情分析_workflow.yaml"
+    }
+  ],
+  "if-else": [
+    {
+      "id": "1711708770787",
+      "type": "if-else",
+      "data": {
+        "conditions": [
+          {
+            "comparison_operator": "is",
+            "id": "1711708913752",
+            "value": "True",
+            "variable_selector": [
+              "1711708591503",
+              "Multisentiment"
+            ]
+          }
+        ],
+        "desc": "",
+        "logical_operator": "and",
+        "selected": false,
+        "title": "IF/ELSE",
+        "type": "if-else"
+      },
+      "position": {
+        "x": 362.5,
+        "y": 3033.5
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1711708770787",
+      "type": "if-else",
+      "data": {
+        "conditions": [
+          {
+            "comparison_operator": "is",
+            "id": "1711708913752",
+            "value": "True",
+            "variable_selector": [
+              "1711708591503",
+              "Multisentiment"
+            ]
+          }
+        ],
+        "desc": "",
+        "logical_operator": "and",
+        "selected": false,
+        "title": "IF/ELSE",
+        "type": "if-else"
+      },
+      "position": {
+        "x": 362.5,
+        "y": 3033.5
+      },
+      "source_file": "感情分析_workflow.yaml"
+    },
+    {
+      "id": "1739245723720",
+      "type": "if-else",
+      "data": {
+        "cases": [
+          {
+            "case_id": "true",
+            "conditions": [
+              {
+                "comparison_operator": "is",
+                "id": "b3169e80-3090-4a5b-8df4-3148d7afcb4d",
+                "value": "True",
+                "varType": "string",
+                "variable_selector": [
+                  "1739245524260",
+                  "text"
+                ]
+              }
+            ],
+            "id": "true",
+            "logical_operator": "and"
+          }
+        ],
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "selected": false,
+        "title": "IF/ELSE",
+        "type": "if-else"
+      },
+      "position": {
+        "x": 48.74608363090499,
+        "y": 534.403100663696
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "document-extractor": [
+    {
+      "id": "1754916862628",
+      "type": "document-extractor",
+      "data": {
+        "desc": "",
+        "is_array_file": false,
+        "selected": false,
+        "title": "テキスト抽出",
+        "type": "document-extractor",
+        "variable_selector": [
+          "1754916346450",
+          "file"
+        ]
+      },
+      "position": {
+        "x": 380,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1754916862628",
+      "type": "document-extractor",
+      "data": {
+        "desc": "",
+        "is_array_file": false,
+        "selected": false,
+        "title": "テキスト抽出",
+        "type": "document-extractor",
+        "variable_selector": [
+          "1754916346450",
+          "file"
+        ]
+      },
+      "position": {
+        "x": 380,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    }
+  ],
+  "template-transform": [
+    {
+      "id": "1754920435754",
+      "type": "template-transform",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "template": "{{ arg1 }}\r\n{{ arg2 }}",
+        "title": "テンプレート",
+        "type": "template-transform",
+        "variables": [
+          {
+            "value_selector": [
+              "1754917555372",
+              "text"
+            ],
+            "value_type": "string",
+            "variable": "arg1"
+          },
+          {
+            "value_selector": [
+              "llm",
+              "text"
+            ],
+            "value_type": "string",
+            "variable": "arg2"
+          }
+        ]
+      },
+      "position": {
+        "x": 1284.7406572305918,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1720758555344",
+      "type": "template-transform",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1716911333343",
+        "selected": false,
+        "template": "{{ arg1 }}\\SP{{ text }}",
+        "title": "Combine URL and Summary",
+        "type": "template-transform",
+        "variables": [
+          {
+            "value_selector": [
+              "1716911333343",
+              "item"
+            ],
+            "variable": "arg1"
+          },
+          {
+            "value_selector": [
+              "1716959261724",
+              "text"
+            ],
+            "variable": "text"
+          }
+        ]
+      },
+      "position": {
+        "x": 725,
+        "y": 85
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1720761482451",
+      "type": "template-transform",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "template": "|URL|Summary|\n|---|---|\n{% for data in arg1 -%}\n|{{data.url}}|{{data.text}}|\n{% endfor -%}",
+        "title": "Result in Table",
+        "type": "template-transform",
+        "variables": [
+          {
+            "value_selector": [
+              "1720759755103",
+              "result"
+            ],
+            "variable": "arg1"
+          }
+        ]
+      },
+      "position": {
+        "x": 2291,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1754920435754",
+      "type": "template-transform",
+      "data": {
+        "desc": "",
+        "selected": false,
+        "template": "{{ arg1 }}\r\n{{ arg2 }}",
+        "title": "テンプレート",
+        "type": "template-transform",
+        "variables": [
+          {
+            "value_selector": [
+              "1754917555372",
+              "text"
+            ],
+            "value_type": "string",
+            "variable": "arg1"
+          },
+          {
+            "value_selector": [
+              "llm",
+              "text"
+            ],
+            "value_type": "string",
+            "variable": "arg2"
+          }
+        ]
+      },
+      "position": {
+        "x": 1284.7406572305918,
+        "y": 282
+      },
+      "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+    },
+    {
+      "id": "1739254060247",
+      "type": "template-transform",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "selected": false,
+        "template": "{{ index + 1 }}/{{ depth }}回目の検索を実行しました。\n\n",
+        "title": "中感出力フォーマット",
+        "type": "template-transform",
+        "variables": [
+          {
+            "value_selector": [
+              "1739244888446",
+              "index"
+            ],
+            "variable": "index"
+          },
+          {
+            "value_selector": [
+              "1739229221219",
+              "depth"
+            ],
+            "variable": "depth"
+          }
+        ]
+      },
+      "position": {
+        "x": 867.6964657330811,
+        "y": 631.2310099968581
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    },
+    {
+      "id": "1739254516383",
+      "type": "template-transform",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "selected": false,
+        "template": " ",
+        "title": "空白",
+        "type": "template-transform",
+        "variables": []
+      },
+      "position": {
+        "x": 325.67632971971057,
+        "y": 879.2385925098547
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "tool": [
+    {
+      "id": "1713262010863",
+      "type": "tool",
+      "data": {
+        "desc": "",
+        "provider_id": "tavily",
+        "provider_name": "tavily",
+        "provider_type": "builtin",
+        "selected": false,
+        "title": "TavilySearch",
+        "tool_configurations": {
+          "exclude_domains": null,
+          "include_answer": 0,
+          "include_domains": null,
+          "include_images": 0,
+          "include_raw_content": 0,
+          "max_results": 10,
+          "search_depth": "basic"
+        },
+        "tool_label": "TavilySearch",
+        "tool_name": "tavily_search",
+        "tool_parameters": {
+          "query": {
+            "type": "mixed",
+            "value": "{{#1713261835258.Question#}}"
+          }
+        },
+        "type": "tool"
+      },
+      "position": {
+        "x": 331.7190223065919,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1720758285748",
+      "type": "tool",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "isIterationStart": true,
+        "iteration_id": "1716911333343",
+        "provider_id": "jina",
+        "provider_name": "jina",
+        "provider_type": "builtin",
+        "selected": false,
+        "title": "JinaReader",
+        "tool_configurations": {
+          "gather_all_images_at_the_end": 0,
+          "gather_all_links_at_the_end": 0,
+          "image_caption": 0,
+          "no_cache": 0,
+          "proxy_server": null,
+          "summary": 0,
+          "target_selector": null,
+          "wait_for_selector": null
+        },
+        "tool_label": "JinaReader",
+        "tool_name": "jina_reader",
+        "tool_parameters": {
+          "url": {
+            "type": "mixed",
+            "value": "{{#1716911333343.item#}}"
+          }
+        },
+        "type": "tool"
+      },
+      "position": {
+        "x": 117,
+        "y": 85
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1739245424964",
+      "type": "tool",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "provider_id": "tavily",
+        "provider_name": "tavily",
+        "provider_type": "builtin",
+        "selected": false,
+        "title": "Tavily Search",
+        "tool_configurations": {
+          "days": {
+            "type": "constant",
+            "value": 3
+          },
+          "exclude_domains": {
+            "type": "constant",
+            "value": null
+          },
+          "include_answer": {
+            "type": "constant",
+            "value": 0
+          },
+          "include_domains": {
+            "type": "constant",
+            "value": null
+          },
+          "include_image_descriptions": {
+            "type": "constant",
+            "value": 0
+          },
+          "include_images": {
+            "type": "constant",
+            "value": 0
+          },
+          "include_raw_content": {
+            "type": "constant",
+            "value": 0
+          },
+          "max_results": {
+            "type": "constant",
+            "value": 5
+          },
+          "search_depth": {
+            "type": "constant",
+            "value": "advanced"
+          },
+          "topic": {
+            "type": "constant",
+            "value": "general"
+          }
+        },
+        "tool_label": "Tavily Search",
+        "tool_name": "tavily_search",
+        "tool_node_version": "2",
+        "tool_parameters": {
+          "query": {
+            "type": "mixed",
+            "value": "{{#conversation.nextSearchTopic#}}"
+          }
+        },
+        "type": "tool"
+      },
+      "position": {
+        "x": 326.22599578713334,
+        "y": 498.438562962014
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    },
+    {
+      "id": "1739245446901",
+      "type": "tool",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "provider_id": "json_process",
+        "provider_name": "json_process",
+        "provider_type": "builtin",
+        "selected": false,
+        "title": "Extract nextSearchTopic",
+        "tool_configurations": {
+          "ensure_ascii": {
+            "type": "constant",
+            "value": 1
+          }
+        },
+        "tool_label": "JSON Parse",
+        "tool_name": "parse",
+        "tool_node_version": "2",
+        "tool_parameters": {
+          "content": {
+            "type": "mixed",
+            "value": "{{#1739245286499.text#}}"
+          },
+          "json_filter": {
+            "type": "mixed",
+            "value": "nextSearchTopic"
+          }
+        },
+        "type": "tool"
+      },
+      "position": {
+        "x": 47.75538842320191,
+        "y": 247.82584481078118
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    },
+    {
+      "id": "1739245524260",
+      "type": "tool",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "provider_id": "json_process",
+        "provider_name": "json_process",
+        "provider_type": "builtin",
+        "selected": false,
+        "title": "Extract shouldContinue",
+        "tool_configurations": {
+          "ensure_ascii": {
+            "type": "constant",
+            "value": 1
+          }
+        },
+        "tool_label": "JSON Parse",
+        "tool_name": "parse",
+        "tool_node_version": "2",
+        "tool_parameters": {
+          "content": {
+            "type": "mixed",
+            "value": "{{#1739245286499.text#}}"
+          },
+          "json_filter": {
+            "type": "mixed",
+            "value": "shouldContinue"
+          }
+        },
+        "type": "tool"
+      },
+      "position": {
+        "x": 49.19865333377197,
+        "y": 358.53359239733356
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "code": [
+    {
+      "id": "1713262060182",
+      "type": "code",
+      "data": {
+        "code": "import re\nimport time\ndef main(arg1) -> dict:\n    urls = re.findall(r'http[s]?://[^\\s)]+', arg1)\n    return {\n        \"result\": urls,\n    }",
+        "code_language": "python3",
+        "desc": "",
+        "outputs": {
+          "result": {
+            "children": null,
+            "type": "array[string]"
+          }
+        },
+        "selected": false,
+        "title": "Code",
+        "type": "code",
+        "variables": [
+          {
+            "value_selector": [
+              "1713262010863",
+              "text"
+            ],
+            "variable": "arg1"
+          }
+        ]
+      },
+      "position": {
+        "x": 638,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1720759755103",
+      "type": "code",
+      "data": {
+        "code": "import time\ndef main(arg1) -> dict:\n    result = []\n    for item in arg1:\n        url, text = item.split('\\\\SP')\n        text = text.replace('\\n', ' ')\n        result.append({'url':url, 'text':text})\n    return {\n        \"result\": result,\n    }\n",
+        "code_language": "python3",
+        "desc": "",
+        "outputs": {
+          "result": {
+            "children": null,
+            "type": "array[object]"
+          }
+        },
+        "selected": false,
+        "title": "Split URL and Text Summary",
+        "type": "code",
+        "variables": [
+          {
+            "value_selector": [
+              "1716911333343",
+              "output"
+            ],
+            "variable": "arg1"
+          }
+        ]
+      },
+      "position": {
+        "x": 1987,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1739245548624",
+      "type": "code",
+      "data": {
+        "code": "\ndef main(depth: int) -> dict:\n    depth = depth or 3\n    array = list(range(depth))\n    return {\n        \"array\": array,\n        \"depth\": depth\n    }\n",
+        "code_language": "python3",
+        "desc": "",
+        "outputs": {
+          "array": {
+            "children": null,
+            "type": "array[number]"
+          },
+          "depth": {
+            "children": null,
+            "type": "number"
+          }
+        },
+        "selected": false,
+        "title": "配列作成",
+        "type": "code",
+        "variables": [
+          {
+            "value_selector": [
+              "1739229221219",
+              "depth"
+            ],
+            "variable": "depth"
+          }
+        ]
+      },
+      "position": {
+        "x": 371.36822492017325,
+        "y": 563.5
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "iteration": [
+    {
+      "id": "1716911333343",
+      "type": "iteration",
+      "data": {
+        "desc": "",
+        "height": 377,
+        "iterator_selector": [
+          "1713262060182",
+          "result"
+        ],
+        "output_selector": [
+          "1720758555344",
+          "output"
+        ],
+        "output_type": "array[string]",
+        "selected": false,
+        "startNodeType": "tool",
+        "start_node_id": "1716911333343start0",
+        "title": "Iteration",
+        "type": "iteration",
+        "width": 985
+      },
+      "position": {
+        "x": 942,
+        "y": 388.5
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1739244888446",
+      "type": "iteration",
+      "data": {
+        "desc": "",
+        "error_handle_mode": "terminated",
+        "height": 1042,
+        "is_parallel": false,
+        "iterator_selector": [
+          "1739245548624",
+          "array"
+        ],
+        "output_selector": [
+          "1739254296073",
+          "output"
+        ],
+        "output_type": "array[string]",
+        "parallel_nums": 10,
+        "selected": false,
+        "start_node_id": "1739244888446start",
+        "title": "イテレーション",
+        "type": "iteration",
+        "width": 1186
+      },
+      "position": {
+        "x": 650.8824354561594,
+        "y": 550.399123970737
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "iteration-start": [
+    {
+      "id": "1716911333343start0",
+      "type": "iteration-start",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "title": "",
+        "type": "iteration-start"
+      },
+      "position": {
+        "x": 24,
+        "y": 68
+      },
+      "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+    },
+    {
+      "id": "1739244888446start",
+      "type": "iteration-start",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "selected": false,
+        "title": "",
+        "type": "iteration-start"
+      },
+      "position": {
+        "x": 24,
+        "y": 68
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "assigner": [
+    {
+      "id": "1739245826988",
+      "type": "assigner",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "items": [
+          {
+            "input_type": "variable",
+            "operation": "over-write",
+            "value": [
+              "1739245446901",
+              "text"
+            ],
+            "variable_selector": [
+              "conversation",
+              "nextSearchTopic"
+            ],
+            "write_mode": "over-write"
+          },
+          {
+            "input_type": "variable",
+            "operation": "over-write",
+            "value": [
+              "1739245524260",
+              "text"
+            ],
+            "variable_selector": [
+              "conversation",
+              "shouldContinue"
+            ],
+            "write_mode": "over-write"
+          },
+          {
+            "input_type": "variable",
+            "operation": "append",
+            "value": [
+              "conversation",
+              "nextSearchTopic"
+            ],
+            "variable_selector": [
+              "conversation",
+              "topics"
+            ],
+            "write_mode": "over-write"
+          }
+        ],
+        "iteration_id": "1739244888446",
+        "selected": false,
+        "title": "変数代入",
+        "type": "assigner",
+        "version": "2"
+      },
+      "position": {
+        "x": 751.8559564663802,
+        "y": 65
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    },
+    {
+      "id": "1739246085820",
+      "type": "assigner",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "items": [
+          {
+            "input_type": "variable",
+            "operation": "append",
+            "value": [
+              "1739245424964",
+              "text"
+            ],
+            "variable_selector": [
+              "conversation",
+              "findings"
+            ],
+            "write_mode": "over-write"
+          }
+        ],
+        "iteration_id": "1739244888446",
+        "selected": false,
+        "title": "変数代入",
+        "type": "assigner",
+        "version": "2"
+      },
+      "position": {
+        "x": 606.0088891085952,
+        "y": 628.4868835893722
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ],
+  "variable-aggregator": [
+    {
+      "id": "1739254296073",
+      "type": "variable-aggregator",
+      "data": {
+        "desc": "",
+        "isInIteration": true,
+        "iteration_id": "1739244888446",
+        "output_type": "string",
+        "selected": false,
+        "title": "変数集約器",
+        "type": "variable-aggregator",
+        "variables": [
+          [
+            "1739254060247",
+            "output"
+          ],
+          [
+            "1739254516383",
+            "output"
+          ]
+        ]
+      },
+      "position": {
+        "x": 640.0246481283732,
+        "y": 876.3796107886387
+      },
+      "source_file": "DeepResearch_advanced-chat.yaml"
+    }
+  ]
+}

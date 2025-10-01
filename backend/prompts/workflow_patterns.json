@@ -1,0 +1,313 @@
+[
+  {
+    "name": "投資分析レポート コパイロット",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 0,
+    "edge_count": 0,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "投資分析レポート_コパイロット_agent-chat.yaml"
+  },
+  {
+    "name": "コード インタープリター",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 0,
+    "edge_count": 0,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "コード_インタープリター_chat.yaml"
+  },
+  {
+    "name": "test",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 1,
+    "edge_count": 0,
+    "node_types": [
+      "start"
+    ],
+    "node_sequence": [
+      "start"
+    ],
+    "source_file": "test_workflow.yaml"
+  },
+  {
+    "name": "テスト",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 4,
+    "edge_count": 2,
+    "node_types": [
+      "start",
+      "llm",
+      "answer"
+    ],
+    "node_sequence": [
+      "start",
+      "llm",
+      "answer"
+    ],
+    "source_file": "テスト_advanced-chat.yaml"
+  },
+  {
+    "name": "感情分析",
+    "description": "",
+    "type": "conditional",
+    "node_count": 8,
+    "edge_count": 5,
+    "node_types": [
+      "start",
+      "llm",
+      "if-else",
+      "end"
+    ],
+    "node_sequence": [
+      "start",
+      "llm",
+      "end",
+      "if-else",
+      "llm",
+      "end"
+    ],
+    "source_file": "感情分析_workflow.yaml"
+  },
+  {
+    "name": "YouTubeチャンネルデータ分析",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 0,
+    "edge_count": 0,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "YouTubeチャンネルデータ分析_agent-chat.yaml"
+  },
+  {
+    "name": "Simple Test Workflow",
+    "description": "A simple test workflow created by DSLMaker",
+    "type": "simple_chain",
+    "node_count": 3,
+    "edge_count": 2,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "Simple_Test_Workflow_workflow.yaml"
+  },
+  {
+    "name": "AI ポッドキャスト",
+    "description": "参考サイトからポッドキャストを作ります。",
+    "type": "rag",
+    "node_count": 9,
+    "edge_count": 8,
+    "node_types": [
+      "llm",
+      "document-extractor",
+      "start",
+      "answer",
+      "template-transform"
+    ],
+    "node_sequence": [
+      "start",
+      "llm",
+      "answer",
+      "document-extractor",
+      "llm",
+      "llm",
+      "answer",
+      "answer",
+      "template-transform"
+    ],
+    "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+  },
+  {
+    "name": "投資分析レポート コパイロット",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 0,
+    "edge_count": 0,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "投資分析レポート_コパイロット_agent-chat.yaml"
+  },
+  {
+    "name": "ウェブの検索と要約のワークフローパターン",
+    "description": "",
+    "type": "iteration",
+    "node_count": 11,
+    "edge_count": 9,
+    "node_types": [
+      "llm",
+      "end",
+      "code",
+      "tool",
+      "start",
+      "iteration",
+      "template-transform",
+      "iteration-start"
+    ],
+    "node_sequence": [
+      "start",
+      "tool",
+      "code",
+      "end",
+      "iteration",
+      "tool",
+      "llm",
+      "template-transform",
+      "code",
+      "template-transform",
+      "iteration-start"
+    ],
+    "source_file": "ウェブの検索と要約のワークフローパターン_workflow.yaml"
+  },
+  {
+    "name": "コード インタープリター",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 0,
+    "edge_count": 0,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "コード_インタープリター_chat.yaml"
+  },
+  {
+    "name": "test",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 1,
+    "edge_count": 0,
+    "node_types": [
+      "start"
+    ],
+    "node_sequence": [
+      "start"
+    ],
+    "source_file": "test_workflow.yaml"
+  },
+  {
+    "name": "テスト",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 4,
+    "edge_count": 2,
+    "node_types": [
+      "start",
+      "llm",
+      "answer"
+    ],
+    "node_sequence": [
+      "start",
+      "llm",
+      "answer"
+    ],
+    "source_file": "テスト_advanced-chat.yaml"
+  },
+  {
+    "name": "感情分析",
+    "description": "",
+    "type": "conditional",
+    "node_count": 8,
+    "edge_count": 5,
+    "node_types": [
+      "start",
+      "llm",
+      "if-else",
+      "end"
+    ],
+    "node_sequence": [
+      "start",
+      "llm",
+      "end",
+      "if-else",
+      "llm",
+      "end"
+    ],
+    "source_file": "感情分析_workflow.yaml"
+  },
+  {
+    "name": "YouTubeチャンネルデータ分析",
+    "description": "",
+    "type": "simple_chain",
+    "node_count": 0,
+    "edge_count": 0,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "YouTubeチャンネルデータ分析_agent-chat.yaml"
+  },
+  {
+    "name": "Simple Test Workflow",
+    "description": "A simple test workflow created by DSLMaker",
+    "type": "simple_chain",
+    "node_count": 3,
+    "edge_count": 2,
+    "node_types": [],
+    "node_sequence": [],
+    "source_file": "Simple_Test_Workflow_workflow.yaml"
+  },
+  {
+    "name": "AI ポッドキャスト",
+    "description": "参考サイトからポッドキャストを作ります。",
+    "type": "rag",
+    "node_count": 9,
+    "edge_count": 8,
+    "node_types": [
+      "llm",
+      "document-extractor",
+      "start",
+      "answer",
+      "template-transform"
+    ],
+    "node_sequence": [
+      "start",
+      "llm",
+      "answer",
+      "document-extractor",
+      "llm",
+      "llm",
+      "answer",
+      "answer",
+      "template-transform"
+    ],
+    "source_file": "AI_ポッドキャスト_advanced-chat.yaml"
+  },
+  {
+    "name": "DeepResearch",
+    "description": "",
+    "type": "iteration",
+    "node_count": 23,
+    "edge_count": 17,
+    "node_types": [
+      "llm",
+      "assigner",
+      "code",
+      "iteration",
+      "start",
+      "tool",
+      "variable-aggregator",
+      "answer",
+      "template-transform",
+      "iteration-start",
+      "if-else"
+    ],
+    "node_sequence": [
+      "start",
+      "answer",
+      "iteration",
+      "iteration-start",
+      "llm",
+      "tool",
+      "tool",
+      "tool",
+      "code",
+      "if-else",
+      "assigner",
+      "assigner",
+      "llm",
+      "answer",
+      "template-transform",
+      "variable-aggregator",
+      "template-transform"
+    ],
+    "source_file": "DeepResearch_advanced-chat.yaml"
+  }
+]

@@ -3,13 +3,15 @@ Base Agent Class for Multi-Agent Workflow Generation
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict, Any, TYPE_CHECKING
 import logging
 
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 
-from app.graph.state import WorkflowGenerationState
+if TYPE_CHECKING:
+    from app.graph.state import WorkflowGenerationState
+
 from app.services.vector_store import vector_store
 from app.services.llm_service import llm_service
 
@@ -114,7 +116,7 @@ class BaseAgent(ABC):
         return "\n\n".join(formatted)
 
     @abstractmethod
-    async def execute(self, state: WorkflowGenerationState) -> Dict[str, Any]:
+    async def execute(self, state: "WorkflowGenerationState") -> Dict[str, Any]:
         """
         Execute the agent's primary task.
 
@@ -126,7 +128,7 @@ class BaseAgent(ABC):
         """
         pass
 
-    def log_execution(self, state: WorkflowGenerationState, result: Dict[str, Any]) -> None:
+    def log_execution(self, state: "WorkflowGenerationState", result: Dict[str, Any]) -> None:
         """Log agent execution for monitoring."""
         logger.info(
             f"🤖 {self.name} completed\n"
