@@ -157,23 +157,51 @@ class DifyClient {
    */
   async importFromFile(file: File): Promise<DifyDSL> {
     return new Promise((resolve, reject) => {
+      // Validate file type
+      if (!file.name.endsWith('.yaml') && !file.name.endsWith('.yml')) {
+        reject(new Error('Invalid file type. Please select a YAML file (.yaml or .yml)'))
+        return
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      if (file.size > maxSize) {
+        reject(new Error('File too large. Maximum size is 10MB'))
+        return
+      }
+
       const reader = new FileReader()
 
       reader.onload = async (e) => {
         try {
           const content = e.target?.result as string
+          if (!content || content.trim().length === 0) {
+            throw new Error('File is empty')
+          }
           const dsl = await this.importFromYAML(content)
           resolve(dsl)
         } catch (error) {
+          console.error('Error parsing file:', error)
           reject(error)
         }
       }
 
-      reader.onerror = () => {
-        reject(new Error('Failed to read file'))
+      reader.onerror = (event) => {
+        console.error('FileReader error:', event, reader.error)
+        const errorMessage = reader.error?.message || 'Unknown error'
+        reject(new Error(`Failed to read file: ${errorMessage}`))
       }
 
-      reader.readAsText(file)
+      reader.onabort = () => {
+        reject(new Error('File reading was aborted'))
+      }
+
+      try {
+        reader.readAsText(file, 'UTF-8')
+      } catch (error) {
+        console.error('Error starting file read:', error)
+        reject(new Error('Failed to start reading file'))
+      }
     })
   }
 }
