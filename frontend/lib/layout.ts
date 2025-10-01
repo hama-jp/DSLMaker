@@ -54,8 +54,8 @@ export function getLayoutedElements(
   // Add nodes to the graph
   nodes.forEach((node) => {
     // Use custom dimensions if provided in node data, otherwise use defaults
-    const width = node.data?.width || opts.nodeWidth
-    const height = node.data?.height || opts.nodeHeight
+    const width = (node.data?.width as number) || opts.nodeWidth
+    const height = (node.data?.height as number) || opts.nodeHeight
 
     dagreGraph.setNode(node.id, {
       width,
@@ -85,8 +85,8 @@ export function getLayoutedElements(
     }
 
     // Dagre gives us the center position, we need to adjust to top-left
-    const width = node.data?.width || opts.nodeWidth!
-    const height = node.data?.height || opts.nodeHeight!
+    const width = (node.data?.width as number) || opts.nodeWidth!
+    const height = (node.data?.height as number) || opts.nodeHeight!
 
     return {
       ...node,
@@ -125,8 +125,8 @@ export function getNodesBoundingBox(nodes: Node[]): {
   let maxY = -Infinity
 
   nodes.forEach((node) => {
-    const width = node.data?.width || defaultOptions.nodeWidth!
-    const height = node.data?.height || defaultOptions.nodeHeight!
+    const width = (node.data?.width as number) || defaultOptions.nodeWidth!
+    const height = (node.data?.height as number) || defaultOptions.nodeHeight!
 
     minX = Math.min(minX, node.position.x)
     minY = Math.min(minY, node.position.y)

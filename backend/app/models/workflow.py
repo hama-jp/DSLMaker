@@ -32,6 +32,9 @@ class WorkflowMetadata(BaseModel):
     version: str = "1.0.0"
     tags: List[str] = Field(default_factory=list)
     complexity: Literal["simple", "moderate", "complex"] = "moderate"
+    node_count: int = Field(default=0, description="Number of nodes in the workflow")
+    edge_count: int = Field(default=0, description="Number of edges in the workflow")
+    iteration_count: int = Field(default=0, description="Number of refinement iterations performed")
 
 
 class WorkflowRequest(BaseModel):

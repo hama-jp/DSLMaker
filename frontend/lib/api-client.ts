@@ -19,6 +19,9 @@ export interface WorkflowMetadata {
   description: string
   complexity: string
   tags: string[]
+  node_count: number
+  edge_count: number
+  iteration_count: number
 }
 
 export interface WorkflowResponse {

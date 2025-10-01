@@ -18,6 +18,7 @@ from app.services.dsl_service import dsl_service
 from app.services.vector_store import vector_store
 from app.services.recommendation_service import recommendation_service
 from app.graph.workflow_graph import workflow_graph
+# from app.utils.dify_converter_v2 import DifyConverter  # Not used yet
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +245,10 @@ async def generate_multi_agent_workflow(request: WorkflowRequest) -> WorkflowRes
             description=final_dsl["app"]["description"],
             created_at=datetime.now(),
             complexity=architecture.complexity if architecture else "moderate",
-            tags=["generated", "multi-agent", "ai-enhanced"]
+            tags=["generated", "multi-agent", "ai-enhanced"],
+            node_count=len(result.get("configured_nodes", [])),
+            edge_count=len(result.get("configured_edges", [])),
+            iteration_count=result.get("iterations", 0)
         )
 
         # Build suggestions from quality report
@@ -315,3 +319,48 @@ async def reset_token_usage() -> Dict[str, str]:
         "status": "success",
         "message": "Token usage statistics have been reset"
     }
+
+
+@router.post("/convert/dify")
+async def convert_workflow_to_dify(workflow: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert DSLMaker workflow format to Dify-compatible format.
+
+    This endpoint takes a workflow in DSLMaker format (with 'metadata' and 'workflow' keys)
+    and converts it to Dify's DSL format which can be directly imported into Dify.
+
+    Args:
+        workflow: Workflow in DSLMaker format
+
+    Returns:
+        Workflow in Dify-compatible format
+    """
+    try:
+        logger.info("🔄 Converting workflow to Dify format...")
+
+        # Validate input format
+        if "metadata" not in workflow or "workflow" not in workflow:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid workflow format. Expected 'metadata' and 'workflow' keys."
+            )
+
+        # Convert to Dify format
+        dify_workflow = convert_to_dify_format(workflow)
+
+        logger.info("✅ Successfully converted workflow to Dify format")
+
+        return {
+            "status": "success",
+            "data": dify_workflow,
+            "format": "dify-v0.4.0"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to convert workflow to Dify format: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Conversion failed: {str(e)}"
+        )

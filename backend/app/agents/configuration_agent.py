@@ -111,13 +111,18 @@ Return configuration as valid JSON with 'nodes' and 'edges' keys:
     {{
       "id": "edge_1",
       "source": "start_1",
-      "target": "llm_1",
-      "sourceHandle": "source",
-      "targetHandle": "target"
+      "target": "llm_1"
     }},
     ...
   ]
-}}"""
+}}
+
+IMPORTANT Edge Rules:
+- Do NOT include "sourceHandle" or "targetHandle" in normal edges
+- ONLY for if-else nodes, use:
+  - sourceHandle: "true" for true branch
+  - sourceHandle: "false" for false branch
+- All other edges should only have: id, source, target"""
 
     def __init__(self):
         super().__init__(name="Configuration Agent")

@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Send, Sparkles, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react'
-import { useWorkflowGeneration } from '@/hooks/useWorkflowGeneration'
 import { cn } from '@/lib/utils'
+import type { WorkflowRequest, WorkflowResponse } from '@/lib/api-client'
+import type { GenerationMethod } from '@/hooks/useWorkflowGeneration'
 
 export interface ChatMessage {
   id: string
@@ -17,7 +18,12 @@ export interface ChatMessage {
   }
 }
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  onGenerate: (request: WorkflowRequest, method?: GenerationMethod) => Promise<WorkflowResponse | null>
+  workflowResult: WorkflowResponse | null
+}
+
+export default function ChatInterface({ onGenerate, workflowResult }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -30,7 +36,6 @@ export default function ChatInterface() {
   const [isGenerating, setIsGenerating] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const { generate, result } = useWorkflowGeneration()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -84,7 +89,7 @@ export default function ChatInterface() {
     abortControllerRef.current = new AbortController()
 
     try {
-      const workflowResult = await generate({
+      const result = await onGenerate({
         description: input.trim(),
         preferences: {
           complexity: 'moderate',
@@ -100,16 +105,16 @@ export default function ChatInterface() {
 
       setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id))
 
-      if (workflowResult) {
+      if (result) {
         const successMessage: ChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `ワークフローを生成しました！🎉\n\n📊 **品質スコア**: ${workflowResult.quality_score}/100\n⏱️ **生成時間**: ${workflowResult.generation_time.toFixed(2)}秒\n\n🔧 **ワークフロー構成**\n• ノード数: ${workflowResult.metadata.node_count}個\n• 接続数: ${workflowResult.metadata.edge_count}個\n• 反復回数: ${workflowResult.metadata.iteration_count}回\n\n右側のビジュアライザーで確認できます。修正が必要な場合は、具体的な指示をください。`,
+          content: `ワークフローを生成しました！🎉\n\n📊 **品質スコア**: ${result.quality_score}/100\n⏱️ **生成時間**: ${result.generation_time.toFixed(2)}秒\n\n🔧 **ワークフロー構成**\n• ノード数: ${result.metadata.node_count}個\n• 接続数: ${result.metadata.edge_count}個\n• 反復回数: ${result.metadata.iteration_count}回\n\n右側のビジュアライザーで確認できます。修正が必要な場合は、具体的な指示をください。`,
           timestamp: new Date(),
           metadata: {
             workflowGenerated: true,
-            qualityScore: workflowResult.quality_score,
-            iterationCount: workflowResult.metadata.iteration_count,
+            qualityScore: result.quality_score,
+            iterationCount: result.metadata.iteration_count,
           },
         }
         setMessages((prev) => [...prev, successMessage])
@@ -189,17 +194,17 @@ export default function ChatInterface() {
                     <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap">
                       <div className={cn(
                         "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
-                        message.metadata.qualityScore >= 90 ? "bg-green-100 text-green-700" :
-                        message.metadata.qualityScore >= 75 ? "bg-blue-100 text-blue-700" :
-                        message.metadata.qualityScore >= 60 ? "bg-yellow-100 text-yellow-700" :
+                        (message.metadata.qualityScore ?? 0) >= 90 ? "bg-green-100 text-green-700" :
+                        (message.metadata.qualityScore ?? 0) >= 75 ? "bg-blue-100 text-blue-700" :
+                        (message.metadata.qualityScore ?? 0) >= 60 ? "bg-yellow-100 text-yellow-700" :
                         "bg-red-100 text-red-700"
                       )}>
                         <CheckCircle2 className="w-3 h-3" />
-                        Quality {message.metadata.qualityScore}%
+                        Quality {message.metadata.qualityScore ?? 0}%
                       </div>
                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
                         <Sparkles className="w-3 h-3" />
-                        {message.metadata.iterationCount} iterations
+                        {message.metadata.iterationCount ?? 0} iterations
                       </div>
                     </div>
                   )}

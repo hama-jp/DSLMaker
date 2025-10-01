@@ -126,3 +126,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* React Flow node wrapper - make transparent */
+.react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}

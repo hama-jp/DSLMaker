@@ -18,6 +18,7 @@ interface UseWorkflowGenerationState {
 interface UseWorkflowGenerationReturn extends UseWorkflowGenerationState {
   generate: (request: WorkflowRequest, method?: GenerationMethod) => Promise<WorkflowResponse | null>
   reset: () => void
+  setResult: (result: WorkflowResponse | null) => void
 }
 
 export function useWorkflowGeneration(): UseWorkflowGenerationReturn {
@@ -92,10 +93,19 @@ export function useWorkflowGeneration(): UseWorkflowGenerationReturn {
     })
   }, [])
 
+  const setResult = useCallback((result: WorkflowResponse | null) => {
+    setState(prev => ({
+      ...prev,
+      result,
+      error: null,
+    }))
+  }, [])
+
   return {
     ...state,
     generate,
     reset,
+    setResult,
   }
 }
 
