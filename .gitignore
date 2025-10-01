@@ -61,3 +61,4 @@ backend/env/
 backend/chroma_db/
 
 # Backend env (already covered by .env* above)
+backend/app/utils/dify_converter.py
