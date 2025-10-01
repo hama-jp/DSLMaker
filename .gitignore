@@ -89,3 +89,6 @@ frontend/.next/
 
 # Scripts
 scripts/
+
+# Development documentation (internal use only)
+dev_doc/
