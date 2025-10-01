@@ -4,37 +4,22 @@
  */
 
 import { NodeTypes } from '@xyflow/react'
-import { StartNode } from './StartNode'
-import { EndNode } from './EndNode'
-import { LLMNode } from './LLMNode'
-import { IfElseNode } from './IfElseNode'
-import { CodeNode } from './CodeNode'
-import { HttpRequestNode } from './HttpRequestNode'
-import { IterationNode } from './IterationNode'
+import { DIFY_NODE_COMPONENTS } from './dify'
 import { GenericNode } from './GenericNode'
 
 /**
  * React Flow node types mapping
  * Maps Dify node types to React Flow custom components
+ * Now using complete Dify-style components (15 types)
  */
 export const nodeTypes: NodeTypes = {
-  start: StartNode,
-  end: EndNode,
-  llm: LLMNode,
-  'if-else': IfElseNode,
-  code: CodeNode,
-  'http-request': HttpRequestNode,
-  iteration: IterationNode,
+  // All 15 Dify node types
+  ...DIFY_NODE_COMPONENTS,
 
-  // Generic node handles all other types
+  // Legacy aliases for backward compatibility
   'knowledge-retrieval': GenericNode,
-  'question-classifier': GenericNode,
-  'variable-aggregator': GenericNode,
-  'template-transform': GenericNode,
   'parameter-extractor': GenericNode,
-  tool: GenericNode,
-  assigner: GenericNode,
-  'conversation-variable-assigner': GenericNode,
+  'conversation-variable-assigner': DIFY_NODE_COMPONENTS.assigner,
 
   // Default fallback
   default: GenericNode,
@@ -45,24 +30,17 @@ export const nodeTypes: NodeTypes = {
  * Returns the node type string to use in React Flow
  */
 export function getNodeType(difyNodeType: string): string {
-  // Check if we have a specific component for this type
-  if (nodeTypes[difyNodeType]) {
-    return difyNodeType
-  }
+  // All supported Dify node types
+  const supportedTypes = [
+    'start', 'end', 'llm', 'if-else', 'code', 'iteration',
+    'tool', 'answer', 'template-transform', 'http-request',
+    'question-classifier', 'assigner', 'variable-aggregator',
+    'document-extractor', 'knowledge-retrieval', 'parameter-extractor',
+    'conversation-variable-assigner'
+  ]
 
-  // Check if generic node supports it
-  if (
-    [
-      'knowledge-retrieval',
-      'question-classifier',
-      'variable-aggregator',
-      'template-transform',
-      'parameter-extractor',
-      'tool',
-      'assigner',
-      'conversation-variable-assigner',
-    ].includes(difyNodeType)
-  ) {
+  // Check if we have a specific component for this type
+  if (supportedTypes.includes(difyNodeType)) {
     return difyNodeType
   }
 
@@ -70,7 +48,11 @@ export function getNodeType(difyNodeType: string): string {
   return 'default'
 }
 
-// Re-export node components for direct use
+// Re-export Dify node components
+export * from './dify'
+export { GenericNode } from './GenericNode'
+
+// Re-export legacy nodes for backward compatibility
 export { StartNode } from './StartNode'
 export { EndNode } from './EndNode'
 export { LLMNode } from './LLMNode'
@@ -78,6 +60,5 @@ export { IfElseNode } from './IfElseNode'
 export { CodeNode } from './CodeNode'
 export { HttpRequestNode } from './HttpRequestNode'
 export { IterationNode } from './IterationNode'
-export { GenericNode } from './GenericNode'
 export { BaseNode } from './BaseNode'
 export type { BaseNodeData, BaseNodeProps } from './BaseNode'

@@ -16,19 +16,19 @@ export function IfElseNode(props: NodeProps) {
         text: '#fff',
       }}
       handles={{
-        top: true,
+        left: true, // Input from left
         custom: [
           {
             type: 'source',
-            position: Position.Bottom,
+            position: Position.Right,
             id: 'true',
-            style: { left: '30%' },
+            style: { top: '35%' }, // True branch at top-right
           },
           {
             type: 'source',
-            position: Position.Bottom,
+            position: Position.Right,
             id: 'false',
-            style: { left: '70%' },
+            style: { top: '65%' }, // False branch at bottom-right
           },
         ],
       }}

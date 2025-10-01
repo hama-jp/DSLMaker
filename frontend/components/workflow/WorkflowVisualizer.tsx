@@ -22,21 +22,34 @@ import {
   ReactFlowProvider,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Network, Download, Maximize2 } from 'lucide-react'
+import { Network, Download, Upload } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { nodeTypes, getNodeType } from '@/components/nodes'
 import { getLayoutedElements } from '@/lib/layout'
 import type { BaseNodeData } from '@/components/nodes/BaseNode'
+import { DifyEdge } from '@/components/edges/DifyEdge'
 
 export interface WorkflowVisualizerProps {
+  onNodeSelect?: (nodeId: string | null) => void
+  onImport?: () => void
   workflow: {
+    workflow?: {
+      graph?: {
+        nodes?: any[]
+        edges?: any[]
+      }
+    }
     app?: {
       name?: string
       description?: string
-      nodes: any[]
-      edges: any[]
+      nodes?: any[]
+      edges?: any[]
+    }
+    graph?: {
+      nodes?: any[]
+      edges?: any[]
     }
     nodes?: any[]
     edges?: any[]
@@ -48,14 +61,29 @@ export interface WorkflowVisualizerProps {
   }
 }
 
-function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+// Define edge types with custom Dify edge
+const edgeTypes = {
+  dify: DifyEdge,
+}
+
+function WorkflowVisualizerInner({ workflow, metadata, onNodeSelect, onImport }: WorkflowVisualizerProps) {
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   )
+
+  // Handle node selection
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    onNodeSelect?.(node.id)
+  }, [onNodeSelect])
+
+  // Handle pane click (deselect)
+  const handlePaneClick = useCallback(() => {
+    onNodeSelect?.(null)
+  }, [onNodeSelect])
 
   // Convert Dify workflow to React Flow format
   useEffect(() => {
@@ -65,11 +93,12 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
       return
     }
 
-    // Handle both formats: workflow.app.nodes or workflow.nodes
-    const workflowNodes = workflow.app?.nodes || workflow.nodes || []
-    const workflowEdges = workflow.app?.edges || workflow.edges || []
+    // Handle multiple formats: workflow.workflow.graph.nodes, workflow.graph.nodes, workflow.app.nodes, or workflow.nodes
+    const workflowNodes = workflow.workflow?.graph?.nodes || workflow.graph?.nodes || workflow.app?.nodes || workflow.nodes || []
+    const workflowEdges = workflow.workflow?.graph?.edges || workflow.graph?.edges || workflow.app?.edges || workflow.edges || []
 
     if (workflowNodes.length === 0) {
+      console.warn('No nodes found in workflow!')
       setNodes([])
       setEdges([])
       return
@@ -92,6 +121,10 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
         type: reactFlowType,
         position: { x: 0, y: 0 }, // Will be set by layout algorithm
         data: nodeData,
+        style: {
+          width: 200, // Match Dagre nodeWidth
+          height: 110, // Match Dagre nodeHeight
+        },
       }
     })
 
@@ -101,7 +134,7 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
       const sourceNode = workflowNodes.find((n: any) => n.id === edge.source)
       const isConditional = sourceNode?.data?.type === 'if-else'
 
-      // Determine edge label
+      // Determine edge label for conditional branches
       let label: string | undefined
       if (isConditional && edge.sourceHandle) {
         if (edge.sourceHandle === 'true') {
@@ -117,7 +150,7 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
         target: edge.target,
         sourceHandle: edge.sourceHandle,
         targetHandle: edge.targetHandle,
-        type: 'smoothstep',
+        type: 'dify', // Use custom Dify edge with bezier curves
         animated: false,
         label,
         labelStyle: {
@@ -130,14 +163,14 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
           fillOpacity: 0.9,
         },
         style: {
-          stroke: '#9ca3af',
+          stroke: '#94a3b8',
           strokeWidth: 2,
         },
         markerEnd: {
           type: 'arrowclosed' as const,
-          width: 16,
-          height: 16,
-          color: '#9ca3af',
+          width: 20,
+          height: 20,
+          color: '#94a3b8',
         },
       }
     })
@@ -147,9 +180,9 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
       flowNodes,
       flowEdges,
       {
-        direction: 'TB', // Top to Bottom
-        nodeWidth: 220,
-        nodeHeight: 140, // Increased for content
+        direction: 'LR', // Left to Right (like Dify)
+        nodeWidth: 200, // Match actual node width
+        nodeHeight: 110, // Match actual node height with padding
         rankSep: 100,
         nodeSep: 60,
       }
@@ -237,17 +270,6 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
           <span className="text-xs text-muted-foreground whitespace-nowrap">
             {nodes.length} nodes • {edges.length} edges
           </span>
-
-          {/* Download button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDownload}
-            className="h-7 w-7 p-0"
-            title="Download workflow JSON"
-          >
-            <Download className="w-3.5 h-3.5" />
-          </Button>
         </div>
       </CardHeader>
 
@@ -259,7 +281,10 @@ function WorkflowVisualizerInner({ workflow, metadata }: WorkflowVisualizerProps
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeClick={handleNodeClick}
+          onPaneClick={handlePaneClick}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           minZoom={0.1}
           maxZoom={2}

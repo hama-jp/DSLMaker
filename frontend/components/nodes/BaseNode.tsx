@@ -7,7 +7,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export interface BaseNodeData {
+export interface BaseNodeData extends Record<string, unknown> {
   title: string
   type: string
   description?: string
@@ -44,7 +44,7 @@ export function BaseNode({
   data,
   icon: Icon,
   color,
-  handles = { top: true, bottom: true },
+  handles = { left: true, right: true }, // Left-to-right flow (like Dify)
   children,
   selected,
 }: BaseNodeProps) {
@@ -53,13 +53,14 @@ export function BaseNode({
   return (
     <div
       className={cn(
-        'rounded-lg shadow-sm border-2 transition-all duration-200',
+        'rounded-md shadow-sm border-2 transition-all duration-200',
         'hover:shadow-md bg-card',
         selected && 'ring-2 ring-primary ring-offset-2'
       )}
       style={{
         borderColor: color.border,
-        minWidth: nodeWidth,
+        width: '100%', // Fill parent container from React Flow
+        height: '100%', // Fill parent container from React Flow
       }}
     >
       {/* Handles */}
@@ -67,6 +68,7 @@ export function BaseNode({
         <Handle
           type="target"
           position={Position.Top}
+          id="target"
           className="!w-3 !h-3 !bg-muted-foreground !border-2 !border-background"
         />
       )}
@@ -75,6 +77,7 @@ export function BaseNode({
         <Handle
           type="source"
           position={Position.Bottom}
+          id="source"
           className="!w-3 !h-3 !bg-muted-foreground !border-2 !border-background"
         />
       )}
@@ -83,6 +86,7 @@ export function BaseNode({
         <Handle
           type="target"
           position={Position.Left}
+          id="target-left"
           className="!w-3 !h-3 !bg-muted-foreground !border-2 !border-background"
         />
       )}
@@ -91,6 +95,7 @@ export function BaseNode({
         <Handle
           type="source"
           position={Position.Right}
+          id="source-right"
           className="!w-3 !h-3 !bg-muted-foreground !border-2 !border-background"
         />
       )}
@@ -109,7 +114,7 @@ export function BaseNode({
 
       {/* Header */}
       <div
-        className="px-3 py-2 rounded-t-md flex items-center gap-2"
+        className="px-3 py-2 rounded-t-[6px] flex items-center gap-2"
         style={{ background: color.bg, color: color.text }}
       >
         <div
@@ -133,7 +138,7 @@ export function BaseNode({
       )}
 
       {/* Type Badge */}
-      <div className="px-3 py-1.5 bg-muted/50 rounded-b-md">
+      <div className="px-3 py-1.5 bg-muted/50 rounded-b-[6px]">
         <div className="text-xs text-muted-foreground font-medium">
           {data.type.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
         </div>
