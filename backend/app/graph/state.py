@@ -9,6 +9,7 @@ from pydantic import BaseModel
 class ClarifiedRequirements(BaseModel):
     """Structured requirements from Requirements Agent."""
     business_intent: str
+    required_capabilities: List[str]
     input_data: Dict[str, Any]
     expected_output: Dict[str, Any]
     business_logic: List[str]

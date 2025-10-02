@@ -16,6 +16,15 @@ export default function WorkflowGenerator() {
 
   const { loading, error, result, progress, generate, reset } = useWorkflowGeneration()
 
+  const [difyResult, setDifyResult] = useState<string | null>(null)
+  const [difyError, setDifyError] = useState<string | null>(null)
+  const [isDifyRunning, setIsDifyRunning] = useState(false)
+  // Placeholder for the Dify server command. This should eventually be configurable by the user.
+  const [difyServerCommand, setDifyServerCommand] = useState<string[]>([
+    'echo',
+    'Dify MCP Server Placeholder: No command configured. This is a mock response.'
+  ])
+
   const handleGenerate = async () => {
     if (!description.trim()) {
       return
@@ -50,6 +59,41 @@ export default function WorkflowGenerator() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const handleRunOnDify = async () => {
+    if (!result) return
+
+    setIsDifyRunning(true)
+    setDifyResult(null)
+    setDifyError(null)
+
+    try {
+      const dslPayload = JSON.stringify(result.workflow, null, 2)
+
+      const response = await fetch('/api/dify/run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dsl: dslPayload,
+          dify_server_command: difyServerCommand,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to run on Dify')
+      }
+
+      setDifyResult(data.result)
+    } catch (err) {
+      setDifyError(err instanceof Error ? err.message : 'An unknown error occurred')
+    } finally {
+      setIsDifyRunning(false)
+    }
   }
 
   return (
@@ -257,7 +301,42 @@ export default function WorkflowGenerator() {
               >
                 📥 Download Workflow JSON
               </button>
+              <button
+                onClick={handleRunOnDify}
+                disabled={isDifyRunning}
+                className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {isDifyRunning ? 'Running on Dify...' : '🚀 Run on Dify'}
+              </button>
             </div>
+
+            {/* Dify Execution Results */}
+            {isDifyRunning && (
+              <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600 mr-3"></div>
+                  <span className="text-purple-900 font-medium">
+                    Executing on Dify...
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {difyError && (
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h3 className="text-red-800 font-medium mb-2">⚠️ Dify Execution Failed</h3>
+                <p className="text-red-700">{difyError}</p>
+              </div>
+            )}
+
+            {difyResult && (
+              <div className="mt-6">
+                <h3 className="text-xl font-bold mb-2 text-gray-900">Dify Execution Result</h3>
+                <pre className="p-4 bg-gray-900 text-gray-100 rounded overflow-x-auto text-sm">
+                  {difyResult}
+                </pre>
+              </div>
+            )}
 
             {/* Workflow Preview */}
             <details className="bg-gray-50 rounded-lg p-4">

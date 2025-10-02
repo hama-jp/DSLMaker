@@ -179,6 +179,7 @@ Analyze this request and extract structured requirements in JSON format.""")
         """Create basic requirements when analysis fails."""
         return ClarifiedRequirements(
             business_intent=state["user_request"],
+            required_capabilities=[],
             input_data={
                 "type": "string",
                 "description": "User input",

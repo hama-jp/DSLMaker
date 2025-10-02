@@ -18,7 +18,7 @@ def agent():
 def empty_state():
     """Create an empty workflow generation state"""
     return WorkflowGenerationState(
-        user_input="",
+        user_request="",
         requirements=None,
         architecture=None,
         configured_nodes=[],
@@ -36,7 +36,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_simple_qa_chatbot(self, agent, empty_state):
         """Test: Simple Q&A chatbot request"""
-        empty_state["user_input"] = "Create a chatbot that answers questions using GPT-4"
+        empty_state["user_request"] = "Create a chatbot that answers questions using GPT-4"
 
         result = await agent.execute(empty_state)
 
@@ -55,7 +55,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_rag_document_search(self, agent, empty_state):
         """Test: RAG workflow with knowledge retrieval"""
-        empty_state["user_input"] = "Build a document search system that finds relevant information from uploaded PDFs"
+        empty_state["user_request"] = "Build a document search system that finds relevant information from uploaded PDFs"
 
         result = await agent.execute(empty_state)
 
@@ -71,7 +71,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_iteration_workflow(self, agent, empty_state):
         """Test: Workflow requiring iteration"""
-        empty_state["user_input"] = "Process a list of customer reviews and summarize each one"
+        empty_state["user_request"] = "Process a list of customer reviews and summarize each one"
 
         result = await agent.execute(empty_state)
 
@@ -88,7 +88,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_conditional_workflow(self, agent, empty_state):
         """Test: Workflow with conditional logic"""
-        empty_state["user_input"] = "Create a workflow that classifies support tickets and routes them to different teams"
+        empty_state["user_request"] = "Create a workflow that classifies support tickets and routes them to different teams"
 
         result = await agent.execute(empty_state)
 
@@ -101,7 +101,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_tool_integration(self, agent, empty_state):
         """Test: Workflow requiring external tool"""
-        empty_state["user_input"] = "Search the web for latest news and summarize the results"
+        empty_state["user_request"] = "Search the web for latest news and summarize the results"
 
         result = await agent.execute(empty_state)
 
@@ -118,7 +118,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_multi_step_workflow(self, agent, empty_state):
         """Test: Complex multi-step workflow"""
-        empty_state["user_input"] = """
+        empty_state["user_request"] = """
         Create a workflow that:
         1. Extracts text from uploaded documents
         2. Searches for related information in knowledge base
@@ -142,7 +142,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_empty_input(self, agent, empty_state):
         """Test: Empty or invalid input"""
-        empty_state["user_input"] = ""
+        empty_state["user_request"] = ""
 
         result = await agent.execute(empty_state)
 
@@ -152,7 +152,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_vague_input(self, agent, empty_state):
         """Test: Vague user input"""
-        empty_state["user_input"] = "I want to use AI for my business"
+        empty_state["user_request"] = "I want to use AI for my business"
 
         result = await agent.execute(empty_state)
 
@@ -166,7 +166,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_technical_input(self, agent, empty_state):
         """Test: Technical user input with specific node types"""
-        empty_state["user_input"] = "I need a workflow with start -> llm -> knowledge-retrieval -> llm -> end"
+        empty_state["user_request"] = "I need a workflow with start -> llm -> knowledge-retrieval -> llm -> end"
 
         result = await agent.execute(empty_state)
 
@@ -180,7 +180,7 @@ class TestRequirementsAgent:
     @pytest.mark.asyncio
     async def test_output_format(self, agent, empty_state):
         """Test: Requirements object has correct structure"""
-        empty_state["user_input"] = "Create a simple Q&A bot"
+        empty_state["user_request"] = "Create a simple Q&A bot"
 
         result = await agent.execute(empty_state)
 
@@ -191,13 +191,15 @@ class TestRequirementsAgent:
         assert hasattr(requirements, 'business_intent')
         assert hasattr(requirements, 'required_capabilities')
         assert hasattr(requirements, 'constraints')
-        assert hasattr(requirements, 'input_format')
-        assert hasattr(requirements, 'output_format')
+        assert hasattr(requirements, 'input_data')
+        assert hasattr(requirements, 'expected_output')
 
         # Check types
         assert isinstance(requirements.business_intent, str)
         assert isinstance(requirements.required_capabilities, list)
         assert isinstance(requirements.constraints, list)
+        assert isinstance(requirements.input_data, dict)
+        assert isinstance(requirements.expected_output, dict)
 
 
 class TestRequirementsAgentMetrics:
@@ -208,7 +210,7 @@ class TestRequirementsAgentMetrics:
         """Test: Agent response time"""
         import time
 
-        empty_state["user_input"] = "Create a chatbot"
+        empty_state["user_request"] = "Create a chatbot"
 
         start = time.time()
         result = await agent.execute(empty_state)
@@ -220,7 +222,7 @@ class TestRequirementsAgentMetrics:
     @pytest.mark.asyncio
     async def test_consistency(self, agent, empty_state):
         """Test: Agent produces consistent results"""
-        empty_state["user_input"] = "Create a chatbot that answers questions"
+        empty_state["user_request"] = "Create a chatbot that answers questions"
 
         # Run twice
         result1 = await agent.execute(empty_state.copy())

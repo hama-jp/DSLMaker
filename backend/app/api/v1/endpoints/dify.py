@@ -9,6 +9,8 @@ import logging
 import time
 
 from app.models.dify_models import DifyDSL
+from app.models.workflow import DifyExecutionRequest, DifyExecutionResponse
+from app.mcp_client import run_dify_workflow
 from app.utils.dify_converter_v2 import DifyConverterV2
 from pydantic import ValidationError
 
@@ -273,3 +275,23 @@ async def get_supported_node_types() -> Dict[str, Any]:
         "total": len(node_types),
         "version": "0.4.0"
     }
+
+
+@router.post("/execute", response_model=DifyExecutionResponse)
+async def execute_dify_workflow(request: DifyExecutionRequest) -> DifyExecutionResponse:
+    """
+    Execute a Dify DSL workflow using the MCP client.
+    """
+    logger.info("Received request to execute Dify workflow via MCP.")
+    try:
+        result = await run_dify_workflow(
+            dify_server_command=request.dify_server_command,
+            dsl_content=request.dsl_content
+        )
+        logger.info(f"Workflow execution finished with result: {result[:100]}...")
+        return DifyExecutionResponse(status="success", result=result)
+    except Exception as e:
+        logger.error(f"Failed to execute Dify workflow: {e}", exc_info=True)
+        # Check for specific error messages if needed, otherwise return a generic error
+        error_message = f"An unexpected error occurred: {e}"
+        return DifyExecutionResponse(status="error", result=error_message)

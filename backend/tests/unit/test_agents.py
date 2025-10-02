@@ -47,6 +47,7 @@ def state_with_requirements():
         "preferences": {"complexity": "simple"},
         "requirements": ClarifiedRequirements(
             business_intent="Translate text from English to Spanish",
+            required_capabilities=["llm", "translation"],
             input_data={"type": "string", "description": "English text"},
             expected_output={"type": "string", "description": "Spanish translation"},
             business_logic=["Receive English text", "Translate to Spanish"],
@@ -73,6 +74,7 @@ def state_with_architecture():
     """Create state with architecture designed."""
     requirements = ClarifiedRequirements(
         business_intent="Translate text from English to Spanish",
+        required_capabilities=["llm", "translation"],
         input_data={"type": "string", "description": "English text"},
         expected_output={"type": "string", "description": "Spanish translation"},
         business_logic=["Receive English text", "Translate to Spanish"],

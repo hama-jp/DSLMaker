@@ -42,6 +42,7 @@ class TestArchitectureAgent:
         """Test: Simple Q&A chatbot architecture"""
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Q&A Chatbot",
+            required_capabilities=["llm"],
             input_data={"type": "text", "source": "user"},
             expected_output={"type": "text", "format": "answer"},
             business_logic=["answer user questions using LLM"],
@@ -72,10 +73,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Document Q&A with knowledge base",
             required_capabilities=["knowledge-retrieval", "llm"],
+            input_data={"type": "text", "description": "User query"},
+            expected_output={"type": "text", "description": "Answer from documents"},
+            business_logic=["Search knowledge base for relevant documents", "Use LLM to synthesize an answer from documents"],
+            integrations=["knowledge-base", "llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["query -> search -> llm -> answer"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -100,10 +103,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Process list of items",
             required_capabilities=["iteration", "llm"],
+            input_data={"type": "array", "description": "List of items to process"},
+            expected_output={"type": "array", "description": "Processed items"},
+            business_logic=["Iterate over each item", "Apply LLM processing to each item"],
+            integrations=["llm"],
             constraints=[],
-            input_format="array",
-            output_format="array",
-            data_flow=["items -> iteration(llm) -> results"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -128,10 +133,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Route messages based on type",
             required_capabilities=["if-else", "llm"],
+            input_data={"type": "text", "description": "Input message"},
+            expected_output={"type": "text", "description": "Processed message"},
+            business_logic=["Classify message type", "Route to different branches based on type"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> classify -> branch(A/B) -> process -> output"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -159,10 +166,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Search web and summarize",
             required_capabilities=["tool", "llm"],
+            input_data={"type": "text", "description": "Search query"},
+            expected_output={"type": "text", "description": "Summary of search results"},
+            business_logic=["Use a search tool to find information", "Summarize results with an LLM"],
+            integrations=["tavily-search", "llm"],
             constraints=["use Tavily search"],
-            input_format="text",
-            output_format="text",
-            data_flow=["query -> search_tool -> llm -> summary"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -185,10 +194,17 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Document processing pipeline",
             required_capabilities=["document-extractor", "knowledge-retrieval", "llm", "template-transform"],
+            input_data={"type": "document", "description": "Input document"},
+            expected_output={"type": "text", "description": "Formatted report"},
+            business_logic=[
+                "Extract text from the document",
+                "Search a knowledge base for related information",
+                "Generate a report with an LLM",
+                "Format the output as markdown"
+            ],
+            integrations=["document-extractor", "knowledge-base", "llm", "template-transform"],
             constraints=[],
-            input_format="document",
-            output_format="formatted_text",
-            data_flow=["document -> extract -> search -> llm -> format -> output"]
+            confidence_score=0.95
         )
 
         result = await agent.execute(base_state)
@@ -211,10 +227,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Simple Q&A",
             required_capabilities=["llm"],
+            input_data={"type": "text"},
+            expected_output={"type": "text"},
+            business_logic=["Answer questions"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> process -> output"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -240,10 +258,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Simple chatbot",
             required_capabilities=["llm"],
+            input_data={"type": "text"},
+            expected_output={"type": "text"},
+            business_logic=["Chat with user"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> process -> output"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -270,10 +290,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Q&A Chatbot",
             required_capabilities=["llm"],
+            input_data={"type": "text"},
+            expected_output={"type": "text"},
+            business_logic=["Answer questions"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> llm -> output"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -294,10 +316,12 @@ class TestArchitectureAgent:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Simple workflow",
             required_capabilities=["llm"],
+            input_data={"type": "text"},
+            expected_output={"type": "text"},
+            business_logic=["Process input"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> process -> output"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)
@@ -324,10 +348,12 @@ class TestArchitectureAgentMetrics:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Q&A bot",
             required_capabilities=["llm"],
+            input_data={"type": "text"},
+            expected_output={"type": "text"},
+            business_logic=["Answer questions"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> llm -> output"]
+            confidence_score=0.9
         )
 
         start = time.time()
@@ -343,10 +369,12 @@ class TestArchitectureAgentMetrics:
         base_state["requirements"] = ClarifiedRequirements(
             business_intent="Simple bot",
             required_capabilities=["llm"],
+            input_data={"type": "text"},
+            expected_output={"type": "text"},
+            business_logic=["Process input"],
+            integrations=["llm"],
             constraints=[],
-            input_format="text",
-            output_format="text",
-            data_flow=["input -> output"]
+            confidence_score=0.9
         )
 
         result = await agent.execute(base_state)

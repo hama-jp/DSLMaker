@@ -91,3 +91,15 @@ class GenerationRequest(BaseModel):
     preferences: Dict[str, Any]
     retrieved_patterns: List[Dict[str, Any]] = Field(default_factory=list)
     stage: Literal["requirements", "architecture", "configuration", "quality"] = "requirements"
+
+
+class DifyExecutionRequest(BaseModel):
+    """Request model for executing a DSL workflow via MCP."""
+    dify_server_command: List[str] = Field(..., description="The command and arguments to run the Dify MCP server.")
+    dsl_content: str = Field(..., description="The DSL content to be executed.")
+
+
+class DifyExecutionResponse(BaseModel):
+    """Response model for a DSL workflow execution."""
+    status: Literal["success", "error"] = Field(..., description="The execution status.")
+    result: str = Field(..., description="The output from the workflow execution or an error message.")
