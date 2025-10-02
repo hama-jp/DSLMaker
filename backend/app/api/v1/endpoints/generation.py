@@ -233,7 +233,6 @@ async def generate_multi_agent_workflow(request: WorkflowRequest) -> WorkflowRes
         # Extract results
         final_dsl = result.get("final_dsl")
         quality_report = result.get("quality_report")
-        requirements = result.get("requirements")
         architecture = result.get("architecture")
 
         if not final_dsl:
@@ -320,47 +319,3 @@ async def reset_token_usage() -> Dict[str, str]:
         "message": "Token usage statistics have been reset"
     }
 
-
-@router.post("/convert/dify")
-async def convert_workflow_to_dify(workflow: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Convert DSLMaker workflow format to Dify-compatible format.
-
-    This endpoint takes a workflow in DSLMaker format (with 'metadata' and 'workflow' keys)
-    and converts it to Dify's DSL format which can be directly imported into Dify.
-
-    Args:
-        workflow: Workflow in DSLMaker format
-
-    Returns:
-        Workflow in Dify-compatible format
-    """
-    try:
-        logger.info("🔄 Converting workflow to Dify format...")
-
-        # Validate input format
-        if "metadata" not in workflow or "workflow" not in workflow:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid workflow format. Expected 'metadata' and 'workflow' keys."
-            )
-
-        # Convert to Dify format
-        dify_workflow = convert_to_dify_format(workflow)
-
-        logger.info("✅ Successfully converted workflow to Dify format")
-
-        return {
-            "status": "success",
-            "data": dify_workflow,
-            "format": "dify-v0.4.0"
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Failed to convert workflow to Dify format: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Conversion failed: {str(e)}"
-        )

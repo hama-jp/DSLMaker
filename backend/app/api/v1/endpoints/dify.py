@@ -4,7 +4,7 @@ Validation, conversion, and import/export for Dify DSL format
 """
 
 from fastapi import APIRouter, HTTPException
-from typing import Dict, Any, List
+from typing import Dict, Any
 import logging
 import time
 
@@ -86,8 +86,8 @@ async def convert_to_dify(custom_dsl: Dict[str, Any]) -> Dict[str, Any]:
         # Convert to Dify format
         dify_dsl = converter.convert_to_dify(custom_dsl)
 
-        # Validate the result
-        validated_dsl = DifyDSL(**dify_dsl)
+        # Validate the result, but no need to assign it
+        DifyDSL(**dify_dsl)
 
         conversion_time = time.time() - start_time
 

@@ -134,7 +134,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
                     "error": "Rate limit exceeded",
-                    "message": f"Too many requests. Please try again later.",
+                    "message": "Too many requests. Please try again later.",
                     "retry_after": self.limiter.period
                 },
                 headers={

@@ -5,7 +5,6 @@ Intelligent pattern selection and recommendation for workflow generation
 
 from typing import List, Dict, Any, Optional, Tuple
 import logging
-from collections import Counter
 
 from app.services.vector_store import vector_store
 from app.services.llm_service import llm_service

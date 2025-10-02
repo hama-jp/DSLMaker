@@ -4,7 +4,6 @@ Manages embeddings and semantic search for workflow patterns
 """
 
 import chromadb
-from chromadb.config import Settings
 from typing import List, Dict, Any, Optional
 import logging
 

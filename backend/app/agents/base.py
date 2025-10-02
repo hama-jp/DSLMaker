@@ -7,7 +7,6 @@ from typing import Dict, Any, TYPE_CHECKING
 import logging
 
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
 
 if TYPE_CHECKING:
     from app.graph.state import WorkflowGenerationState

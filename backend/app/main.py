@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
                 if result["status"] == "success":
                     logger.info(f"✅ Loaded {result['loaded']} patterns successfully")
                 else:
-                    logger.warning(f"⚠️ Pattern loading completed with warnings")
+                    logger.warning("⚠️ Pattern loading completed with warnings")
             except Exception as pattern_error:
                 logger.error(f"Failed to load patterns: {pattern_error}")
                 logger.warning("⚠️ Continuing without patterns - manual initialization may be required")

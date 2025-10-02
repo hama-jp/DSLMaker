@@ -4,24 +4,12 @@ Dify DSL Builder Utilities
 Helper functions to create Dify-compatible nodes and structures.
 Based on real Dify 0.4.0 format.
 """
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Optional
 import uuid
 from datetime import datetime
 
 from app.models.dify_models import (
-    DifyPosition, DifyNodeBase, DifyEdge, DifyEdgeData,
-    DifyStartVariable, DifyStartNodeData,
-    DifyEndOutput, DifyEndNodeData,
-    DifyLLMPrompt, DifyLLMModel, DifyLLMContext, DifyLLMVision, DifyLLMNodeData,
-    DifyIfElseCondition, DifyIfElseNodeData,
-    DifyCodeVariable, DifyCodeOutput, DifyCodeNodeData,
-    DifyTemplateVariable, DifyTemplateTransformNodeData,
-    DifyToolParameter, DifyToolNodeData,
-    DifyAnswerNodeData,
-    DifyIterationNodeData, DifyIterationStartNodeData,
-    DifyAssignerItem, DifyAssignerNodeData,
-    DifyVariableAggregatorNodeData,
-    DifyDocumentExtractorNodeData,
+    DifyPosition,
 )
 
 

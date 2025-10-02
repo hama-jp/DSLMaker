@@ -251,7 +251,7 @@ Perform comprehensive quality assessment. Return JSON with scores, issues, and r
 
             # Log issues if any
             if quality_report.issues:
-                logger.warning(f"⚠️ Quality Issues Detected:")
+                logger.warning("⚠️ Quality Issues Detected:")
                 for issue in quality_report.issues[:5]:  # Log top 5
                     node_info = issue.node_id if issue.node_id else "General"
                     logger.warning(

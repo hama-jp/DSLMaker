@@ -4,7 +4,7 @@ Dify DSL Converter V2
 Complete rewrite based on real Dify 0.4.0 format.
 Converts DSLMaker format to authentic Dify-compatible DSL.
 """
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List
 import re
 
 from app.utils.dify_builder import (
@@ -19,7 +19,6 @@ from app.utils.dify_builder import (
     build_edge,
     build_workflow_dsl,
     make_variable_reference,
-    parse_variable_reference,
 )
 
 

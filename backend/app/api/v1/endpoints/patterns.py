@@ -3,12 +3,12 @@ Pattern Management Endpoints
 """
 
 from fastapi import APIRouter, HTTPException
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 import logging
 
 from app.services.vector_store import vector_store
 from app.services.recommendation_service import recommendation_service
-from app.models.workflow import PatternMetadata, WorkflowPattern
+from app.models.workflow import WorkflowPattern
 
 logger = logging.getLogger(__name__)
 
