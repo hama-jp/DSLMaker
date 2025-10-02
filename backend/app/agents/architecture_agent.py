@@ -142,6 +142,8 @@ Input Data: {input_data}
 
 Expected Output: {expected_output}
 
+Required Capabilities: {required_capabilities}
+
 Business Logic:
 {business_logic}
 
@@ -162,6 +164,7 @@ Design the optimal workflow architecture in JSON format.""")
                 "business_intent": requirements.business_intent,
                 "input_data": json.dumps(requirements.input_data, indent=2),
                 "expected_output": json.dumps(requirements.expected_output, indent=2),
+                "required_capabilities": str(requirements.required_capabilities),
                 "business_logic": "\n".join(f"- {step}" for step in requirements.business_logic),
                 "integrations": ", ".join(requirements.integrations) or "None",
                 "patterns": self._format_recommendations(recommended_patterns)
