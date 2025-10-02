@@ -6,10 +6,14 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
-client = TestClient(app)
+@pytest.fixture
+def client():
+    """Provides a TestClient instance for making API requests."""
+    with TestClient(app) as c:
+        yield c
 
 
-def test_get_pattern_recommendations():
+def test_get_pattern_recommendations(client: TestClient):
     """Test pattern recommendation endpoint."""
     response = client.get(
         "/api/v1/patterns/recommend",
@@ -41,7 +45,7 @@ def test_get_pattern_recommendations():
         assert "recommendation_score" in rec
 
 
-def test_get_pattern_recommendations_with_complexity():
+def test_get_pattern_recommendations_with_complexity(client: TestClient):
     """Test recommendations with complexity filter."""
     response = client.get(
         "/api/v1/patterns/recommend",
@@ -66,7 +70,7 @@ def test_get_pattern_recommendations_with_complexity():
         assert rec["metadata"]["complexity"] == "simple"
 
 
-def test_get_pattern_statistics():
+def test_get_pattern_statistics(client: TestClient):
     """Test pattern statistics endpoint."""
     response = client.get("/api/v1/patterns/statistics")
 
@@ -82,7 +86,7 @@ def test_get_pattern_statistics():
     assert "total_patterns" in data or "error" in data
 
 
-def test_recommend_patterns_invalid_complexity():
+def test_recommend_patterns_invalid_complexity(client: TestClient):
     """Test recommendations with invalid complexity value."""
     response = client.get(
         "/api/v1/patterns/recommend",

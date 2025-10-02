@@ -1,34 +1,38 @@
+import os
 import pytest
 import json
 from unittest.mock import MagicMock, AsyncMock
 
+# Set a dummy API key BEFORE any application modules are imported.
+os.environ["OPENAI_API_KEY"] = "test_key_for_pytest"
+
+from langchain_core.messages import AIMessage
+
+# This import must happen AFTER the environment variable is set.
 from app.agents.base import BaseAgent
 from app.services.vector_store import vector_store
 from app.graph.state import ClarifiedRequirements, WorkflowArchitecture, ConfiguredNode, QualityAssessment
+from app.services.llm_service import llm_service
 
 @pytest.fixture(autouse=True)
 def mock_services_and_llm(monkeypatch):
     """
-    Mocks all external services and the LLM provider for all agent tests.
+    Mocks external services and the LLM provider for all agent tests.
     It patches the `ensure_llm` method on the BaseAgent to return a mock LLM.
-    This version of the mock returns a raw JSON string, which the JsonOutputParser
-    is designed to handle, avoiding complexities with LangChain's internal message formats.
+    It also patches the global llm_service for integration tests.
     """
 
-    async def mock_llm_ainvoke(*args, **kwargs):
-        # The input to the chain is passed to the llm's ainvoke method.
-        # We can inspect it to decide which mock response to return.
+    # This async function simulates the behavior of the LLM's ainvoke method for AGENTS
+    async def mock_agent_llm_ainvoke(*args, **kwargs):
         prompt_input = args[0] if args else kwargs.get("input", {})
         user_content = str(prompt_input).lower()
-
         response_data = {}
 
-        # Default response for vague/empty inputs to prevent ZeroDivisionError in consistency test
+        # Default response for vague/empty inputs
         default_requirements = ClarifiedRequirements(
             business_intent="Default mocked intent",
             required_capabilities=["llm", "default_capability"],
-            input_data={"type": "text"},
-            expected_output={"type": "text"},
+            input_data={"type": "text"}, expected_output={"type": "text"},
             business_logic=[], integrations=[], constraints=["gpt-4"], confidence_score=0.9
         ).model_dump()
 
@@ -45,15 +49,13 @@ def mock_services_and_llm(monkeypatch):
             if any(k in user_content for k in ["multi-step", "extracts text"]):
                  required_capabilities.extend(["document-extractor", "knowledge-retrieval", "template-transform"])
 
-            # Use default for tests that send vague or empty requests
-            if "i want to use ai for my business" in user_content or "user_request=''" in user_content:
+            if "i want to use ai for my business" in user_content or "user_request=''" in user_content or not required_capabilities:
                  response_data = default_requirements
             else:
                 response_data = ClarifiedRequirements(
                     business_intent="Mocked intent for a specific test",
                     required_capabilities=list(set(required_capabilities)),
-                    input_data={"type": "text"},
-                    expected_output={"type": "text"},
+                    input_data={"type": "text"}, expected_output={"type": "text"},
                     business_logic=[], integrations=[], constraints=["gpt-4"], confidence_score=0.9
                 ).model_dump()
 
@@ -66,7 +68,7 @@ def mock_services_and_llm(monkeypatch):
             if "iteration" in user_content:
                 node_types.append("iteration")
                 pattern_name = "Iteration"
-            if any(k in user_content for k in ["conditional", "if-else"]):
+            if "conditional" in user_content or "if-else" in user_content:
                 node_types.append("if-else")
                 pattern_name = "Conditional"
             if "tool" in user_content:
@@ -81,8 +83,7 @@ def mock_services_and_llm(monkeypatch):
                 pattern_name=pattern_name,
                 node_types=list(set(node_types)),
                 edge_structure=[{"from": "start", "to": "llm"}, {"from": "llm", "to": "end"}],
-                complexity='moderate',
-                estimated_nodes=len(set(node_types)),
+                complexity='moderate', estimated_nodes=len(set(node_types)),
                 reasoning='Mocked reasoning'
             ).model_dump()
 
@@ -103,27 +104,25 @@ def mock_services_and_llm(monkeypatch):
         else:
             response_data = default_requirements
 
-        # THE FINAL FIX: Return a raw JSON string. The JsonOutputParser will receive this string
-        # directly from the chain and parse it.
-        return json.dumps(response_data)
+        # This is the correct format for JsonOutputParser
+        return AIMessage(content=json.dumps(response_data))
 
-    # We need to mock the LLM instance that the agent will use.
+    # --- Apply Agent Mock ---
     mock_llm_instance = MagicMock()
-    # The chain calls `ainvoke` on the instance. We replace it with our async mock function.
-    mock_llm_instance.ainvoke = AsyncMock(side_effect=mock_llm_ainvoke)
-
-    # This async function will replace the real `ensure_llm` on the BaseAgent.
+    mock_llm_instance.ainvoke = AsyncMock(side_effect=mock_agent_llm_ainvoke)
     async def mock_ensure_llm(*args, **kwargs):
         return mock_llm_instance
-
-    # --- Apply the Mocks ---
-    # 1. Patch the single point of entry for LLM creation in all agents.
     monkeypatch.setattr(BaseAgent, "ensure_llm", mock_ensure_llm)
 
-    # 2. Mock other external services.
+    # --- Apply Integration Test Mocks ---
+    # Mock the global llm_service for tests that use it directly
+    monkeypatch.setattr(llm_service, "generate_completion", AsyncMock(return_value=MagicMock(choices=[MagicMock(message=MagicMock(content='{"text": "mocked"}'))])))
+    monkeypatch.setattr(llm_service, "generate_with_context", AsyncMock(return_value="Mocked RAG description"))
+
+    # --- Mock Other Services ---
     monkeypatch.setattr(vector_store, "search_patterns", AsyncMock(return_value=[]))
     monkeypatch.setattr(
-        "app.agents.architecture_agent.recommendation_service.recommend_patterns",
+        "app.services.recommendation_service.recommendation_service.recommend_patterns",
         AsyncMock(return_value=[])
     )
     monkeypatch.setattr(

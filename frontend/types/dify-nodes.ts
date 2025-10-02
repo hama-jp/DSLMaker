@@ -147,8 +147,8 @@ export interface DifyIterationNodeData {
   output_type: string // array[string], array[object], etc.
   startNodeType: string // Type of first node in iteration
   start_node_id: string // ID of iteration-start node
-  width: number
-  height: number
+  width?: number
+  height?: number
 }
 
 export interface DifyIterationStartNodeData {
@@ -335,8 +335,8 @@ export interface DifyCustomNoteNodeData {
   author: string
   showAuthor?: boolean
   theme?: string // blue, yellow, pink, etc.
-  width: number
-  height: number
+  width?: number
+  height?: number
 }
 
 // =============================================================================

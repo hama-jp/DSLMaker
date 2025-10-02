@@ -5,6 +5,8 @@ Tests end-to-end workflow generation
 
 import pytest
 import time
+from unittest.mock import AsyncMock
+
 from app.graph.workflow_graph import workflow_graph
 from app.services.vector_store import vector_store
 from app.services.llm_service import llm_service
